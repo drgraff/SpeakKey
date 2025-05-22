@@ -56,13 +56,9 @@ SpeakKey is an Android application that enables voice-driven transcription, AI-p
 ## 📤 Sending Flow
 
 ```plaintext
-[Voice] → [Whisper API] → [Transcript] 
-                               ↓                                                                   
-                       [Show in Text box]  → [ChatGPT API] → [Response]
-                                                                 ↓
-                                                        [Show in Text box]                 
-                                                                 ↓
-                                                           [InputStick]
+[Voice] → [Whisper API] → [Transcript] → [Show in editable Text box] → [ChatGPT API] → [Response] → [Show in editable Text box] → [InputStick]
+
+                                                          
 ```
 
 
