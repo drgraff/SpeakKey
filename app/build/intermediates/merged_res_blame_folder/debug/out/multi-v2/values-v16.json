@@ -1,10 +1,20 @@
 {
     "logs": [
         {
-            "outputFile": "com.drgraff.speakkey.app-mergeDebugResources-48:/values-v16/values-v16.xml",
+            "outputFile": "com.drgraff.speakkey.app-mergeDebugResources-47:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "/home/runner/.gradle/caches/8.14/transforms/ae500682b470e9b190f5345c39f791af/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "source": "/home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
+                    }
+                },
+                {
+                    "source": "/home/runner/.gradle/caches/8.14/transforms/7632e902ac53f519140266c7e6afa8b7/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -20,16 +30,6 @@
                         "endLines": "6",
                         "endColumns": "12",
                         "endOffsets": "289"
-                    }
-                },
-                {
-                    "source": "/home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/res/values-v16/values-v16.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "65",
-                        "endOffsets": "116"
                     }
                 }
             ]

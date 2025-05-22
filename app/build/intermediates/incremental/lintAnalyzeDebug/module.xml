@@ -4,9 +4,9 @@
     name=":app"
     type="APP"
     maven="SpeakKey:app:"
-    gradle="7.4.2"
+    agpVersion="8.2.2"
     buildFolder="build"
-    bootClassPath="/usr/local/lib/android/sdk/platforms/android-33/android.jar:/usr/local/lib/android/sdk/build-tools/30.0.3/core-lambda-stubs.jar"
+    bootClassPath="/usr/local/lib/android/sdk/platforms/android-33/android.jar:/usr/local/lib/android/sdk/build-tools/34.0.0/core-lambda-stubs.jar"
     javaSourceLevel="11"
     compileTarget="android-33"
     neverShrinking="true">

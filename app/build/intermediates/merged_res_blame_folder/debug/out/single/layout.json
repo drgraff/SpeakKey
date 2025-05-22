@@ -1,22 +1,22 @@
 [
     {
-        "merged": "com.drgraff.speakkey.app-mergeDebugResources-49:/layout/nav_header_main.xml",
-        "source": "com.drgraff.speakkey.app-main-52:/layout/nav_header_main.xml"
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/app_bar_main.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/app_bar_main.xml"
     },
     {
-        "merged": "com.drgraff.speakkey.app-mergeDebugResources-49:/layout/activity_settings.xml",
-        "source": "com.drgraff.speakkey.app-main-52:/layout/activity_settings.xml"
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/nav_header_main.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/nav_header_main.xml"
     },
     {
-        "merged": "com.drgraff.speakkey.app-mergeDebugResources-49:/layout/content_main.xml",
-        "source": "com.drgraff.speakkey.app-main-52:/layout/content_main.xml"
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_settings.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_settings.xml"
     },
     {
-        "merged": "com.drgraff.speakkey.app-mergeDebugResources-49:/layout/activity_main.xml",
-        "source": "com.drgraff.speakkey.app-main-52:/layout/activity_main.xml"
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/content_main.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/content_main.xml"
     },
     {
-        "merged": "com.drgraff.speakkey.app-mergeDebugResources-49:/layout/app_bar_main.xml",
-        "source": "com.drgraff.speakkey.app-main-52:/layout/app_bar_main.xml"
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_main.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_main.xml"
     }
 ]

@@ -4,32 +4,29 @@
     minSdkVersion="24"
     targetSdkVersion="33"
     mergedManifest="build/intermediates/merged_manifest/release/AndroidManifest.xml"
-    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-7.4.2:proguard-rules.pro"
+    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2:proguard-rules.pro"
     partialResultsDir="build/intermediates/lint_vital_partial_results/release/out"
-    desugaredMethodsFiles="/home/runner/.gradle/caches/8.14/transforms/749f7e805c2574f6317259d5a280cd07/transformed/D8BackportedDesugaredMethods.txt">
+    desugaredMethodsFiles="/home/runner/.gradle/caches/8.14/transforms/3e842814d4c3067946c18882d1983402/transformed/D8BackportedDesugaredMethods.txt">
   <buildFeatures
       viewBinding="true"
       namespacing="REQUIRED"/>
   <sourceProviders>
     <sourceProvider
-        manifest="src/main/AndroidManifest.xml"
-        javaDirectories="src/main/java:src/main/kotlin"
-        resDirectories="src/main/res"
-        assetsDirectories="src/main/assets"/>
-    <sourceProvider
-        manifest="src/release/AndroidManifest.xml"
-        javaDirectories="src/release/java:src/release/kotlin"
-        resDirectories="src/release/res"
-        assetsDirectories="src/release/assets"/>
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/release/java:src/main/kotlin:src/release/kotlin"
+        resDirectories="src/main/res:src/release/res"
+        assetsDirectories="src/main/assets:src/release/assets"/>
   </sourceProviders>
   <testSourceProviders>
   </testSourceProviders>
   <testFixturesSourceProviders>
   </testFixturesSourceProviders>
-  <mainArtifact
+  <artifact
       classOutputs="build/intermediates/javac/release/classes:build/tmp/kotlin-classes/release:build/kotlinToolingMetadata:build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/release/R.jar"
+      type="MAIN"
       applicationId="com.drgraff.speakkey"
-      generatedSourceFolders="build/generated/ap_generated_sources/release/out:build/generated/aidl_source_output_dir/release/out:build/generated/source/buildConfig/release:build/generated/renderscript_source_output_dir/release/out:build/generated/data_binding_base_class_source_out/release/out"
-      generatedResourceFolders="build/generated/res/rs/release:build/generated/res/resValues/release">
-  </mainArtifact>
+      generatedSourceFolders="build/generated/ap_generated_sources/release/out:build/generated/data_binding_base_class_source_out/release/out"
+      generatedResourceFolders="build/generated/res/resValues/release"
+      desugaredMethodsFiles="/home/runner/.gradle/caches/8.14/transforms/3e842814d4c3067946c18882d1983402/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
 </variant>

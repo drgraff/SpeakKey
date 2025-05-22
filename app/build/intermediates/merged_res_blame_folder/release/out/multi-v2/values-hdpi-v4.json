@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.drgraff.speakkey.app-mergeReleaseResources-48:/values-hdpi-v4/values-hdpi-v4.xml",
+            "outputFile": "com.drgraff.speakkey.app-mergeReleaseResources-47:/values-hdpi-v4/values-hdpi-v4.xml",
             "map": [
                 {
-                    "source": "/home/runner/.gradle/caches/8.14/transforms/ae500682b470e9b190f5345c39f791af/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",
+                    "source": "/home/runner/.gradle/caches/8.14/transforms/7632e902ac53f519140266c7e6afa8b7/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
