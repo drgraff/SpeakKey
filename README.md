@@ -52,6 +52,12 @@ SpeakKey is an Android application that enables voice-driven transcription, AI-p
 
 ## 🛠️ Dependencies
 
+- Android Gradle Plugin 8.2.2
+- Kotlin Gradle Plugin 1.9.22
+- Minimum Android SDK 24
+- Target SDK 33
+- Gradle 8.14
+
 
 ## 📤 Sending Flow
 
