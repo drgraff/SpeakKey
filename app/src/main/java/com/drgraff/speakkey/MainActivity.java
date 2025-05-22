@@ -31,6 +31,7 @@ import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.WhisperApi;
 import com.drgraff.speakkey.inputstick.InputStickManager;
 import com.drgraff.speakkey.settings.SettingsActivity;
+import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
@@ -77,6 +78,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Initialize settings
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        
+        // Apply the theme before setting content view
+        ThemeManager.applyTheme(sharedPreferences);
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
@@ -95,9 +102,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         // Initialize UI elements
         initializeUiElements();
-        
-        // Initialize settings
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         
         // Initialize APIs
         initializeApis();
@@ -482,6 +486,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        // Apply theme in case it was changed in settings
+        ThemeManager.applyTheme(sharedPreferences);
+        
         // Refresh settings in case they were changed
         initializeApis();
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
