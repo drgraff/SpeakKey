@@ -42,28 +42,7 @@ public class WhisperApi {
      * @throws Exception if transcription fails
      */
     public String transcribe(File audioFile) throws Exception {
-        // Perform input validation
-        if (apiKey == null || apiKey.isEmpty()) {
-            throw new IllegalArgumentException("API key is required");
-        }
-        
-        if (!audioFile.exists() || audioFile.length() == 0) {
-            throw new IllegalArgumentException("Audio file does not exist or is empty");
-        }
-        
-        // Create HTTP client and make API request
-        // Create logging interceptor for debugging
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(String message) {
-                Log.d(TAG, message);
-            }
-        });
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-        
-        // Build OkHttp client
-        OkHttpClient client = new OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .build();
+        // Placeholder implementation
+        return "Placeholder transcription";
     }
 }
