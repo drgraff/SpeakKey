@@ -56,8 +56,8 @@ dependencies {
     // Audio recording
     implementation 'androidx.media:media:1.6.0'
 
-    // InputStick API (from JitPack)
-    implementation 'com.github.inputstick:InputStickAPI-Android:1.44'
+    // InputStick API available locally
+    // No dependency needed
     
     // Testing libraries
     testImplementation 'junit:junit:4.13.2'
