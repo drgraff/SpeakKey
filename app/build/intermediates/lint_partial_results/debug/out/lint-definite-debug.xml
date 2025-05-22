@@ -481,10 +481,10 @@
             file="${:app*projectDir}/build.gradle"
             line="40"
             column="20"
-            startOffset="875"
+            startOffset="872"
             endLine="40"
             endColumn="50"
-            endOffset="905"/>
+            endOffset="902"/>
     </incident>
 
     <incident
@@ -500,10 +500,10 @@
             file="${:app*projectDir}/build.gradle"
             line="41"
             column="20"
-            startOffset="925"
+            startOffset="922"
             endLine="41"
             endColumn="56"
-            endOffset="961"/>
+            endOffset="958"/>
     </incident>
 
     <incident
@@ -519,10 +519,10 @@
             file="${:app*projectDir}/build.gradle"
             line="42"
             column="20"
-            startOffset="981"
+            startOffset="978"
             endLine="42"
             endColumn="70"
-            endOffset="1031"/>
+            endOffset="1028"/>
     </incident>
 
     <incident
@@ -538,10 +538,10 @@
             file="${:app*projectDir}/build.gradle"
             line="43"
             column="20"
-            startOffset="1051"
+            startOffset="1048"
             endLine="43"
             endColumn="64"
-            endOffset="1095"/>
+            endOffset="1092"/>
     </incident>
 
     <incident
@@ -557,10 +557,10 @@
             file="${:app*projectDir}/build.gradle"
             line="44"
             column="20"
-            startOffset="1115"
+            startOffset="1112"
             endLine="44"
             endColumn="70"
-            endOffset="1165"/>
+            endOffset="1162"/>
     </incident>
 
     <incident
@@ -576,10 +576,10 @@
             file="${:app*projectDir}/build.gradle"
             line="45"
             column="20"
-            startOffset="1185"
+            startOffset="1182"
             endLine="45"
             endColumn="69"
-            endOffset="1234"/>
+            endOffset="1231"/>
     </incident>
 
     <incident
@@ -595,10 +595,10 @@
             file="${:app*projectDir}/build.gradle"
             line="46"
             column="20"
-            startOffset="1254"
+            startOffset="1251"
             endLine="46"
             endColumn="62"
-            endOffset="1296"/>
+            endOffset="1293"/>
     </incident>
 
     <incident
@@ -614,10 +614,10 @@
             file="${:app*projectDir}/build.gradle"
             line="47"
             column="20"
-            startOffset="1316"
+            startOffset="1313"
             endLine="47"
             endColumn="71"
-            endOffset="1367"/>
+            endOffset="1364"/>
     </incident>
 
     <incident
@@ -633,10 +633,10 @@
             file="${:app*projectDir}/build.gradle"
             line="48"
             column="20"
-            startOffset="1387"
+            startOffset="1384"
             endLine="48"
             endColumn="65"
-            endOffset="1432"/>
+            endOffset="1429"/>
     </incident>
 
     <incident
@@ -652,10 +652,10 @@
             file="${:app*projectDir}/build.gradle"
             line="57"
             column="20"
-            startOffset="1759"
+            startOffset="1756"
             endLine="57"
             endColumn="48"
-            endOffset="1787"/>
+            endOffset="1784"/>
     </incident>
 
     <incident
@@ -671,10 +671,10 @@
             file="${:app*projectDir}/build.gradle"
             line="64"
             column="31"
-            startOffset="1961"
+            startOffset="1958"
             endLine="64"
             endColumn="62"
-            endOffset="1992"/>
+            endOffset="1989"/>
     </incident>
 
     <incident
@@ -690,10 +690,10 @@
             file="${:app*projectDir}/build.gradle"
             line="65"
             column="31"
-            startOffset="2023"
+            startOffset="2020"
             endLine="65"
             endColumn="75"
-            endOffset="2067"/>
+            endOffset="2064"/>
     </incident>
 
     <incident

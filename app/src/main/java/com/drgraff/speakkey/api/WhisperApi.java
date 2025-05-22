@@ -65,5 +65,9 @@ public class WhisperApi {
         OkHttpClient client = new OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build();
+            
+        // TODO: Implement actual API call to Whisper service
+        // Placeholder return until real implementation is added
+        return "Placeholder transcription. API implementation needed.";
     }
 }
