@@ -7,7 +7,7 @@
     gradle="7.4.2"
     buildFolder="build"
     bootClassPath="/usr/local/lib/android/sdk/platforms/android-33/android.jar:/usr/local/lib/android/sdk/build-tools/30.0.3/core-lambda-stubs.jar"
-    javaSourceLevel="1.8"
+    javaSourceLevel="11"
     compileTarget="android-33"
     neverShrinking="true">
   <lintOptions
