@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SpeakKey</string>
+    <string name="action_settings">Settings</string>
+    
+    <!-- Main UI -->
+    <string name="start_recording">Start Recording</string>
+    <string name="pause_recording">Pause Recording</string>
+    <string name="stop_recording">Stop Recording</string>
+    <string name="send_to_whisper">Send to Whisper</string>
+    <string name="clear_recording">Clear Recording</string>
+    <string name="clear_transcription">Clear Transcription</string>
+    <string name="send_to_chatgpt">Send to ChatGPT</string>
+    <string name="clear_chatgpt_response">Clear Response</string>
+    <string name="send_to_inputstick">Send to InputStick</string>
+    
+    <!-- Settings -->
+    <string name="title_activity_settings">Settings</string>
+    <string name="settings_api_key_title">OpenAI API Key</string>
+    <string name="settings_api_key_summary">Enter your OpenAI API key</string>
+    <string name="settings_model_title">ChatGPT Model</string>
+    <string name="settings_model_summary">Select the model to use</string>
+    <string name="settings_whisper_endpoint_title">Whisper Endpoint</string>
+    <string name="settings_whisper_endpoint_summary">URL for Whisper API</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_summary">Select the language for transcription</string>
+    <string name="settings_inputstick_title">InputStick</string>
+    <string name="settings_inputstick_summary">Enable/disable InputStick functionality</string>
+    <string name="settings_dark_mode_title">Dark Mode</string>
+    <string name="settings_dark_mode_summary">Enable/disable dark mode</string>
+    <string name="settings_auto_send_whisper_title">Auto-send to Whisper</string>
+    <string name="settings_auto_send_whisper_summary">Automatically send recordings to Whisper after recording stops</string>
+    <string name="settings_auto_send_inputstick_title">Auto-send to InputStick</string>
+    <string name="settings_auto_send_inputstick_summary">Automatically send ChatGPT responses to InputStick</string>
+    
+    <!-- Navigation Drawer -->
+    <string name="nav_header_title">SpeakKey</string>
+    <string name="nav_header_subtitle">Voice to Text to ChatGPT to InputStick</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="nav_menu_home">Home</string>
+    <string name="nav_menu_settings">Settings</string>
+    
+    <!-- Recording -->
+    <string name="recording_time">Recording: %1$d:%2$02d</string>
+    <string name="recording_permission_required">Recording permission is required</string>
+    
+    <!-- Errors -->
+    <string name="error_no_api_key">Please set your OpenAI API key in Settings</string>
+    <string name="error_recording">Error while recording audio</string>
+    <string name="error_transcribing">Error transcribing audio</string>
+    <string name="error_chatgpt">Error getting response from ChatGPT</string>
+    <string name="error_inputstick">Error connecting to InputStick</string>
+    <string name="error_bluetooth">Bluetooth is not enabled</string>
+</resources>

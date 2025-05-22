@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="OpenAI API Settings">
+        <EditTextPreference
+            android:key="openai_api_key"
+            android:title="@string/settings_api_key_title"
+            android:summary="@string/settings_api_key_summary"
+            android:inputType="textPassword" />
+
+        <ListPreference
+            android:key="chatgpt_model"
+            android:title="@string/settings_model_title"
+            android:summary="@string/settings_model_summary"
+            android:defaultValue="gpt-3.5-turbo"
+            android:entries="@array/chatgpt_model_entries"
+            android:entryValues="@array/chatgpt_model_values" />
+
+        <EditTextPreference
+            android:key="whisper_endpoint"
+            android:title="@string/settings_whisper_endpoint_title"
+            android:summary="@string/settings_whisper_endpoint_summary"
+            android:defaultValue="https://api.openai.com/v1/audio/transcriptions" />
+
+        <ListPreference
+            android:key="language"
+            android:title="@string/settings_language_title"
+            android:summary="@string/settings_language_summary"
+            android:defaultValue="en"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="InputStick Settings">
+        <SwitchPreferenceCompat
+            android:key="inputstick_enabled"
+            android:title="@string/settings_inputstick_title"
+            android:summary="@string/settings_inputstick_summary"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="App Settings">
+        <SwitchPreferenceCompat
+            android:key="dark_mode"
+            android:title="@string/settings_dark_mode_title"
+            android:summary="@string/settings_dark_mode_summary"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="auto_send_whisper"
+            android:title="@string/settings_auto_send_whisper_title"
+            android:summary="@string/settings_auto_send_whisper_summary"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="auto_send_inputstick"
+            android:title="@string/settings_auto_send_inputstick_title"
+            android:summary="@string/settings_auto_send_inputstick_summary"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
