@@ -401,7 +401,7 @@
         errorLine2="         ~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="23"
+            line="179"
             column="10"/>
     </issue>
 
@@ -419,61 +419,7 @@
         errorLine2="         ~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="30"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="ButtonStyle"
-        severity="Warning"
-        message="Buttons in button bars should be borderless; use `style=&quot;?android:attr/buttonBarButtonStyle&quot;` (and `?android:attr/buttonBarStyle` on the parent)"
-        category="Usability"
-        priority="5"
-        summary="Button should be borderless"
-        explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
-        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
-        errorLine1="        &lt;Button"
-        errorLine2="         ~~~~~~">
-        <location
-            file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="38"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="ButtonStyle"
-        severity="Warning"
-        message="Buttons in button bars should be borderless; use `style=&quot;?android:attr/buttonBarButtonStyle&quot;` (and `?android:attr/buttonBarStyle` on the parent)"
-        category="Usability"
-        priority="5"
-        summary="Button should be borderless"
-        explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
-        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
-        errorLine1="        &lt;Button"
-        errorLine2="         ~~~~~~">
-        <location
-            file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="174"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="ButtonStyle"
-        severity="Warning"
-        message="Buttons in button bars should be borderless; use `style=&quot;?android:attr/buttonBarButtonStyle&quot;` (and `?android:attr/buttonBarStyle` on the parent)"
-        category="Usability"
-        priority="5"
-        summary="Button should be borderless"
-        explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
-        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
-        errorLine1="        &lt;Button"
-        errorLine2="         ~~~~~~">
-        <location
-            file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="181"
+            line="186"
             column="10"/>
     </issue>
 
@@ -491,7 +437,7 @@
         errorLine2="     ~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="88"
+            line="93"
             column="6"/>
     </issue>
 
@@ -509,7 +455,7 @@
         errorLine2="     ~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="151"
+            line="156"
             column="6"/>
     </issue>
 
@@ -525,7 +471,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="82"
+            line="87"
             column="9"/>
     </issue>
 
@@ -541,7 +487,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="95"
+            line="100"
             column="9"/>
     </issue>
 
@@ -557,7 +503,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="115"
+            line="120"
             column="13"/>
     </issue>
 
@@ -573,7 +519,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="145"
+            line="150"
             column="9"/>
     </issue>
 
@@ -589,7 +535,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="158"
+            line="163"
             column="9"/>
     </issue>
 
@@ -605,7 +551,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml"
-            line="204"
+            line="209"
             column="13"/>
     </issue>
 

@@ -159,19 +159,10 @@
    lint.unused-resources.exclude-tests =true.
    ,
 
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:23: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:179: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
         <Button
          ~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:30: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
-        <Button
-         ~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:38: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
-        <Button
-         ~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:174: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
-        <Button
-         ~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:181: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:186: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
         <Button
          ~~~~~~
 
@@ -182,10 +173,10 @@
 
    https://d.android.com/r/studio-ui/designer/material/dialogs
 
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:88: Warning: Missing autofillHints attribute [Autofill]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:93: Warning: Missing autofillHints attribute [Autofill]
     <EditText
      ~~~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:151: Warning: Missing autofillHints attribute [Autofill]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:156: Warning: Missing autofillHints attribute [Autofill]
     <EditText
      ~~~~~~~~
 
@@ -209,22 +200,22 @@
 
    https://developer.android.com/guide/topics/text/autofill.html
 
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:82: Warning: Hardcoded string "Whisper Transcription", should use @string resource [HardcodedText]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:87: Warning: Hardcoded string "Whisper Transcription", should use @string resource [HardcodedText]
         android:text="Whisper Transcription"
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:95: Warning: Hardcoded string "Transcribed text will appear here", should use @string resource [HardcodedText]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:100: Warning: Hardcoded string "Transcribed text will appear here", should use @string resource [HardcodedText]
         android:hint="Transcribed text will appear here"
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:115: Warning: Hardcoded string "Auto-send", should use @string resource [HardcodedText]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:120: Warning: Hardcoded string "Auto-send", should use @string resource [HardcodedText]
             android:text="Auto-send"
             ~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:145: Warning: Hardcoded string "ChatGPT Response", should use @string resource [HardcodedText]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:150: Warning: Hardcoded string "ChatGPT Response", should use @string resource [HardcodedText]
         android:text="ChatGPT Response"
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:158: Warning: Hardcoded string "ChatGPT response will appear here", should use @string resource [HardcodedText]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:163: Warning: Hardcoded string "ChatGPT response will appear here", should use @string resource [HardcodedText]
         android:hint="ChatGPT response will appear here"
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:204: Warning: Hardcoded string "Auto-send", should use @string resource [HardcodedText]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:209: Warning: Hardcoded string "Auto-send", should use @string resource [HardcodedText]
             android:text="Auto-send"
             ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -242,4 +233,4 @@
    There are quickfixes to automatically extract this hardcoded string into a
    resource lookup.
 
-0 errors, 37 warnings
+0 errors, 34 warnings

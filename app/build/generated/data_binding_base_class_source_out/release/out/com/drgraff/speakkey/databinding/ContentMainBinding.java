@@ -8,10 +8,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.drgraff.speakkey.R;
@@ -21,7 +21,7 @@ import java.lang.String;
 
 public final class ContentMainBinding implements ViewBinding {
   @NonNull
-  private final ConstraintLayout rootView;
+  private final ScrollView rootView;
 
   @NonNull
   public final Button btnClearChatgpt;
@@ -89,7 +89,7 @@ public final class ContentMainBinding implements ViewBinding {
   @NonNull
   public final EditText whisperText;
 
-  private ContentMainBinding(@NonNull ConstraintLayout rootView, @NonNull Button btnClearChatgpt,
+  private ContentMainBinding(@NonNull ScrollView rootView, @NonNull Button btnClearChatgpt,
       @NonNull Button btnClearRecording, @NonNull Button btnClearTranscription,
       @NonNull Button btnPauseRecording, @NonNull Button btnSendChatgpt,
       @NonNull Button btnSendInputstick, @NonNull Button btnSendWhisper,
@@ -128,7 +128,7 @@ public final class ContentMainBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public ConstraintLayout getRoot() {
+  public ScrollView getRoot() {
     return rootView;
   }
 
@@ -285,7 +285,7 @@ public final class ContentMainBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ContentMainBinding((ConstraintLayout) rootView, btnClearChatgpt, btnClearRecording,
+      return new ContentMainBinding((ScrollView) rootView, btnClearChatgpt, btnClearRecording,
           btnClearTranscription, btnPauseRecording, btnSendChatgpt, btnSendInputstick,
           btnSendWhisper, btnStartRecording, btnStopRecording, chatgptControls, chatgptLabel,
           chatgptText, chkAutoSendInputstick, chkAutoSendWhisper, inputstickControls,
