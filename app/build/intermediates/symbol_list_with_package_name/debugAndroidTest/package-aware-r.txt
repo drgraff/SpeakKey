@@ -1,3 +1,0 @@
-com.drgraff.speakkey.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
