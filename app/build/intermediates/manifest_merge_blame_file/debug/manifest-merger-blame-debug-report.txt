@@ -6,9 +6,7 @@
 6
 7    <uses-sdk
 8        android:minSdkVersion="24"
-8-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml
 9        android:targetSdkVersion="33" />
-9-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml
 10
 11    <!-- Permissions for internet, audio recording, and Bluetooth -->
 12    <uses-permission android:name="android.permission.INTERNET" />
@@ -31,22 +29,22 @@
 17-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:12:22-70
 18
 19    <permission
-19-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+19-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
 20        android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-20-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+20-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
 21        android:protectionLevel="signature" />
-21-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+21-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
 22
 23    <uses-permission android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
-23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
 24
 25    <application
 25-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-40:19
 26        android:allowBackup="true"
 26-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:15:9-35
 27        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-27-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/b4bbe04b48543cfd4e0fc78dc6c32067/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+27-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
 28        android:debuggable="true"
 29        android:extractNativeLibs="false"
 30        android:icon="@mipmap/ic_launcher"
@@ -93,40 +91,40 @@
 51            android:parentActivityName="com.drgraff.speakkey.MainActivity" />
 51-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:39:13-55
 52
-53        <uses-library
-53-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/cae6468e5705cc39c41b96e6b33229dc/transformed/jetified-window-1.0.0/AndroidManifest.xml:25:9-27:40
-54            android:name="androidx.window.extensions"
-54-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/cae6468e5705cc39c41b96e6b33229dc/transformed/jetified-window-1.0.0/AndroidManifest.xml:26:13-54
-55            android:required="false" />
-55-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/cae6468e5705cc39c41b96e6b33229dc/transformed/jetified-window-1.0.0/AndroidManifest.xml:27:13-37
-56        <uses-library
-56-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/cae6468e5705cc39c41b96e6b33229dc/transformed/jetified-window-1.0.0/AndroidManifest.xml:28:9-30:40
-57            android:name="androidx.window.sidecar"
-57-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/cae6468e5705cc39c41b96e6b33229dc/transformed/jetified-window-1.0.0/AndroidManifest.xml:29:13-51
-58            android:required="false" />
-58-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/cae6468e5705cc39c41b96e6b33229dc/transformed/jetified-window-1.0.0/AndroidManifest.xml:30:13-37
-59
-60        <provider
-60-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
-61            android:name="androidx.startup.InitializationProvider"
-61-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
-62            android:authorities="com.drgraff.speakkey.androidx-startup"
-62-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
-63            android:exported="false" >
-63-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
-64            <meta-data
-64-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
-65                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-65-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
-66                android:value="androidx.startup" />
-66-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/2db620f92191b1e367e09dfa166c8606/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
-67            <meta-data
-67-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/05cba18cbb1f748299eb3a84a72d6cbc/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
-68                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-68-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/05cba18cbb1f748299eb3a84a72d6cbc/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
-69                android:value="androidx.startup" />
-69-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/05cba18cbb1f748299eb3a84a72d6cbc/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
-70        </provider>
+53        <provider
+53-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+54            android:name="androidx.startup.InitializationProvider"
+54-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+55            android:authorities="com.drgraff.speakkey.androidx-startup"
+55-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+56            android:exported="false" >
+56-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+57            <meta-data
+57-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+58                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+58-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+59                android:value="androidx.startup" />
+59-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+60            <meta-data
+60-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+61                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+61-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+62                android:value="androidx.startup" />
+62-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+63        </provider>
+64
+65        <uses-library
+65-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:25:9-27:40
+66            android:name="androidx.window.extensions"
+66-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:26:13-54
+67            android:required="false" />
+67-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:27:13-37
+68        <uses-library
+68-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:28:9-30:40
+69            android:name="androidx.window.sidecar"
+69-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:29:13-51
+70            android:required="false" />
+70-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:30:13-37
 71    </application>
 72
 73</manifest>

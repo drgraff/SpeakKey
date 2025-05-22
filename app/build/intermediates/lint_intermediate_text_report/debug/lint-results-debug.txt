@@ -180,7 +180,7 @@
    style="?android:attr/buttonBarButtonStyle" attribute on each of the
    buttons, and set style="?android:attr/buttonBarStyle" on the parent layout
 
-   https://material.io/components/dialogs/
+   https://d.android.com/r/studio-ui/designer/material/dialogs
 
 /home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:88: Warning: Missing autofillHints attribute [Autofill]
     <EditText

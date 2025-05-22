@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.drgraff.speakkey.app-mergeReleaseResources-48:/values-sw360dp-v13/values-sw360dp-v13.xml",
+            "outputFile": "com.drgraff.speakkey.app-mergeReleaseResources-47:/values-sw360dp-v13/values-sw360dp-v13.xml",
             "map": [
                 {
-                    "source": "/home/runner/.gradle/caches/8.14/transforms/c3e7e0f350bab39dd733d3d734e7e84a/transformed/preference-1.2.0/res/values-sw360dp-v13/values-sw360dp-v13.xml",
+                    "source": "/home/runner/.gradle/caches/8.14/transforms/0931cdd8ff87126de4cfb0b69d255805/transformed/preference-1.2.0/res/values-sw360dp-v13/values-sw360dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

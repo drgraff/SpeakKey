@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="6" by="lint 7.4.2">
+<issues format="6" by="lint 8.2.2">
 
     <issue
         id="OldTargetApi"
@@ -395,8 +395,8 @@
         priority="5"
         summary="Button should be borderless"
         explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://material.io/components/dialogs/"
-        urls="https://material.io/components/dialogs/"
+        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
+        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
         errorLine1="        &lt;Button"
         errorLine2="         ~~~~~~">
         <location
@@ -413,8 +413,8 @@
         priority="5"
         summary="Button should be borderless"
         explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://material.io/components/dialogs/"
-        urls="https://material.io/components/dialogs/"
+        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
+        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
         errorLine1="        &lt;Button"
         errorLine2="         ~~~~~~">
         <location
@@ -431,8 +431,8 @@
         priority="5"
         summary="Button should be borderless"
         explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://material.io/components/dialogs/"
-        urls="https://material.io/components/dialogs/"
+        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
+        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
         errorLine1="        &lt;Button"
         errorLine2="         ~~~~~~">
         <location
@@ -449,8 +449,8 @@
         priority="5"
         summary="Button should be borderless"
         explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://material.io/components/dialogs/"
-        urls="https://material.io/components/dialogs/"
+        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
+        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
         errorLine1="        &lt;Button"
         errorLine2="         ~~~~~~">
         <location
@@ -467,8 +467,8 @@
         priority="5"
         summary="Button should be borderless"
         explanation="Button bars typically use a borderless style for the buttons. Set the `style=&quot;?android:attr/buttonBarButtonStyle&quot;` attribute on each of the buttons, and set `style=&quot;?android:attr/buttonBarStyle&quot;` on the parent layout"
-        url="https://material.io/components/dialogs/"
-        urls="https://material.io/components/dialogs/"
+        url="https://d.android.com/r/studio-ui/designer/material/dialogs"
+        urls="https://d.android.com/r/studio-ui/designer/material/dialogs"
         errorLine1="        &lt;Button"
         errorLine2="         ~~~~~~">
         <location
