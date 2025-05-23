@@ -177,9 +177,9 @@ document.getElementById(id).style.display = 'none';
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
-      <span class="mdl-layout-title">Lint Report: 34 warnings</span>
+      <span class="mdl-layout-title">Lint Report: 41 warnings</span>
       <div class="mdl-layout-spacer"></div>
-      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Thu May 22 09:39:19 UTC 2025 by AGP (8.2.2)</nav>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">Check performed at Fri May 23 08:14:59 UTC 2025 by AGP (8.2.2)</nav>
     </div>
   </header>
   <div class="mdl-layout__drawer">
@@ -192,7 +192,8 @@ document.getElementById(id).style.display = 'none';
       <a class="mdl-navigation__link" href="#ObsoleteSdkInt"><i class="material-icons warning-icon">warning</i>Obsolete SDK_INT Version Check (2)</a>
       <a class="mdl-navigation__link" href="#VectorPath"><i class="material-icons warning-icon">warning</i>Long vector paths (1)</a>
       <a class="mdl-navigation__link" href="#Overdraw"><i class="material-icons warning-icon">warning</i>Overdraw: Painting regions more than once (1)</a>
-      <a class="mdl-navigation__link" href="#UnusedResources"><i class="material-icons warning-icon">warning</i>Unused resources (6)</a>
+      <a class="mdl-navigation__link" href="#UnusedResources"><i class="material-icons warning-icon">warning</i>Unused resources (8)</a>
+      <a class="mdl-navigation__link" href="#IconLauncherShape"><i class="material-icons warning-icon">warning</i>The launcher icon shape should use a distinct silhouette (5)</a>
       <a class="mdl-navigation__link" href="#ButtonStyle"><i class="material-icons warning-icon">warning</i>Button should be borderless (2)</a>
       <a class="mdl-navigation__link" href="#Autofill"><i class="material-icons warning-icon">warning</i>Use Autofill (2)</a>
       <a class="mdl-navigation__link" href="#HardcodedText"><i class="material-icons warning-icon">warning</i>Hardcoded text (6)</a>
@@ -231,8 +232,13 @@ document.getElementById(id).style.display = 'none';
 <td class="countColumn">1</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#Overdraw">Overdraw</a>: Overdraw: Painting regions more than once</td></tr>
 <tr>
-<td class="countColumn">6</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
+<td class="countColumn">8</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
 <a href="#UnusedResources">UnusedResources</a>: Unused resources</td></tr>
+<tr><td class="countColumn"></td><td class="categoryColumn"><a href="#Usability:Icons">Usability:Icons</a>
+</td></tr>
+<tr>
+<td class="countColumn">5</td><td class="issueColumn"><i class="material-icons warning-icon">warning</i>
+<a href="#IconLauncherShape">IconLauncherShape</a>: The launcher icon shape should use a distinct silhouette</td></tr>
 <tr><td class="countColumn"></td><td class="categoryColumn"><a href="#Usability">Usability</a>
 </td></tr>
 <tr>
@@ -694,7 +700,17 @@ Dismiss</button>            </div>
 <span class="lineno"> 12 </span>    <span class="tag">&lt;color</span><span class="attribute"> name</span>=<span class="value">"gray"</span>>#757575<span class="tag">&lt;/color></span>
 <span class="lineno"> 13 </span>    <span class="tag">&lt;color</span><span class="attribute"> name</span>=<span class="value">"red"</span>>#F44336<span class="tag">&lt;/color></span>
 <span class="caretline"><span class="lineno"> 14 </span>    <span class="tag">&lt;color</span><span class="attribute"> </span><span class="warning"><span class="attribute">name</span>=<span class="value">"green"</span></span>>#4CAF50<span class="tag">&lt;/color></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-<span class="lineno"> 15 </span><span class="tag">&lt;/resources></span></pre>
+<span class="lineno"> 15 </span>    
+<span class="lineno"> 16 </span>    <span class="tag">&lt;color</span><span class="attribute"> name</span>=<span class="value">"edit_text_background"</span>>@android:color/white<span class="tag">&lt;/color></span> <span class="comment">&lt;!-- Default text box background color --></span>
+<span class="lineno"> 17 </span><span class="tag">&lt;/resources></span></pre>
+
+<span class="location"><a href="../../src/main/res/mipmap-hdpi/ic_launcher.xml">../../src/main/res/mipmap-hdpi/ic_launcher.xml</a>:1</span>: <span class="message">The resource <code>R.mipmap.ic_launcher</code> appears to be unused</span><br /><pre class="errorlines">
+<span class="caretline"><span class="lineno"> 1 </span><span class="warning"><span class="tag">&lt;svg</span><span class="attribute"> xmlns</span>=<span class="value">"http://www.w3.org/2000/svg"</span> <span class="attribute">width</span>=<span class="value">"24"</span> <span class="attribute">height</span>=<span class="value">"24"</span> <span class="attribute">viewBox</span>=<span class="value">"0 0 24 24"</span>><span class="tag">&lt;circle</span><span class="attribute"> cx</span>=<span class="value">"12"</span> <span class="attribute">cy</span>=<span class="value">"12"</span> <span class="attribute">r</span>=<span class="value">"10"</span> <span class="attribute">fill</span>=<span class="value">"#3F51B5"</span>/><span class="tag">&lt;/svg></span></span></span>
+</pre>
+
+<span class="location"><a href="../../src/main/res/mipmap-hdpi/ic_launcher_round.xml">../../src/main/res/mipmap-hdpi/ic_launcher_round.xml</a>:1</span>: <span class="message">The resource <code>R.mipmap.ic_launcher_round</code> appears to be unused</span><br /><pre class="errorlines">
+<span class="caretline"><span class="lineno"> 1 </span><span class="warning"><span class="tag">&lt;svg</span><span class="attribute"> xmlns</span>=<span class="value">"http://www.w3.org/2000/svg"</span> <span class="attribute">width</span>=<span class="value">"24"</span> <span class="attribute">height</span>=<span class="value">"24"</span> <span class="attribute">viewBox</span>=<span class="value">"0 0 24 24"</span>><span class="tag">&lt;circle</span><span class="attribute"> cx</span>=<span class="value">"12"</span> <span class="attribute">cy</span>=<span class="value">"12"</span> <span class="attribute">r</span>=<span class="value">"10"</span> <span class="attribute">fill</span>=<span class="value">"#3F51B5"</span>/><span class="tag">&lt;/svg></span></span></span>
+</pre>
 
 <span class="location"><a href="../../src/main/res/values/strings.xml">../../src/main/res/values/strings.xml</a>:4</span>: <span class="message">The resource <code>R.string.action_settings</code> appears to be unused</span><br /><pre class="errorlines">
 <span class="lineno">  1 </span><span class="prologue">&lt;?xml version="1.0" encoding="utf-8"?></span>
@@ -743,6 +759,53 @@ To suppress this error, use the issue id "UnusedResources" as explained in the <
               <div class="mdl-card__actions mdl-card--border">
 <button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="explanationUnusedResourcesLink" onclick="reveal('explanationUnusedResources');">
 Explain</button><button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="UnusedResourcesCardLink" onclick="hideid('UnusedResourcesCard');">
+Dismiss</button>            </div>
+            </div>
+          </section>
+<a name="Usability:Icons"></a>
+<a name="IconLauncherShape"></a>
+<section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp" id="IconLauncherShapeCard" style="display: block;">
+            <div class="mdl-card mdl-cell mdl-cell--12-col">
+  <div class="mdl-card__title">
+    <h2 class="mdl-card__title-text">The launcher icon shape should use a distinct silhouette</h2>
+  </div>
+              <div class="mdl-card__supporting-text">
+<div class="issue">
+<div class="warningslist">
+<span class="location"><a href="../../src/main/res/mipmap-hdpi/mic_pencil_icon.png">../../src/main/res/mipmap-hdpi/mic_pencil_icon.png</a></span>: <img class="embedimage" align="right" src="../../src/main/res/mipmap-hdpi/mic_pencil_icon.png" /><span class="message">Launcher icon used as round icon did not have a circular shape</span><br clear="right"/>
+<span class="location"><a href="../../src/main/res/mipmap-mdpi/mic_pencil_icon.png">../../src/main/res/mipmap-mdpi/mic_pencil_icon.png</a></span>: <img class="embedimage" align="right" src="../../src/main/res/mipmap-mdpi/mic_pencil_icon.png" /><span class="message">Launcher icon used as round icon did not have a circular shape</span><br clear="right"/>
+<span class="location"><a href="../../src/main/res/mipmap-xhdpi/mic_pencil_icon.png">../../src/main/res/mipmap-xhdpi/mic_pencil_icon.png</a></span>: <img class="embedimage" align="right" src="../../src/main/res/mipmap-xhdpi/mic_pencil_icon.png" /><span class="message">Launcher icon used as round icon did not have a circular shape</span><br clear="right"/>
+<span class="location"><a href="../../src/main/res/mipmap-xxhdpi/mic_pencil_icon.png">../../src/main/res/mipmap-xxhdpi/mic_pencil_icon.png</a></span>: <img class="embedimage" align="right" src="../../src/main/res/mipmap-xxhdpi/mic_pencil_icon.png" /><span class="message">Launcher icon used as round icon did not have a circular shape</span><br clear="right"/>
+<span class="location"><a href="../../src/main/res/mipmap-xxxhdpi/mic_pencil_icon.png">../../src/main/res/mipmap-xxxhdpi/mic_pencil_icon.png</a></span>: <img class="embedimage" align="right" src="../../src/main/res/mipmap-xxxhdpi/mic_pencil_icon.png" /><span class="message">Launcher icon used as round icon did not have a circular shape</span><br clear="right"/>
+</div>
+<div class="metadata"><div class="explanation" id="explanationIconLauncherShape" style="display: none;">
+According to the Android Design Guide (<a href="https://d.android.com/r/studio-ui/designer/material/iconography">https://d.android.com/r/studio-ui/designer/material/iconography</a>) your launcher icons should "use a distinct silhouette", a "three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth."<br/>
+<br/>
+The unique silhouette implies that your launcher icon should not be a filled square.<br/>To suppress this error, use the issue id "IconLauncherShape" as explained in the <a href="#SuppressInfo">Suppressing Warnings and Errors</a> section.<br/>
+<br/></div>
+</div>
+</div>
+<div class="chips">
+<span class="mdl-chip">
+    <span class="mdl-chip__text">IconLauncherShape</span>
+</span>
+<span class="mdl-chip">
+    <span class="mdl-chip__text">Icons</span>
+</span>
+<span class="mdl-chip">
+    <span class="mdl-chip__text">Usability</span>
+</span>
+<span class="mdl-chip">
+    <span class="mdl-chip__text">Warning</span>
+</span>
+<span class="mdl-chip">
+    <span class="mdl-chip__text">Priority 6/10</span>
+</span>
+</div>
+              </div>
+              <div class="mdl-card__actions mdl-card--border">
+<button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="explanationIconLauncherShapeLink" onclick="reveal('explanationIconLauncherShape');">
+Explain</button><button class="mdl-button mdl-js-button mdl-js-ripple-effect" id="IconLauncherShapeCardLink" onclick="hideid('IconLauncherShapeCard');">
 Dismiss</button>            </div>
             </div>
           </section>
@@ -884,7 +947,7 @@ Dismiss</button>            </div>
 <span class="location"><a href="../../src/main/res/layout/content_main.xml">../../src/main/res/layout/content_main.xml</a>:100</span>: <span class="message">Hardcoded string "Transcribed text will appear here", should use <code>@string</code> resource</span><br /><pre class="errorlines">
 <span class="lineno">  97 </span>        <span class="prefix">android:</span><span class="attribute">layout_marginTop</span>=<span class="value">"8dp"</span>
 <span class="lineno">  98 </span>        <span class="prefix">android:</span><span class="attribute">layout_marginBottom</span>=<span class="value">"8dp"</span>
-<span class="lineno">  99 </span>        <span class="prefix">android:</span><span class="attribute">background</span>=<span class="value">"@android:color/white"</span>
+<span class="lineno">  99 </span>        <span class="prefix">android:</span><span class="attribute">background</span>=<span class="value">"@color/edit_text_background"</span>
 <span class="caretline"><span class="lineno"> 100 </span>        <span class="warning"><span class="prefix">android:</span><span class="attribute">hint</span>=<span class="value">"Transcribed text will appear here"</span></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 <span class="lineno"> 101 </span>        <span class="prefix">android:</span><span class="attribute">padding</span>=<span class="value">"8dp"</span>
 <span class="lineno"> 102 </span>        <span class="prefix">android:</span><span class="attribute">gravity</span>=<span class="value">"top|start"</span>
@@ -911,7 +974,7 @@ Dismiss</button>            </div>
 <span class="location"><a href="../../src/main/res/layout/content_main.xml">../../src/main/res/layout/content_main.xml</a>:163</span>: <span class="message">Hardcoded string "ChatGPT response will appear here", should use <code>@string</code> resource</span><br /><pre class="errorlines">
 <span class="lineno"> 160 </span>        <span class="prefix">android:</span><span class="attribute">layout_marginTop</span>=<span class="value">"8dp"</span>
 <span class="lineno"> 161 </span>        <span class="prefix">android:</span><span class="attribute">layout_marginBottom</span>=<span class="value">"8dp"</span>
-<span class="lineno"> 162 </span>        <span class="prefix">android:</span><span class="attribute">background</span>=<span class="value">"@android:color/white"</span>
+<span class="lineno"> 162 </span>        <span class="prefix">android:</span><span class="attribute">background</span>=<span class="value">"@color/edit_text_background"</span>
 <span class="caretline"><span class="lineno"> 163 </span>        <span class="warning"><span class="prefix">android:</span><span class="attribute">hint</span>=<span class="value">"ChatGPT response will appear here"</span></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 <span class="lineno"> 164 </span>        <span class="prefix">android:</span><span class="attribute">padding</span>=<span class="value">"8dp"</span>
 <span class="lineno"> 165 </span>        <span class="prefix">android:</span><span class="attribute">gravity</span>=<span class="value">"top|start"</span>

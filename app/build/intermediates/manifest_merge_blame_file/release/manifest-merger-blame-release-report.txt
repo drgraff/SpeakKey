@@ -46,12 +46,12 @@
 27        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 27-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
 28        android:extractNativeLibs="false"
-29        android:icon="@mipmap/ic_launcher"
-29-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:16:9-43
+29        android:icon="@mipmap/mic_pencil_icon"
+29-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:16:9-47
 30        android:label="@string/app_name"
 30-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:17:9-41
-31        android:roundIcon="@mipmap/ic_launcher_round"
-31-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:18:9-54
+31        android:roundIcon="@mipmap/mic_pencil_icon"
+31-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:18:9-52
 32        android:supportsRtl="true"
 32-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:19:9-35
 33        android:theme="@style/Theme.SpeakKey" >

@@ -138,6 +138,12 @@
 /home/runner/work/SpeakKey/SpeakKey/app/src/main/res/values/colors.xml:14: Warning: The resource R.color.green appears to be unused [UnusedResources]
     <color name="green">#4CAF50</color>
            ~~~~~~~~~~~~
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-hdpi/ic_launcher.xml:1: Warning: The resource R.mipmap.ic_launcher appears to be unused [UnusedResources]
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#3F51B5"/></svg>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-hdpi/ic_launcher_round.xml:1: Warning: The resource R.mipmap.ic_launcher_round appears to be unused [UnusedResources]
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#3F51B5"/></svg>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/runner/work/SpeakKey/SpeakKey/app/src/main/res/values/strings.xml:4: Warning: The resource R.string.action_settings appears to be unused [UnusedResources]
     <string name="action_settings">Settings</string>
             ~~~~~~~~~~~~~~~~~~~~~~
@@ -158,6 +164,22 @@
    them (usually for performance reasons), use
    lint.unused-resources.exclude-tests =true.
    ,
+
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-hdpi/mic_pencil_icon.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-mdpi/mic_pencil_icon.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-xhdpi/mic_pencil_icon.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-xxhdpi/mic_pencil_icon.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+/home/runner/work/SpeakKey/SpeakKey/app/src/main/res/mipmap-xxxhdpi/mic_pencil_icon.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+
+   Explanation for issues of type "IconLauncherShape":
+   According to the Android Design Guide
+   (https://d.android.com/r/studio-ui/designer/material/iconography) your
+   launcher icons should "use a distinct silhouette", a "three-dimensional,
+   front view, with a slight perspective as if viewed from above, so that
+   users perceive some depth."
+
+   The unique silhouette implies that your launcher icon should not be a
+   filled square.
 
 /home/runner/work/SpeakKey/SpeakKey/app/src/main/res/layout/content_main.xml:179: Warning: Buttons in button bars should be borderless; use style="?android:attr/buttonBarButtonStyle" (and ?android:attr/buttonBarStyle on the parent) [ButtonStyle]
         <Button
@@ -233,4 +255,4 @@
    There are quickfixes to automatically extract this hardcoded string into a
    resource lookup.
 
-0 errors, 34 warnings
+0 errors, 41 warnings
