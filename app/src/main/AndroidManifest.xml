@@ -43,6 +43,12 @@
             android:theme="@style/Theme.SpeakKey"
             android:parentActivityName=".MainActivity">
         </activity>
+        <activity
+            android:name=".data.PromptsActivity"
+            android:label="Manage Prompts"
+            android:theme="@style/Theme.SpeakKey"
+            android:parentActivityName=".MainActivity">
+        </activity>
     </application>
 
 </manifest>
