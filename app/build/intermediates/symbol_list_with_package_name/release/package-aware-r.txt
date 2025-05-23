@@ -1466,6 +1466,7 @@ color dim_foreground_disabled_material_dark
 color dim_foreground_disabled_material_light
 color dim_foreground_material_dark
 color dim_foreground_material_light
+color edit_text_background
 color error_color_material_dark
 color error_color_material_light
 color foreground_material_dark
@@ -3692,6 +3693,7 @@ layout support_simple_spinner_dropdown_item
 menu menu_drawer
 mipmap ic_launcher
 mipmap ic_launcher_round
+mipmap mic_pencil_icon
 plurals mtrl_badge_content_description
 string abc_action_bar_home_description
 string abc_action_bar_up_description

@@ -128,9 +128,9 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/runner/.gradle/caches
 	android:label
 		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:17:9-41
 	android:roundIcon
-		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:18:9-54
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:18:9-52
 	android:icon
-		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:16:9-43
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:16:9-47
 	android:allowBackup
 		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:15:9-35
 	android:theme

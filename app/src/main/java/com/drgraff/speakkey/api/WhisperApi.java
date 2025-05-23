@@ -77,5 +77,8 @@ public class WhisperApi {
             
         // Create API service
         WhisperApiService apiService = retrofit.create(WhisperApiService.class);
+
+        // Just return a placeholder for now
+        return "Transcription placeholder";
     }
 }
