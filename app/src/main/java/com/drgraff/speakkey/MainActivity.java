@@ -31,6 +31,7 @@ import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.WhisperApi;
 import com.drgraff.speakkey.inputstick.InputStickManager;
 import com.drgraff.speakkey.settings.SettingsActivity;
+import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
 
@@ -369,17 +370,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         
         Toast.makeText(this, "Transcribing audio...", Toast.LENGTH_SHORT).show();
+        AppLogManager.getInstance().addEntry("INFO", "Whisper: Starting transcription...", null);
         
         // Perform transcription in background
         new Thread(() -> {
             try {
                 String transcription = whisperApi.transcribe(audioFile);
+                AppLogManager.getInstance().addEntry("SUCCESS", "Whisper: Transcription successful", "Length: " + transcription.length());
                 mainHandler.post(() -> {
                     whisperText.setText(transcription);
                     Toast.makeText(MainActivity.this, "Transcription complete", Toast.LENGTH_SHORT).show();
                 });
             } catch (Exception e) {
                 Log.e(TAG, "Error transcribing audio", e);
+                AppLogManager.getInstance().addEntry("ERROR", "Whisper: Transcription failed", e.toString());
                 mainHandler.post(() -> {
                     // Show a more specific toast
                     String detailedErrorMessage = getString(R.string.error_transcribing);
@@ -430,11 +434,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         
         Toast.makeText(this, "Sending to ChatGPT...", Toast.LENGTH_SHORT).show();
+        AppLogManager.getInstance().addEntry("INFO", "ChatGPT: Sending request...", null);
         
         // Send to ChatGPT in background
         new Thread(() -> {
             try {
                 String response = chatGptApi.getCompletion(transcript);
+                AppLogManager.getInstance().addEntry("SUCCESS", "ChatGPT: Response received", "Length: " + response.length());
                 mainHandler.post(() -> {
                     chatGptText.setText(response);
                     Toast.makeText(MainActivity.this, "Response received", Toast.LENGTH_SHORT).show();
@@ -446,6 +452,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 });
             } catch (Exception e) {
                 Log.e(TAG, "Error getting ChatGPT response", e);
+                AppLogManager.getInstance().addEntry("ERROR", "ChatGPT: Request failed", e.toString());
                 mainHandler.post(() -> {
                     Toast.makeText(MainActivity.this, R.string.error_chatgpt, Toast.LENGTH_SHORT).show();
                 });
@@ -491,6 +498,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Already on home, just close drawer
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_view_logs) {
+            Intent intent = new Intent(this, com.drgraff.speakkey.utils.LogActivity.class);
             startActivity(intent);
         }
         

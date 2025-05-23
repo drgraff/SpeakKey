@@ -37,6 +37,12 @@
             android:exported="false"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".utils.LogActivity"
+            android:label="Application Logs"
+            android:theme="@style/Theme.SpeakKey"
+            android:parentActivityName=".MainActivity">
+        </activity>
     </application>
 
 </manifest>
