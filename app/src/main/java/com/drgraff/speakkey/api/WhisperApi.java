@@ -32,7 +32,16 @@ public class WhisperApi {
      */
     public WhisperApi(String apiKey, String endpoint, String language) {
         this.apiKey = apiKey;
-        this.endpoint = endpoint;
+        
+        String correctedEndpoint = endpoint;
+        if (correctedEndpoint != null) {
+            // Remove trailing slashes
+            while (correctedEndpoint.endsWith("/")) {
+                correctedEndpoint = correctedEndpoint.substring(0, correctedEndpoint.length() - 1);
+            }
+        }
+        this.endpoint = correctedEndpoint;
+        
         this.language = language;
     }
     
