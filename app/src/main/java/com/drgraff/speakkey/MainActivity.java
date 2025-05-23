@@ -381,7 +381,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } catch (Exception e) {
                 Log.e(TAG, "Error transcribing audio", e);
                 mainHandler.post(() -> {
-                    Toast.makeText(MainActivity.this, R.string.error_transcribing, Toast.LENGTH_SHORT).show();
+                    // Show a more specific toast
+                    String detailedErrorMessage = getString(R.string.error_transcribing);
+                    if (e.getMessage() != null && !e.getMessage().isEmpty()) {
+                        // Append only the first part of the message if it's too long or has newlines.
+                        // Let's take up to the first newline or a certain character limit.
+                        String userFriendlyMessage = e.getMessage();
+                        int newlineIndex = userFriendlyMessage.indexOf('\n');
+                        if (newlineIndex != -1) {
+                            userFriendlyMessage = userFriendlyMessage.substring(0, newlineIndex);
+                        }
+                        if (userFriendlyMessage.length() > 150) { // Arbitrary limit for toast length
+                            userFriendlyMessage = userFriendlyMessage.substring(0, 147) + "...";
+                        }
+                        detailedErrorMessage += ": " + userFriendlyMessage;
+                    }
+                    Toast.makeText(MainActivity.this, detailedErrorMessage, Toast.LENGTH_LONG).show(); // Use LENGTH_LONG
                 });
             }
         }).start();
