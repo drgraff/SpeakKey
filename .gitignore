@@ -12,4 +12,7 @@
 *.aab
 *.dex
 *.class
-/app/build/
+/app/build/# Build artifacts
+.gradle/
+app/build/
+build/
