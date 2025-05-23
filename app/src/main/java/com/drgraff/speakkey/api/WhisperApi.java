@@ -92,11 +92,11 @@ public class WhisperApi {
         String authToken = "Bearer " + this.apiKey;
 
         // Call apiService.transcribeAudio()
-        Call<WhisperResponse> call = apiService.transcribeAudio(authToken, model, audioFilePart, language);
+        Call<WhisperApiResponse> call = apiService.transcribeAudio(authToken, audioFilePart, model, language);
 
         try {
             // Execute the Retrofit call synchronously
-            Response<WhisperResponse> response = call.execute();
+            Response<WhisperApiResponse> response = call.execute();
 
             // Check if the call was successful
             if (response.isSuccessful() && response.body() != null) {
