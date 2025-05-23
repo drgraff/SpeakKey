@@ -23,7 +23,7 @@ public interface WhisperApiService {
      * @return Response containing the transcription
      */
     @Multipart
-    @POST("v1/audio/transcriptions")
+    @POST("/v1/audio/transcriptions") // Added leading slash
     Call<WhisperApiResponse> transcribeAudio(
         @Header("Authorization") String authorization,
         @Part MultipartBody.Part file,
