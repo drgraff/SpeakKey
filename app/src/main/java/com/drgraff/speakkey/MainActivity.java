@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -150,6 +151,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Set initial checkbox states from preferences
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
         chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false));
+
+        // Listener to improve EditText scrolling within ScrollView
+        View.OnTouchListener editTextTouchListener = (v, event) -> {
+            // Check if the view is an EditText and can scroll vertically
+            if (v.isFocusable() && v instanceof EditText) {
+                // Check if the EditText can scroll up or down
+                // (1 for down, -1 for up)
+                boolean canScrollVertically = v.canScrollVertically(1) || v.canScrollVertically(-1);
+
+                if (canScrollVertically) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            // Disallow the ScrollView to intercept touch events
+                            v.getParent().requestDisallowInterceptTouchEvent(true);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                        case MotionEvent.ACTION_CANCEL:
+                            // Allow the ScrollView to intercept touch events again
+                            v.getParent().requestDisallowInterceptTouchEvent(false);
+                            break;
+                    }
+                }
+            }
+            // Return false so that the event is not consumed and other
+            // touch listeners or default behavior (like cursor placement) still work.
+            return false;
+        };
+
+        whisperText.setOnTouchListener(editTextTouchListener);
+        chatGptText.setOnTouchListener(editTextTouchListener);
     }
     
     private void initializeApis() {
