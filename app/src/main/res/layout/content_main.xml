@@ -19,35 +19,36 @@
         android:id="@+id/recording_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <Button
             android:id="@+id/btn_start_recording"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/start_recording"
             android:layout_margin="4dp" />
 
         <Button
             android:id="@+id/btn_pause_recording"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/pause_recording"
             android:enabled="false"
             android:layout_margin="4dp" />
 
         <Button
             android:id="@+id/btn_stop_recording"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/stop_recording"
             android:enabled="false"
             android:layout_margin="4dp" />
-
     </LinearLayout>
 
     <!-- Recording Indicator -->
@@ -114,36 +115,51 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
+        android:gravity="center_horizontal" <!-- Center the rows if they are wrap_content -->
         app:layout_constraintTop_toBottomOf="@id/whisper_text">
 
-        <CheckBox
-            android:id="@+id/chk_auto_send_whisper"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
-            android:text="Auto-send"
-            android:layout_margin="4dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <Button
-            android:id="@+id/btn_send_whisper"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/send_to_whisper"
-            android:layout_margin="4dp" />
+            <Button
+                android:id="@+id/btn_send_whisper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/send_to_whisper"
+                android:layout_marginEnd="8dp"/> <!-- Adjust margin as needed -->
 
-        <Button
-            android:id="@+id/btn_clear_recording"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/clear_recording"
-            android:layout_margin="4dp" />
+            <CheckBox
+                android:id="@+id/chk_auto_send_whisper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto-send"/> 
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_clear_transcription"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/clear_transcription"
-            android:layout_margin="4dp" />
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"> <!-- Add some top margin -->
+
+            <Button
+                android:id="@+id/btn_clear_recording"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/clear_recording"
+                android:layout_marginEnd="4dp"/> <!-- Small margin between buttons -->
+
+            <Button
+                android:id="@+id/btn_clear_transcription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/clear_transcription"
+                android:layout_marginStart="4dp"/> <!-- Small margin between buttons -->
+        </LinearLayout>
     </LinearLayout>
 
     <!-- ChatGPT Section -->
@@ -180,23 +196,36 @@
         android:id="@+id/chatgpt_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
+        android:orientation="vertical" 
+        android:gravity="center_horizontal" 
         app:layout_constraintTop_toBottomOf="@id/chatgpt_text">
 
-        <Button
-            android:id="@+id/btn_send_chatgpt"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/send_to_chatgpt"
-            android:layout_margin="4dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btn_send_chatgpt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/send_to_chatgpt"
+                android:layout_marginEnd="8dp"/> <!-- Adjust margin -->
+
+            <CheckBox
+                android:id="@+id/chk_auto_send_to_chatgpt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto Send to ChatGPT"/> 
+        </LinearLayout>
 
         <Button
             android:id="@+id/btn_clear_chatgpt"
-            android:layout_width="wrap_content"
+            android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:text="@string/clear_chatgpt_response"
-            android:layout_margin="4dp" />
+            android:layout_marginTop="8dp"/> <!-- Add margin -->
     </LinearLayout>
 
     <!-- InputStick Section -->
@@ -210,19 +239,19 @@
         app:layout_constraintTop_toBottomOf="@id/chatgpt_controls"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <CheckBox
-            android:id="@+id/chk_auto_send_inputstick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Auto-send"
-            android:layout_margin="4dp" />
-
         <Button
             android:id="@+id/btn_send_inputstick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send_to_inputstick"
-            android:layout_margin="4dp" />
+            android:layout_marginEnd="8dp"/> <!-- Added marginEnd for spacing -->
+
+        <CheckBox
+            android:id="@+id/chk_auto_send_inputstick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto-send" /> 
+            <!-- Removed original layout_margin, relying on button's marginEnd -->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
