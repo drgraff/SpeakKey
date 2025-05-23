@@ -93,7 +93,7 @@
     <EditText
         android:id="@+id/whisper_text"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="120dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:background="@color/edit_text_background"
@@ -107,8 +107,7 @@
         android:minLines="3"
         android:maxLines="100"
         app:layout_constraintTop_toBottomOf="@id/whisper_label"
-        app:layout_constraintBottom_toTopOf="@id/whisper_controls"
-        app:layout_constraintHeight_percent="0.2" />
+        app:layout_constraintBottom_toTopOf="@id/whisper_controls" />
 
     <LinearLayout
         android:id="@+id/whisper_controls"
@@ -161,7 +160,7 @@
     <EditText
         android:id="@+id/chatgpt_text"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="120dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:background="@color/edit_text_background"
@@ -175,8 +174,7 @@
         android:minLines="3"
         android:maxLines="100"
         app:layout_constraintTop_toBottomOf="@id/chatgpt_label"
-        app:layout_constraintBottom_toTopOf="@id/chatgpt_controls"
-        app:layout_constraintHeight_percent="0.2" />
+        app:layout_constraintBottom_toTopOf="@id/chatgpt_controls" />
 
     <LinearLayout
         android:id="@+id/chatgpt_controls"
