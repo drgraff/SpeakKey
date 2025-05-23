@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/log_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:layout_marginEnd="8dp"
+            android:text="2023-01-01 12:00:00"/>
+
+        <TextView
+            android:id="@+id/log_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:text="INFO"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/log_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        android:text="Log message here"/>
+
+    <TextView
+        android:id="@+id/log_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:layout_marginTop="2dp"
+        android:textColor="@android:color/darker_gray"
+        android:textIsSelectable="true" 
+        android:text="Detail message here (e.g., exception details)"/>
+
+</LinearLayout>
