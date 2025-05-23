@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void initializeApis() {
         String apiKey = sharedPreferences.getString("openai_api_key", "");
         String whisperEndpoint = sharedPreferences.getString("whisper_endpoint", 
-                "https://api.openai.com/v1/audio/transcriptions");
+                "https://api.openai.com/"); // Ensure this ends with a slash
         String model = sharedPreferences.getString("chatgpt_model", "gpt-3.5-turbo");
         String language = sharedPreferences.getString("language", "en");
         
