@@ -77,5 +77,43 @@ public class WhisperApi {
             
         // Create API service
         WhisperApiService apiService = retrofit.create(WhisperApiService.class);
+
+        // Create RequestBody for "model"
+        RequestBody model = RequestBody.create(MediaType.parse("text/plain"), "whisper-1");
+
+        // Create RequestBody for "language"
+        RequestBody language = RequestBody.create(MediaType.parse("text/plain"), this.language);
+
+        // Create MultipartBody.Part for the audio file
+        RequestBody audioRequestBody = RequestBody.create(MediaType.parse("audio/*"), audioFile);
+        MultipartBody.Part audioFilePart = MultipartBody.Part.createFormData("file", audioFile.getName(), audioRequestBody);
+
+        // Construct the "Authorization" header
+        String authToken = "Bearer " + this.apiKey;
+
+        // Call apiService.transcribeAudio()
+        Call<WhisperResponse> call = apiService.transcribeAudio(authToken, model, audioFilePart, language);
+
+        try {
+            // Execute the Retrofit call synchronously
+            Response<WhisperResponse> response = call.execute();
+
+            // Check if the call was successful
+            if (response.isSuccessful() && response.body() != null) {
+                return response.body().getText();
+            } else {
+                // Throw an exception if the call was not successful or the body is null
+                String errorMessage = "Transcription failed: ";
+                if (response.errorBody() != null) {
+                    errorMessage += response.errorBody().string();
+                } else {
+                    errorMessage += "Response code " + response.code();
+                }
+                throw new Exception(errorMessage);
+            }
+        } catch (java.io.IOException e) {
+            // Handle potential IOException
+            throw new Exception("Transcription failed due to network error: " + e.getMessage(), e);
+        }
     }
 }
