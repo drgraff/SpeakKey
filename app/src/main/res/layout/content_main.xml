@@ -115,7 +115,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal" <!-- Center the rows if they are wrap_content -->
+        android:gravity="center_horizontal"
         app:layout_constraintTop_toBottomOf="@id/whisper_text">
 
         <LinearLayout
