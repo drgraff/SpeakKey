@@ -65,9 +65,15 @@ public class WhisperApi {
         OkHttpClient client = new OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .build();
+        
+        // Create Retrofit instance
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(endpoint)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
             
-        // TODO: Implement actual API call to Whisper service
-        // Placeholder return until real implementation is added
-        return "Placeholder transcription. API implementation needed.";
+        // Create API service
+        WhisperApiService apiService = retrofit.create(WhisperApiService.class);
     }
 }
