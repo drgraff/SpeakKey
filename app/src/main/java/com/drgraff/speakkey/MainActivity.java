@@ -30,6 +30,8 @@ import androidx.preference.PreferenceManager;
 
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.WhisperApi;
+import com.drgraff.speakkey.data.Prompt;
+import com.drgraff.speakkey.data.PromptManager;
 import com.drgraff.speakkey.inputstick.InputStickManager;
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.utils.AppLogManager;
@@ -38,8 +40,10 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -464,13 +468,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         
+        // Add this block:
+        PromptManager promptManager = new PromptManager(this); // Initialize PromptManager
+        List<Prompt> allPrompts = promptManager.getPrompts();
+        String activePromptsString = allPrompts.stream()
+                                         .filter(Prompt::isActive)
+                                         .map(Prompt::getText)
+                                         .collect(Collectors.joining("\n\n")); // Join active prompts with double newline
+
+        String finalPromptPayload;
+        if (!activePromptsString.isEmpty()) {
+            finalPromptPayload = activePromptsString + "\n\n" + transcript;
+        } else {
+            finalPromptPayload = transcript;
+        }
+        // End of new block
+        
         Toast.makeText(this, "Sending to ChatGPT...", Toast.LENGTH_SHORT).show();
-        AppLogManager.getInstance().addEntry("INFO", "ChatGPT: Sending request...", null);
+        AppLogManager.getInstance().addEntry("INFO", "ChatGPT: Sending request...", "Payload: " + finalPromptPayload); // Log the payload
         
         // Send to ChatGPT in background
         new Thread(() -> {
             try {
-                String response = chatGptApi.getCompletion(transcript);
+                String response = chatGptApi.getCompletion(finalPromptPayload);
                 AppLogManager.getInstance().addEntry("SUCCESS", "ChatGPT: Response received", "Length: " + response.length());
                 mainHandler.post(() -> {
                     chatGptText.setText(response);
@@ -532,6 +552,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_view_logs) {
             Intent intent = new Intent(this, com.drgraff.speakkey.utils.LogActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_prompts) { // Make sure R.id.nav_prompts matches the ID in menu_drawer.xml
+            Intent intent = new Intent(this, com.drgraff.speakkey.data.PromptsActivity.class); // Use fully qualified name
             startActivity(intent);
         }
         

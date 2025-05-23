@@ -16,5 +16,9 @@
             android:id="@+id/nav_view_logs"
             android:icon="@android:drawable/ic_menu_view"
             android:title="View Logs" />
+        <item
+            android:id="@+id/nav_prompts"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="Prompts" />
     </group>
 </menu>
