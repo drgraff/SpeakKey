@@ -3,6 +3,7 @@ package com.drgraff.speakkey.api;
 import android.util.Log;
 
 import java.io.File;
+// Unused imports for URL and MalformedURLException will be removed by not re-adding them.
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -32,24 +33,12 @@ public class WhisperApi {
      */
     public WhisperApi(String apiKey, String endpoint, String language) {
         this.apiKey = apiKey;
-        
-        String correctedEndpoint = endpoint;
-        if (correctedEndpoint != null && !correctedEndpoint.trim().isEmpty()) { // Check for non-empty after trimming whitespace
-            // Remove all existing trailing slashes first to handle cases like "http://example.com///"
-            while (correctedEndpoint.endsWith("/")) {
-                correctedEndpoint = correctedEndpoint.substring(0, correctedEndpoint.length() - 1);
-            }
-            // Then add a single trailing slash
-            correctedEndpoint += "/";
-        } else {
-            // If endpoint is null, empty, or whitespace-only, this is problematic.
-            // Throw an error or use a hardcoded default known to be correct.
-            // Given MainActivity provides a default, an exception for a bad configured state is reasonable.
-            throw new IllegalArgumentException("Endpoint URL cannot be null or empty.");
-        }
-        this.endpoint = correctedEndpoint;
-        
         this.language = language;
+
+        if (endpoint == null || endpoint.trim().isEmpty()) {
+            throw new IllegalArgumentException("Endpoint URL cannot be null, empty, or whitespace-only.");
+        }
+        this.endpoint = endpoint.trim(); // Assign trimmed endpoint directly
     }
     
     /**
