@@ -101,6 +101,9 @@
         android:padding="8dp"
         android:gravity="top|start"
         android:inputType="textMultiLine"
+        android:scrollbars="vertical"
+        android:minLines="3"
+        android:maxLines="100"
         app:layout_constraintTop_toBottomOf="@id/whisper_label"
         app:layout_constraintBottom_toTopOf="@id/whisper_controls"
         app:layout_constraintHeight_percent="0.2" />
@@ -164,6 +167,9 @@
         android:padding="8dp"
         android:gravity="top|start"
         android:inputType="textMultiLine"
+        android:scrollbars="vertical"
+        android:minLines="3"
+        android:maxLines="100"
         app:layout_constraintTop_toBottomOf="@id/chatgpt_label"
         app:layout_constraintBottom_toTopOf="@id/chatgpt_controls"
         app:layout_constraintHeight_percent="0.2" />
