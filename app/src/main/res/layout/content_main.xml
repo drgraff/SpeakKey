@@ -94,7 +94,7 @@
     <EditText
         android:id="@+id/whisper_text"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="180dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:background="@color/edit_text_background"
@@ -176,7 +176,7 @@
     <EditText
         android:id="@+id/chatgpt_text"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="180dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:background="@color/edit_text_background"
@@ -217,7 +217,7 @@
                 android:id="@+id/chk_auto_send_to_chatgpt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Auto Send to ChatGPT"/> 
+                android:text="Auto-send"/> 
         </LinearLayout>
 
         <Button
