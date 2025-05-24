@@ -51,4 +51,8 @@
         </activity>
     </application>
 
+    <queries>
+        <package android:name="com.inputstick.apps.inputstickutility" />
+    </queries>
+
 </manifest>
