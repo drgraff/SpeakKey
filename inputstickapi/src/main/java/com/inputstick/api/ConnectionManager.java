@@ -29,11 +29,11 @@ public abstract class ConnectionManager {
         public abstract void disconnect();
         public abstract void sendPacket(Packet p);
 
-        protected void stateNotify(int state) {
+        public void stateNotify(int state) {
                 stateNotify(state, false);
         }
 
-        protected void stateNotify(int state, boolean forceNotification) {
+        public void stateNotify(int state, boolean forceNotification) {
                 if (( !forceNotification) && (mState == state )) {
                         //do nothing
                 } else {

@@ -1,41 +1,86 @@
 package com.inputstick.api.init;
 
-import com.inputstick.api.Util;
-
 public class DeviceInfo {
 
-        private int mFirmwareVersion;
-        private int mHardwareVersion;
-        private int mBootloaderVersion;
-        private byte[] mSerialNumber;
+        private int firmwareType;
+        private int versionMajor;
+        private int versionMinor;
+        private int versionHardware;
+        private int securityStatus;
+        private boolean passwordProtected;
 
         public DeviceInfo(byte[] data) {
-                if (data.length >= 11) {
-                        mFirmwareVersion = Util.getShort(data, 1);
-                        mHardwareVersion = Util.getShort(data, 3);
-                        mBootloaderVersion = Util.getShort(data, 5);
-                        mSerialNumber = new byte[4];
-                        mSerialNumber[0] = data[7];
-                        mSerialNumber[1] = data[8];
-                        mSerialNumber[2] = data[9];
-                        mSerialNumber[3] = data[10];
+                if (data != null) {
+                        if (data.length > 5) {
+                                firmwareType = data[2];
+                                versionMajor = data[3];
+                                versionMinor = data[4];
+                                versionHardware = data[5];
+                        }
+                        if (data.length > 20) {
+                                securityStatus = data[19];
+                                if (data[20] == 0) {
+                                        passwordProtected = false;
+                                } else {
+                                        passwordProtected = true;
+                                }
+                        }
                 }
         }
 
-        public int getFirmwareVersion() {
-                return mFirmwareVersion;
+        public int getSecurityStatus() {
+                return securityStatus;
+        }
+
+        public boolean isAuthenticated() {
+                return ((securityStatus & 0x10) != 0);
+        }
+
+        public boolean isUnlocked() {
+                if (getFirmwareVersion() < 96) {
+                        return true;
+                } else {
+                        return ((securityStatus & 0x08) != 0);
+                }
+        }
+
+        public int getFirmwareType() {
+                return firmwareType;
+        }
+
+        public boolean isPasswordProtected() {
+                return passwordProtected;
+        }
+
+        public int getVersionMinor() {
+                return versionMinor;
+        }
+
+        public int getVersionMajor() {
+                return versionMajor;
         }
 
         public int getHardwareVersion() {
-                return mHardwareVersion;
+                return versionHardware;
         }
 
-        public int getBootloaderVersion() {
-                return mBootloaderVersion;
+        public int getFirmwareVersion() {
+                return (versionMajor) * 100 + versionMinor;
         }
 
-        public byte[] getSerialNumber() {
-                return mSerialNumber;
+        public boolean supportsEncryption() {
+                return (getFirmwareVersion() >= 91);
         }
 
+        public boolean supportsPinChange() {
+                return (getFirmwareVersion() >= 97);
+        }
+
+        public boolean supportsGamepad() {
+                return (getFirmwareVersion() >= 97);
+        }
+
+        public boolean supportsRestoreOptions() {
+                return (getFirmwareVersion() >= 98);
+        }
 }
