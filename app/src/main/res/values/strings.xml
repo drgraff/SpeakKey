@@ -4,12 +4,12 @@
     <string name="action_settings">Settings</string>
     
     <!-- Main UI -->
-    <string name="start_recording">Start Recording</string>
-    <string name="pause_recording">Pause Recording</string>
-    <string name="stop_recording">Stop Recording</string>
+    <string name="start_recording">Start Record</string>
+    <string name="pause_recording">Pause Record</string>
+    <string name="stop_recording">Stop Record</string>
     <string name="send_to_whisper">Send to Whisper</string>
     <string name="clear_recording">Clear Recording</string>
-    <string name="clear_transcription">Clear Transcription</string>
+    <string name="clear_transcription">Clear Transcript</string>
     <string name="send_to_chatgpt">Send to ChatGPT</string>
     <string name="clear_chatgpt_response">Clear Response</string>
     <string name="send_to_inputstick">Send to InputStick</string>
