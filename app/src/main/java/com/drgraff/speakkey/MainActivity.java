@@ -32,7 +32,8 @@ import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.WhisperApi;
 import com.drgraff.speakkey.data.Prompt;
 import com.drgraff.speakkey.data.PromptManager;
-import com.drgraff.speakkey.inputstick.InputStickManager;
+import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
+// import com.drgraff.speakkey.inputstick.InputStickManager; // Removed
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // APIs
     private WhisperApi whisperApi;
     private ChatGptApi chatGptApi;
-    private InputStickManager inputStickManager;
+    // private InputStickManager inputStickManager; // Removed
     
     // Settings
     private SharedPreferences sharedPreferences;
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         whisperApi = new WhisperApi(apiKey, whisperEndpoint, language);
         chatGptApi = new ChatGptApi(apiKey, model);
-        inputStickManager = new InputStickManager(this);
+        // inputStickManager = new InputStickManager(this); // Removed
     }
     
     private void setupClickListeners() {
@@ -552,22 +553,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         String text = chatGptText.getText().toString();
         if (text.isEmpty()) {
-            Toast.makeText(this, "No text to send", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No text to send to InputStick", Toast.LENGTH_SHORT).show(); // Clarified message
             return;
         }
-        
-        inputStickManager.connect(connected -> {
-            if (connected) {
-                inputStickManager.typeText(text);
-                mainHandler.post(() -> {
-                    Toast.makeText(MainActivity.this, "Text sent to InputStick", Toast.LENGTH_SHORT).show();
-                });
-            } else {
-                mainHandler.post(() -> {
-                    Toast.makeText(MainActivity.this, R.string.error_inputstick, Toast.LENGTH_SHORT).show();
-                });
-            }
-        });
+
+        // Check if InputStickUtility is installed and supported
+        if (com.drgraff.speakkey.inputstick.InputStickBroadcast.isSupported(this, true)) {
+            // Send the text using InputStickBroadcast
+            com.drgraff.speakkey.inputstick.InputStickBroadcast.type(this, text, "en-US"); // Using "en-US" as default layout
+            Toast.makeText(MainActivity.this, "Text sent via InputStick broadcast", Toast.LENGTH_SHORT).show();
+            AppLogManager.getInstance().addEntry("INFO", "InputStick: Text broadcasted", "Length: " + text.length());
+        } else {
+            // isSupported() already shows a dialog if not installed/updated.
+            // Optionally, add another toast or log if needed, but DownloadDialog should handle user notification.
+            AppLogManager.getInstance().addEntry("WARN", "InputStick: Utility not supported or user cancelled download.", null);
+        }
     }
     
     @Override

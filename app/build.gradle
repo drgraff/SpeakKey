@@ -57,7 +57,7 @@ dependencies {
     implementation 'androidx.media:media:1.6.0'
 
     // InputStick API (local module)
-    implementation project(':inputstickapi')
+    // implementation project(':inputstickapi')
     
     // Testing libraries
     testImplementation 'junit:junit:4.13.2'

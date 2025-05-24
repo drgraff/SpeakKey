@@ -17,4 +17,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "SpeakKey"
 include ':app'
-include ':inputstickapi'
+// include ':inputstickapi'
