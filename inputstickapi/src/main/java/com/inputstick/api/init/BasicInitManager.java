@@ -108,7 +108,7 @@ public class BasicInitManager implements InitManager {
                 } else {
                         if (mInitState == STATE_INIT_DONE) {
                                 //pass other packets to HID
-                                InputStickHID.getInstance().onInputStickData(data);
+                                com.inputstick.api.basic.InputStickHID.getInstance().onInputStickData(data);
                         }
                 }
         }

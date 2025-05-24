@@ -1,5 +1,25 @@
 package com.inputstick.api;
 
-// TODO: Fetch content from https://github.com/inputstick/InputStickAPI-Android/tree/master/InputStickAPI/src/com/inputstick/api/LayoutHelper.java
 public class LayoutHelper {
+    private String code;
+    private String name;
+    private String displayName;
+
+    public LayoutHelper(String code, String name, String displayName) {
+        this.code = code;
+        this.name = name;
+        this.displayName = displayName;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
 }

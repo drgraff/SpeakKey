@@ -1,56 +1,119 @@
 package com.inputstick.api;
 
-// TODO: Fetch content from https://github.com/inputstick/InputStickAPI-Android/tree/master/InputStickAPI/src/com/inputstick/api/InputStickError.java
+import android.util.SparseArray;
+
 public class InputStickError {
-    public static final int ERROR_NONE = 0;
-    public static final int ERROR_UNKNOWN = 1;
-    public static final int ERROR_BT_NOT_SUPPORTED = 2;
-    public static final int ERROR_BT_NOT_ENABLED = 3;
-    public static final int ERROR_BT_NO_PAIRED_DEVICES = 4; // Not used
-    public static final int ERROR_BT_DEVICE_NOT_PAIRED = 5; // Not used
-    public static final int ERROR_BT_SERVICE_NOT_RUNNING = 6; // Not used
-    public static final int ERROR_BT_SERVICE_CONNECTION_FAILED = 7; // Not used
-    public static final int ERROR_BT_DEVICE_NOT_FOUND = 8;
-    public static final int ERROR_BT_CONNECTION_FAILED = 9;
-    public static final int ERROR_BT_CONNECTION_LOST = 10;
-    public static final int ERROR_BT_ADDRESS_INVALID = 11;
-    public static final int ERROR_BT_UNABLE_TO_OPEN_SOCKET = 12;
-    public static final int ERROR_BT_UNABLE_TO_CLOSE_SOCKET = 13;
-    public static final int ERROR_BT_UNABLE_TO_SEND_DATA = 14;
-    public static final int ERROR_BT_UNABLE_TO_RECEIVE_DATA = 15;
-    public static final int ERROR_BT_CONNECTION_TIMEOUT = 16;
-    public static final int ERROR_BT_ALREADY_CONNECTING = 17;
-    public static final int ERROR_BT_ALREADY_CONNECTED = 18;
-    public static final int ERROR_BT_NOT_CONNECTED = 19;
-    public static final int ERROR_BT_SECURITY_ERROR = 20;
 
-    public static final int ERROR_USB_NOT_SUPPORTED = 21;
-    public static final int ERROR_USB_NOT_ENABLED = 22;
-    public static final int ERROR_USB_NO_PERMISSIONS = 23;
-    public static final int ERROR_USB_DEVICE_NOT_FOUND = 24;
-    public static final int ERROR_USB_CONNECTION_FAILED = 25;
-    public static final int ERROR_USB_CONNECTION_LOST = 26;
-    public static final int ERROR_USB_UNABLE_TO_SEND_DATA = 27;
-    public static final int ERROR_USB_UNABLE_TO_RECEIVE_DATA = 28;
+        public static String ERROR_UNKNOWN_MSG = "Unknown";
 
-    public static final int ERROR_CRYPTO_ERROR = 40;
-    public static final int ERROR_DEVICE_NOT_RESPONDING = 41;
-    public static final int ERROR_FW_TOO_OLD = 42;
-    public static final int ERROR_FW_INVALID_RESPONSE = 43;
-    public static final int ERROR_FW_UNKNOWN_CMD_RESPONSE = 44;
-    public static final int ERROR_FW_BUFFER_FULL = 45;
-    public static final int ERROR_FW_NOT_READY = 46;
-    public static final int ERROR_FW_CHECKSUM = 47;
-    public static final int ERROR_FW_DECRYPTION = 48;
-    public static final int ERROR_FW_INTERNAL = 49;
+        public static final int ERROR_NONE = 0;
+        public static final int ERROR_UNKNOWN = 1;
 
-    public static final int ERROR_INIT_NO_RESPONSE = 50;
-    public static final int ERROR_INIT_DECRYPTION = 51;
-    public static final int ERROR_INIT_AUTH = 52;
-    public static final int ERROR_INIT_CHALLENGE = 53;
+        public static final int ERROR_BLUETOOTH = 0x0100;
+        public static final int ERROR_BLUETOOTH_CONNECTION_FAILED = ERROR_BLUETOOTH | 0x01;
+        public static final int ERROR_BLUETOOTH_CONNECTION_LOST = ERROR_BLUETOOTH | 0x02;
+        public static final int ERROR_BLUETOOTH_NOT_SUPPORTED = ERROR_BLUETOOTH | 0x03;
+        public static final int ERROR_BLUETOOTH_INVALID_MAC = ERROR_BLUETOOTH | 0x04;
+        public static final int ERROR_BLUETOOTH_ECHO_TIMEDOUT = ERROR_BLUETOOTH | 0x05;
+        public static final int ERROR_BLUETOOTH_NO_REMOTE_DEVICE = ERROR_BLUETOOTH | 0x06;
+        public static final int ERROR_BLUETOOTH_BT40_NOT_SUPPRTED = ERROR_BLUETOOTH | 0x07;
+        public static final int ERROR_BLUETOOTH_BT40_NO_SPP_SERVICE = ERROR_BLUETOOTH | 0x08;
+        public static final int ERROR_BLUETOOTH_NOT_ENABLED = ERROR_BLUETOOTH | 0x09;
 
-    public static final int ERROR_ANDROID_NO_UTILITY_APP = 60;
-    public static final int ERROR_ANDROID_UTILITY_APP_TOO_OLD = 61;
-    public static final int ERROR_ANDROID_UTILITY_APP_BIND_FAILED = 62;
-    public static final int ERROR_ANDROID_UTILITY_APP_CONNECTION_TIMEOUT = 63;
+        public static final int ERROR_HARDWARE = 0x0200;
+        public static final int ERROR_HARDWARE_WDG_RESET = ERROR_HARDWARE | 0x01;
+
+        public static final int ERROR_PACKET = 0x0300;
+        public static final int ERROR_PACKET_INVALID_CRC = ERROR_PACKET | 0x01;
+        public static final int ERROR_PACKET_INVALID_LENGTH = ERROR_PACKET | 0x02;
+        public static final int ERROR_PACKET_INVALID_HEADER = ERROR_PACKET | 0x03;
+
+        public static final int ERROR_INIT = 0x0400;
+        public static final int ERROR_INIT_UNSUPPORTED_CMD = ERROR_INIT | 0x01;
+        public static final int ERROR_INIT_TIMEDOUT = ERROR_INIT | 0x02;
+        public static final int ERROR_INIT_FW_TYPE_NOT_SUPPORTED = ERROR_INIT | 0x03;
+        public static final int ERROR_INIT_FW_VERSION_NOT_SUPPORTED = ERROR_INIT | 0x04;
+
+        public static final int ERROR_SECURITY = 0x0500;
+        public static final int ERROR_SECURITY_NOT_SUPPORTED = ERROR_SECURITY | 0x01;
+        public static final int ERROR_SECURITY_NO_KEY = ERROR_SECURITY | 0x02;
+        public static final int ERROR_SECURITY_INVALID_KEY = ERROR_SECURITY | 0x03;
+        public static final int ERROR_SECURITY_CHALLENGE = ERROR_SECURITY | 0x04;
+        public static final int ERROR_SECURITY_NOT_PROTECTED = ERROR_SECURITY | 0x05;
+
+        public static final int ERROR_ANDROID = 0x1000;
+        public static final int ERROR_ANDROID_NO_UTILITY_APP = ERROR_ANDROID | 0x01;
+        public static final int ERROR_ANDROID_SERVICE_DISCONNECTED = ERROR_ANDROID | 0x02;
+        public static final int ERROR_ANDROID_UTIL_FORCE_DISC = ERROR_ANDROID | 0x03;
+        public static final int ERROR_ANDROID_UTIL_IDLE_DISC = ERROR_ANDROID | 0x04;
+
+        private static final SparseArray<String> errorCodeMap;
+        static {
+            errorCodeMap = new SparseArray<String>();
+            errorCodeMap.put(ERROR_NONE, "None");
+            errorCodeMap.put(ERROR_UNKNOWN, "Unknown");
+            errorCodeMap.put(ERROR_BLUETOOTH, "Bluetooth");
+            errorCodeMap.put(ERROR_BLUETOOTH_CONNECTION_FAILED, "Failed to connect");
+            errorCodeMap.put(ERROR_BLUETOOTH_CONNECTION_LOST, "Connection lost");
+            errorCodeMap.put(ERROR_BLUETOOTH_NOT_SUPPORTED, "Not supported");
+            errorCodeMap.put(ERROR_BLUETOOTH_INVALID_MAC, "Invalid MAC");
+            errorCodeMap.put(ERROR_BLUETOOTH_ECHO_TIMEDOUT, "Echo timedout");
+            errorCodeMap.put(ERROR_BLUETOOTH_NO_REMOTE_DEVICE, "Can't find remote device");
+            errorCodeMap.put(ERROR_BLUETOOTH_BT40_NOT_SUPPRTED, "BT 4.0 is not supported");
+            errorCodeMap.put(ERROR_BLUETOOTH_BT40_NO_SPP_SERVICE, "BT 4.0 RXTX not found");
+            errorCodeMap.put(ERROR_BLUETOOTH_NOT_ENABLED, "BT not enabled");
+            errorCodeMap.put(ERROR_HARDWARE, "Hardware");
+            errorCodeMap.put(ERROR_HARDWARE_WDG_RESET, "WDG reset");
+            errorCodeMap.put(ERROR_PACKET, "Invalid packet");
+            errorCodeMap.put(ERROR_PACKET_INVALID_CRC, "Invalid CRC");
+            errorCodeMap.put(ERROR_PACKET_INVALID_LENGTH, "Invalid length");
+            errorCodeMap.put(ERROR_PACKET_INVALID_HEADER, "Invalid header");
+            errorCodeMap.put(ERROR_INIT, "Init");
+            errorCodeMap.put(ERROR_INIT_UNSUPPORTED_CMD, "Command not supported");
+            errorCodeMap.put(ERROR_INIT_TIMEDOUT, "Timedout");
+            errorCodeMap.put(ERROR_INIT_FW_TYPE_NOT_SUPPORTED, "FW type not supported");
+            errorCodeMap.put(ERROR_INIT_FW_VERSION_NOT_SUPPORTED, "FW version not supported");
+            errorCodeMap.put(ERROR_SECURITY, "Security");
+            errorCodeMap.put(ERROR_SECURITY_NOT_SUPPORTED, "Not supported");
+            errorCodeMap.put(ERROR_SECURITY_NO_KEY, "No key provided");
+            errorCodeMap.put(ERROR_SECURITY_INVALID_KEY, "Invalid key");
+            errorCodeMap.put(ERROR_SECURITY_CHALLENGE, "Challenge failed");
+            errorCodeMap.put(ERROR_SECURITY_NOT_PROTECTED, "Key was provided, but device is not password protected");
+            errorCodeMap.put(ERROR_ANDROID, "Android");
+            errorCodeMap.put(ERROR_ANDROID_NO_UTILITY_APP, "InputStickUtility app not installed");
+            errorCodeMap.put(ERROR_ANDROID_SERVICE_DISCONNECTED, "Service connection lost");
+            errorCodeMap.put(ERROR_ANDROID_UTIL_FORCE_DISC, "Connection closed by InputStickUtility");
+            errorCodeMap.put(ERROR_ANDROID_UTIL_IDLE_DISC, "Connection closed due to inactivity");
+        }
+
+        public static String getErrorType(int errorCode) {
+                String result;
+                errorCode &= 0xFF00;
+                result = errorCodeMap.get(errorCode);
+                if (result != null) {
+                        return result;
+                } else {
+                        return ERROR_UNKNOWN_MSG;
+                }
+        }
+
+        public static String getErrorMessage(int errorCode) {
+                String result;
+                if (errorCode == ERROR_NONE) {
+                        return errorCodeMap.get(ERROR_NONE);
+                }
+                if ((errorCode & 0x00FF) == 0) { 
+                        return ERROR_UNKNOWN_MSG;
+                }
+                result = errorCodeMap.get(errorCode);
+                if (result != null) {
+                        return result;
+                } else {
+                        return ERROR_UNKNOWN_MSG;
+                }
+        }
+
+        public static String getFullErrorMessage(int errorCode) {
+                return getErrorType(errorCode) + " - " + getErrorMessage(errorCode);
+        }
 }
