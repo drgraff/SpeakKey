@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View recordingIndicator;
     private TextView recordingTime;
     private CheckBox chkAutoSendWhisper, chkAutoSendInputStick, chkAutoSendToChatGpt; // Added chkAutoSendToChatGpt
+    private CheckBox chk_auto_send_whisper_to_inputstick; // Added
     private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
 
     // Audio recording
@@ -182,6 +183,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
         chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false));
         chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false));
+        chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick); // Added
+        chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Default to false
 
         // Listener to improve EditText scrolling within ScrollView
         View.OnTouchListener editTextTouchListener = (v, event) -> {
@@ -265,6 +268,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             sharedPreferences.edit().putBoolean("auto_send_to_chatgpt", isChecked).apply();
         });
         btnSendWhisperToInputStick.setOnClickListener(v -> sendWhisperToInputStick()); // Added
+        chk_auto_send_whisper_to_inputstick.setOnCheckedChangeListener((buttonView, isChecked) -> { // Added
+            sharedPreferences.edit().putBoolean("auto_send_whisper_to_inputstick", isChecked).apply();
+        });
     }
     
     private void requestPermissions() {
@@ -461,11 +467,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     whisperText.setText(transcription);
                     Toast.makeText(MainActivity.this, "Transcription complete", Toast.LENGTH_SHORT).show();
 
-                    // Add this:
+                    // Existing auto-send to ChatGPT logic (should remain)
                     if (chkAutoSendToChatGpt.isChecked()) {
-                        // Log this action
                         AppLogManager.getInstance().addEntry("INFO", "Auto-sending transcript to ChatGPT...", null);
-                        sendToChatGpt(); // Call sendToChatGpt automatically
+                        sendToChatGpt(); 
+                    }
+
+                    // New: Auto-send Whisper text directly to InputStick
+                    if (chk_auto_send_whisper_to_inputstick.isChecked()) { // Use the new CheckBox ID
+                        AppLogManager.getInstance().addEntry("INFO", "Auto-sending Whisper transcript directly to InputStick...", null);
+                        sendWhisperToInputStick(); // This is the method created in the previous task
                     }
                 });
             } catch (Exception e) {
@@ -627,6 +638,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
         chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false));
         chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false));
+        chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Added
 
         // Refresh active macros
         displayActiveMacros();
