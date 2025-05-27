@@ -46,7 +46,7 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
 
         String label = currentPrompt.getLabel();
         if (label == null || label.trim().isEmpty()) {
-            holder.promptLabelTextView.setText("Untitled Prompt"); // Or use R.string.untitled_prompt
+            holder.promptLabelTextView.setText(context.getString(R.string.untitled_prompt_label));
         } else {
             holder.promptLabelTextView.setText(label);
         }
@@ -75,7 +75,11 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
                 prompts.remove(adapterPosition);
                 notifyItemRemoved(adapterPosition);
                 notifyItemRangeChanged(adapterPosition, prompts.size() - adapterPosition); // Update positions
-                Toast.makeText(context, "Prompt deleted: " + promptToDelete.getLabel(), Toast.LENGTH_SHORT).show();
+                String message = context.getString(R.string.prompt_deleted_message);
+                if (promptToDelete.getLabel() != null && !promptToDelete.getLabel().trim().isEmpty()) {
+                    message += ": " + promptToDelete.getLabel();
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         });
     }

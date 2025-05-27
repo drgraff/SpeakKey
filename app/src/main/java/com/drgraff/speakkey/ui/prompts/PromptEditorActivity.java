@@ -55,7 +55,7 @@ public class PromptEditorActivity extends AppCompatActivity {
 
         if (currentPromptId != INVALID_PROMPT_ID) {
             if (actionBar != null) {
-                actionBar.setTitle("Edit Prompt");
+                actionBar.setTitle(R.string.edit_prompt_title);
             }
             // Load the prompt
             List<Prompt> prompts = promptManager.getPrompts();
@@ -71,15 +71,15 @@ public class PromptEditorActivity extends AppCompatActivity {
                 editTextText.setText(currentPrompt.getText());
             } else {
                 // Prompt with given ID not found, treat as error or new prompt
-                Toast.makeText(this, "Error: Prompt not found.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.prompt_not_found_message, Toast.LENGTH_SHORT).show();
                 if (actionBar != null) {
-                    actionBar.setTitle("Add New Prompt");
+                    actionBar.setTitle(R.string.add_prompt_title);
                 }
                 currentPromptId = INVALID_PROMPT_ID; // Reset to behave like add new
             }
         } else {
             if (actionBar != null) {
-                actionBar.setTitle("Add New Prompt");
+                actionBar.setTitle(R.string.add_prompt_title);
             }
         }
 
@@ -96,8 +96,8 @@ public class PromptEditorActivity extends AppCompatActivity {
         String text = editTextText.getText().toString(); // Text can be empty, or contain just spaces
 
         if (label.isEmpty()) {
-            editTextLabel.setError("Label cannot be empty");
-            Toast.makeText(this, "Label cannot be empty", Toast.LENGTH_SHORT).show();
+            editTextLabel.setError(getString(R.string.prompt_label_required_message)); // Also set error text from string
+            Toast.makeText(this, R.string.prompt_label_required_message, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -107,11 +107,11 @@ public class PromptEditorActivity extends AppCompatActivity {
             currentPrompt.setText(text);
             // isActive state is preserved from the original currentPrompt object
             promptManager.updatePrompt(currentPrompt);
-            Toast.makeText(this, "Prompt updated", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.prompt_saved_message, Toast.LENGTH_SHORT).show(); // Use "Prompt saved" for update too
         } else {
             // Adding new prompt
             promptManager.addPrompt(text, label); // isActive is false by default in addPrompt
-            Toast.makeText(this, "Prompt saved", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.prompt_saved_message, Toast.LENGTH_SHORT).show();
         }
         setResult(Activity.RESULT_OK);
         finish();

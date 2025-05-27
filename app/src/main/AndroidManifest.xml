@@ -46,9 +46,15 @@
         <activity
             android:name=".data.PromptsActivity"
             android:label="Manage Prompts"
-            android:theme="@style/Theme.SpeakKey"
+            android:theme="@style/Theme.SpeakKey.NoActionBar"
             android:parentActivityName=".MainActivity">
         </activity>
+        <activity
+            android:name="com.drgraff.speakkey.ui.prompts.PromptEditorActivity"
+            android:exported="false"
+            android:label="Edit Prompt"
+            android:theme="@style/Theme.SpeakKey.NoActionBar"
+            android:parentActivityName=".data.PromptsActivity" />
 
         <activity
             android:name="com.speakkey.ui.macros.MacroListActivity"

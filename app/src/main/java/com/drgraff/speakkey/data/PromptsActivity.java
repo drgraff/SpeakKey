@@ -47,7 +47,7 @@ public class PromptsActivity extends AppCompatActivity { // Removed PromptsAdapt
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle("Prompts"); // Updated title
+            actionBar.setTitle(R.string.prompts_activity_title);
         }
 
         promptManager = new PromptManager(this);
