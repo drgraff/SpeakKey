@@ -2,7 +2,9 @@ package com.speakkey.ui.macros
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +44,7 @@ class MacroListActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Macros"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.navigationIcon?.setColorFilter(ContextCompat.getColor(this, R.color.gray), PorterDuff.Mode.SRC_ATOP)
 
         macroRepository = MacroRepository(applicationContext)
         recyclerView = findViewById(R.id.macros_recycler_view)
