@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="8dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/action_description_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="14sp"
+        android:text="Action Description" />
+
+    <ImageButton
+        android:id="@+id/action_move_up_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Move Action Up"
+        app:srcCompat="@drawable/ic_arrow_upward" /> <!-- Placeholder, replace with actual drawable -->
+
+    <ImageButton
+        android:id="@+id/action_move_down_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Move Action Down"
+        app:srcCompat="@drawable/ic_arrow_downward" /> <!-- Placeholder, replace with actual drawable -->
+
+    <ImageButton
+        android:id="@+id/action_delete_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Delete Action"
+        app:srcCompat="@android:drawable/ic_menu_delete" />
+
+</LinearLayout>
