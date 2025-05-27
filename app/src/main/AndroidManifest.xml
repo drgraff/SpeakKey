@@ -49,6 +49,13 @@
             android:theme="@style/Theme.SpeakKey"
             android:parentActivityName=".MainActivity">
         </activity>
+
+        <activity
+            android:name="com.speakkey.ui.macros.MacroListActivity"
+            android:label="Manage Macros" />
+        <activity
+            android:name="com.speakkey.ui.macros.MacroEditorActivity"
+            android:label="Edit Macro" />
     </application>
 
     <queries>
