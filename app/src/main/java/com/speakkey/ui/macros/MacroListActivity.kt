@@ -15,7 +15,8 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.speakkey.R
+import com.drgraff.speakkey.R // Changed R import
+import android.widget.Toast // Added Toast import
 import com.speakkey.data.Macro
 import com.speakkey.data.MacroRepository
 
@@ -100,7 +101,7 @@ class MacroListActivity : AppCompatActivity() {
             .setPositiveButton("Delete") { dialog, _ ->
                 macroRepository.deleteMacro(macro.id)
                 loadMacros() // This will also update the empty state
-                Toast.makeText(this, "Macro '${macro.name}' deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MacroListActivity, "Macro '${macro.name}' deleted", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
