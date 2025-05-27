@@ -152,23 +152,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnPauseRecording = findViewById(R.id.btn_pause_recording);
         btnStopRecording = findViewById(R.id.btn_stop_recording);
         
-        // Whisper section
-        whisperText = findViewById(R.id.whisper_text);
-        btnSendWhisper = findViewById(R.id.btn_send_whisper);
-        btnClearRecording = findViewById(R.id.btn_clear_recording);
-        btnClearTranscription = findViewById(R.id.btn_clear_transcription);
-        chkAutoSendWhisper = findViewById(R.id.chk_auto_send_whisper);
-        
-        // ChatGPT section
-        chatGptText = findViewById(R.id.chatgpt_text);
-        btnSendChatGpt = findViewById(R.id.btn_send_chatgpt);
-        btnClearChatGpt = findViewById(R.id.btn_clear_chatgpt);
-        
-        // InputStick section
-        btnSendInputStick = findViewById(R.id.btn_send_inputstick);
-        chkAutoSendInputStick = findViewById(R.id.chk_auto_send_inputstick);
-        btnSendWhisperToInputStick = findViewById(R.id.btn_send_whisper_to_inputstick); // Added
-        
         // Recording indicator
         recordingIndicator = findViewById(R.id.recording_indicator);
         recordingTime = findViewById(R.id.recording_time);
@@ -193,9 +176,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick);
 
         // Set up click listeners
-        setupClickListeners(); 
+        // setupClickListeners(); // Moved down
         
         // Set initial checkbox states from preferences
+        // chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true)); // Moved down
+        // chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false)); // Moved down
+        // chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false)); // Moved down
+        // chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Moved down
+
+        setupClickListeners(); // Moved to after all findViewById calls
+        
+        // Set initial checkbox states from preferences (after they are all initialized)
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
         chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false));
         chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false));
@@ -631,10 +622,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent(this, com.drgraff.speakkey.utils.LogActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_prompts) { // Make sure R.id.nav_prompts matches the ID in menu_drawer.xml
-            Intent intent = new Intent(this, com.drgraff.speakkey.data.PromptsActivity.class); // Use fully qualified name
+            Intent intent = new Intent(this, com.drgraff.speakkey.data.PromptsActivity.class); // Corrected: This was already correct.
             startActivity(intent);
         } else if (id == R.id.nav_macros) {
-            Intent intent = new Intent(this, MacroListActivity.class);
+            Intent intent = new Intent(this, MacroListActivity.class); // This line remains as is, assuming MacroListActivity is still the target for "Macros"
             startActivity(intent);
         }
         

@@ -33,7 +33,7 @@
         android:id="@+id/empty_prompts_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No prompts found. Tap the '+' button to create one."
+        android:text="@string/empty_prompts_text"
         android:textSize="16sp"
         android:visibility="gone"
         android:layout_gravity="center"
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Add new prompt"
+        android:contentDescription="@string/content_description_add_new_prompt"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

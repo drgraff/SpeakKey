@@ -30,7 +30,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Prompt Label">
+            android:hint="@string/prompt_label_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/prompt_edit_label"
@@ -45,7 +45,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="8dp"
-            android:hint="Prompt Text">
+            android:hint="@string/prompt_text_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/prompt_edit_text"
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="16dp"
-            android:text="Save"
+            android:text="@string/save_button_text"
             android:textColor="@android:color/white"/> <!-- Assuming a dark theme for button text or use style -->
 
     </LinearLayout>
