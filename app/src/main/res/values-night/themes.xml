@@ -14,5 +14,13 @@
         
         <!-- Status bar color -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="alertDialogTheme">@style/AppAlertDialogTheme</item>
+    </style>
+
+    <style name="AppAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="buttonBarPositiveButtonStyle">@style/AlertDialog.Button.Positive</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertDialog.Button.Negative</item>
+        <!-- You might also need to set colorPrimary for button backgrounds if they are not appearing correctly -->
+        <!-- <item name="colorPrimary">@color/primaryLight</item> -->
     </style>
 </resources>
