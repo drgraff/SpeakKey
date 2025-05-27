@@ -11,4 +11,7 @@ public interface ChatGptApiService {
             @Header("Authorization") String authorization,
             @Body ChatGptRequest request
     );
+
+    @GET("v1/models")
+    Call<OpenAIModelData.OpenAIModelsResponse> listModels(@Header("Authorization") String authToken);
 }
