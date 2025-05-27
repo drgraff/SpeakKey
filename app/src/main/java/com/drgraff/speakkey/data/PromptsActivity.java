@@ -1,58 +1,74 @@
 package com.drgraff.speakkey.data;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
+// Removed Button, EditText, Toast (Toast might be re-added if needed for other purposes)
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar; // Added for Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.drgraff.speakkey.R; // Ensure R is imported correctly
+import com.drgraff.speakkey.R;
+import com.drgraff.speakkey.ui.prompts.PromptEditorActivity; // Correct path for PromptEditorActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton; // Added for FAB
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PromptsActivity extends AppCompatActivity implements PromptsAdapter.OnPromptInteractionListener {
+public class PromptsActivity extends AppCompatActivity { // Removed PromptsAdapter.OnPromptInteractionListener
 
     private RecyclerView promptsRecyclerView;
     private PromptsAdapter promptsAdapter;
     private PromptManager promptManager;
-    private List<Prompt> promptList;
+    // Removed promptList as adapter will hold its own list
+    private TextView emptyPromptsTextView; // Added for empty state
+    private FloatingActionButton fabAddPrompt; // Added for FAB
 
-    private EditText promptInputText;
-    private Button addPromptButton;
+    // Removed promptInputText, addPromptButton, currentEditingPrompt
 
-    private Prompt currentEditingPrompt = null; // To keep track if we are editing an existing prompt
+    private static final int ADD_PROMPT_REQUEST = 1;
+    // private static final int EDIT_PROMPT_REQUEST = 2; // For future use if adapter starts activity for result
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_prompts);
+        setContentView(R.layout.activity_prompts); // New layout
 
+        Toolbar toolbar = findViewById(R.id.toolbar_prompts); // New Toolbar ID
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle("Manage Prompts");
+            actionBar.setTitle("Prompts"); // Updated title
         }
 
         promptManager = new PromptManager(this);
-        promptList = new ArrayList<>(); // Initialize empty, will be loaded in onResume
 
-        promptInputText = findViewById(R.id.prompt_input_text);
-        addPromptButton = findViewById(R.id.add_prompt_button);
         promptsRecyclerView = findViewById(R.id.prompts_recycler_view);
+        emptyPromptsTextView = findViewById(R.id.empty_prompts_text_view); // Initialize empty view
+        fabAddPrompt = findViewById(R.id.fab_add_prompt); // Initialize FAB
 
         promptsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        promptsAdapter = new PromptsAdapter(promptList, this);
+        // PromptsAdapter constructor was changed to PromptsAdapter(Context context, List<Prompt> prompts, PromptManager promptManager)
+        promptsAdapter = new PromptsAdapter(this, new ArrayList<>(), promptManager);
         promptsRecyclerView.setAdapter(promptsAdapter);
 
-        addPromptButton.setOnClickListener(v -> saveOrUpdatePrompt());
+        fabAddPrompt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(PromptsActivity.this, PromptEditorActivity.class);
+                // For adding a new prompt, we don't pass an ID
+                startActivityForResult(intent, ADD_PROMPT_REQUEST);
+            }
+        });
     }
 
     @Override
@@ -62,71 +78,30 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
     }
 
     private void loadPrompts() {
-        promptList.clear();
-        promptList.addAll(promptManager.getPrompts());
-        promptsAdapter.updatePrompts(promptList); // Use a method that updates the adapter's list reference
-        
-        // Reset editing state
-        currentEditingPrompt = null;
-        promptInputText.setText("");
-        addPromptButton.setText("Add");
-    }
+        List<Prompt> loadedPrompts = promptManager.getPrompts();
+        promptsAdapter.setPrompts(loadedPrompts); // Use the new setPrompts method in adapter
 
-    private void saveOrUpdatePrompt() {
-        String text = promptInputText.getText().toString().trim();
-        if (TextUtils.isEmpty(text)) {
-            Toast.makeText(this, "Prompt text cannot be empty", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (currentEditingPrompt != null) {
-            // Update existing prompt
-            currentEditingPrompt.setText(text);
-            // isActive state is managed by the checkbox in the adapter directly
-            promptManager.updatePrompt(currentEditingPrompt);
-            Toast.makeText(this, "Prompt updated", Toast.LENGTH_SHORT).show();
+        if (loadedPrompts == null || loadedPrompts.isEmpty()) {
+            promptsRecyclerView.setVisibility(View.GONE);
+            emptyPromptsTextView.setVisibility(View.VISIBLE);
         } else {
-            // Add new prompt
-            promptManager.addPrompt(text); // New prompts are inactive by default as per PromptManager
-            Toast.makeText(this, "Prompt added", Toast.LENGTH_SHORT).show();
+            promptsRecyclerView.setVisibility(View.VISIBLE);
+            emptyPromptsTextView.setVisibility(View.GONE);
         }
-        loadPrompts(); // Reload and refresh list, also resets input field and button
     }
 
-    @Override
-    public void onPromptActivateToggle(Prompt prompt, boolean isActive) {
-        // The checkbox in the adapter directly changes the state for immediate visual feedback.
-        // We need to persist this change.
-        prompt.setActive(isActive); // Ensure the prompt object reflects the change
-        promptManager.updatePrompt(prompt); // Save the updated prompt
-        // No need to call loadPrompts() here if only active state changed, 
-        // unless other visual cues depend on it. The checkbox is already updated.
-        // For simplicity, a full reload ensures consistency if other derived states existed.
-        // However, to avoid list flicker, a more targeted update would be better if performance issues arise.
-        // For now, let's keep it simple:
-        // int index = promptList.indexOf(prompt); // This relies on Prompt.equals() based on ID
-        // if (index != -1) {
-        //     promptsAdapter.notifyItemChanged(index);
-        // }
-        // The PromptManager.togglePromptActiveStatus(prompt.getId()) could also be used here
-        // if the adapter didn't handle the state change directly for the checkbox.
-        // Since the adapter's checkbox listener is the source of truth for the UI event,
-        // updating the object and saving is the main task.
-    }
+    // Removed saveOrUpdatePrompt method
+
+    // Removed onPromptActivateToggle, onEditPrompt, onDeletePrompt listener methods
 
     @Override
-    public void onEditPrompt(Prompt prompt) {
-        currentEditingPrompt = prompt;
-        promptInputText.setText(prompt.getText());
-        promptInputText.requestFocus();
-        addPromptButton.setText("Save");
-    }
-
-    @Override
-    public void onDeletePrompt(Prompt prompt) {
-        promptManager.deletePrompt(prompt.getId());
-        Toast.makeText(this, "Prompt deleted", Toast.LENGTH_SHORT).show();
-        loadPrompts(); // Reload and refresh list
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ADD_PROMPT_REQUEST && resultCode == Activity.RESULT_OK) {
+            // Prompts were added/edited, onResume will call loadPrompts()
+            // loadPrompts(); // Explicitly calling here is also fine, but onResume handles it
+        }
+        // Handle EDIT_PROMPT_REQUEST if implemented
     }
 
     @Override
