@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
-import com.speakkey.R
+import com.drgraff.speakkey.R // Changed R import
 import com.speakkey.data.ActionType
 import com.speakkey.data.Macro
 import com.speakkey.data.MacroAction
@@ -87,21 +87,21 @@ class MacroEditorActivity : AppCompatActivity() {
                     actionsAdapter.notifyItemRemoved(index)
                     actionsAdapter.notifyItemRangeChanged(index, currentActions.size - index) // To update subsequent items' positions
                     updateActionsEmptyState()
-                    Toast.makeText(this, "Action removed: $removedActionName", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MacroEditorActivity, "Action removed: $removedActionName", Toast.LENGTH_SHORT).show()
                 }
             },
             onMoveUp = { position ->
                 if (position > 0) {
                     Collections.swap(currentActions, position, position - 1)
                     actionsAdapter.notifyItemMoved(position, position - 1)
-                    Toast.makeText(this, "Action moved up", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MacroEditorActivity, "Action moved up", Toast.LENGTH_SHORT).show()
                 }
             },
             onMoveDown = { position ->
                 if (position < currentActions.size - 1) {
                     Collections.swap(currentActions, position, position + 1)
                     actionsAdapter.notifyItemMoved(position, position + 1)
-                    Toast.makeText(this, "Action moved down", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MacroEditorActivity, "Action moved down", Toast.LENGTH_SHORT).show()
                 }
             }
             // Edit functionality can be added later
@@ -125,7 +125,7 @@ class MacroEditorActivity : AppCompatActivity() {
                     if (fromPosition != toPosition) { // Only show Toast if position actually changed
                         Collections.swap(currentActions, fromPosition, toPosition)
                         actionsAdapter.notifyItemMoved(fromPosition, toPosition)
-                        Toast.makeText(this, "Action reordered", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MacroEditorActivity, "Action reordered", Toast.LENGTH_SHORT).show()
                     }
                     return true
                 }
@@ -161,7 +161,7 @@ class MacroEditorActivity : AppCompatActivity() {
                 if (delayMs != null && delayMs > 0) {
                     addAction(ActionType.DELAY, delayMillis = delayMs)
                 } else {
-                    Toast.makeText(this, "Invalid delay value", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MacroEditorActivity, "Invalid delay value", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -175,7 +175,7 @@ class MacroEditorActivity : AppCompatActivity() {
         currentActions.add(action)
         actionsAdapter.notifyItemInserted(currentActions.size - 1)
         updateActionsEmptyState()
-        Toast.makeText(this, "Action added: ${action.getDisplayName()}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@MacroEditorActivity, "Action added: ${action.getDisplayName()}", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateActionsEmptyState() {
@@ -208,7 +208,7 @@ class MacroEditorActivity : AppCompatActivity() {
             return
         }
         if (currentActions.isEmpty()) {
-            Toast.makeText(this, "Macro must have at least one action", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MacroEditorActivity, "Macro must have at least one action", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -224,10 +224,10 @@ class MacroEditorActivity : AppCompatActivity() {
 
         if (currentMacro == null) {
             macroRepository.addMacro(macroToSave)
-            Toast.makeText(this, "Macro saved: ${macroToSave.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MacroEditorActivity, "Macro saved: ${macroToSave.name}", Toast.LENGTH_SHORT).show()
         } else {
             macroRepository.updateMacro(macroToSave)
-            Toast.makeText(this, "Macro updated: ${macroToSave.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MacroEditorActivity, "Macro updated: ${macroToSave.name}", Toast.LENGTH_SHORT).show()
         }
         setResult(Activity.RESULT_OK)
         finish()
