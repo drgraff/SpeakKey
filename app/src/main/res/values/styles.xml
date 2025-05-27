@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- You can add custom styles here later if needed. -->
+    <!-- For example, if SpeakKey had specific text appearances or button styles not covered by MaterialComponents directly -->
+
+    <!-- Example of a custom style (can be left out if not immediately needed):
+    <style name="MyCustomTextStyle">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    -->
+</resources>
