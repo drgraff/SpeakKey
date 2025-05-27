@@ -172,19 +172,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Recording indicator
         recordingIndicator = findViewById(R.id.recording_indicator);
         recordingTime = findViewById(R.id.recording_time);
-
-        // ChatGPT section (added checkbox)
+        
+        // Whisper section
+        whisperText = findViewById(R.id.whisper_text);
+        btnSendWhisper = findViewById(R.id.btn_send_whisper);
+        btnClearRecording = findViewById(R.id.btn_clear_recording);
+        btnClearTranscription = findViewById(R.id.btn_clear_transcription);
+        chkAutoSendWhisper = findViewById(R.id.chk_auto_send_whisper);
+        
+        // ChatGPT section
+        chatGptText = findViewById(R.id.chatgpt_text);
+        btnSendChatGpt = findViewById(R.id.btn_send_chatgpt);
+        btnClearChatGpt = findViewById(R.id.btn_clear_chatgpt);
         chkAutoSendToChatGpt = findViewById(R.id.chk_auto_send_to_chatgpt);
         
+        // InputStick section
+        btnSendInputStick = findViewById(R.id.btn_send_inputstick);
+        chkAutoSendInputStick = findViewById(R.id.chk_auto_send_inputstick);
+        btnSendWhisperToInputStick = findViewById(R.id.btn_send_whisper_to_inputstick);
+        chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick);
+
         // Set up click listeners
-        setupClickListeners();
+        setupClickListeners(); 
         
         // Set initial checkbox states from preferences
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
         chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false));
         chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false));
-        chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick); // Added
-        chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Default to false
+        chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false));
 
         // Listener to improve EditText scrolling within ScrollView
         View.OnTouchListener editTextTouchListener = (v, event) -> {
