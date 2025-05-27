@@ -52,10 +52,12 @@
 
         <activity
             android:name="com.speakkey.ui.macros.MacroListActivity"
-            android:label="Manage Macros" />
+            android:label="Manage Macros"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
         <activity
             android:name="com.speakkey.ui.macros.MacroEditorActivity"
-            android:label="Edit Macro" />
+            android:label="Edit Macro"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
     </application>
 
     <queries>
