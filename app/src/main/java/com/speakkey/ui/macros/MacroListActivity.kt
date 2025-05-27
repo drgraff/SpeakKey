@@ -41,6 +41,7 @@ class MacroListActivity : AppCompatActivity() {
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_macros)
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Macros"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         macroRepository = MacroRepository(applicationContext)
         recyclerView = findViewById(R.id.macros_recycler_view)
@@ -161,5 +162,10 @@ class MacroListActivity : AppCompatActivity() {
                 deleteButton.setOnClickListener { onDeleteClick(macro) }
             }
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed() // or finish()
+        return true
     }
 }

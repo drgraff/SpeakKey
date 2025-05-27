@@ -131,7 +131,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="Cancel"/>
+                android:text="Cancel"
+                android:textColor="@android:color/white"/>
 
             <Button
                 android:id="@+id/btn_save_macro"
@@ -139,7 +140,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Save Macro"/>
+                android:text="Save Macro"
+                android:textColor="@android:color/white"/>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
