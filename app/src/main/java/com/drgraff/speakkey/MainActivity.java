@@ -28,13 +28,20 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
 
+import android.widget.LinearLayout; // Added for Macro buttons
+import com.google.android.material.button.MaterialButton; // Added for Macro buttons
+
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.WhisperApi;
 import com.drgraff.speakkey.data.Prompt;
 import com.drgraff.speakkey.data.PromptManager;
+import com.speakkey.data.Macro; // Added for Macro buttons
+import com.speakkey.data.MacroRepository; // Added for Macro buttons
+import com.speakkey.service.MacroExecutor; // Added for Macro Execution
 import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
 // import com.drgraff.speakkey.inputstick.InputStickManager; // Removed
 import com.drgraff.speakkey.settings.SettingsActivity;
+import com.speakkey.ui.macros.MacroListActivity; // Added for Macros
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
@@ -45,8 +52,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.concurrent.ExecutorService; // Added for Macro Execution
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import android.text.TextUtils; // Added for ellipsize
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FullScreenEditTextDialogFragment.OnSaveListener {
     private static final String TAG = "MainActivity";
@@ -79,6 +88,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     
     // Settings
     private SharedPreferences sharedPreferences;
+    private MacroRepository macroRepository; // Added for Macro buttons
+    private MacroExecutor macroExecutor; // Added for Macro Execution
+    private ExecutorService macroExecutorService; // Added for Macro Execution
     
     // Timer
     private ScheduledExecutorService timerExecutor;
@@ -94,6 +106,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        macroExecutor = new MacroExecutor(this); // Initialize MacroExecutor
+        macroExecutorService = Executors.newSingleThreadExecutor(); // Initialize ExecutorService
         
         // Initialize toolbar and navigation
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -111,8 +126,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize UI elements
         initializeUiElements();
         
-        // Initialize APIs
+        // Initialize APIs and MacroRepository
         initializeApis();
+        macroRepository = new MacroRepository(getApplicationContext()); // Initialize MacroRepository
         
         // Request permissions
         requestPermissions();
@@ -123,6 +139,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             audioDir.mkdirs();
         }
         audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
+
+        // Display active macros
+        displayActiveMacros(); // Call after macroRepository is initialized
     }
     
     private void initializeUiElements() {
@@ -585,6 +604,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_prompts) { // Make sure R.id.nav_prompts matches the ID in menu_drawer.xml
             Intent intent = new Intent(this, com.drgraff.speakkey.data.PromptsActivity.class); // Use fully qualified name
             startActivity(intent);
+        } else if (id == R.id.nav_macros) {
+            Intent intent = new Intent(this, MacroListActivity.class);
+            startActivity(intent);
         }
         
         drawerLayout.closeDrawer(GravityCompat.START);
@@ -598,10 +620,105 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ThemeManager.applyTheme(sharedPreferences);
         
         // Refresh settings in case they were changed
-        initializeApis();
+        initializeApis(); // Refreshes API keys etc.
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
         chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false));
         chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false));
+
+        // Refresh active macros
+        displayActiveMacros();
+    }
+
+    private void displayActiveMacros() {
+        if (macroRepository == null) {
+            Log.e(TAG, "MacroRepository not initialized in displayActiveMacros");
+            return;
+        }
+        LinearLayout activeMacrosRowsContainer = findViewById(R.id.active_macros_rows_container);
+        activeMacrosRowsContainer.removeAllViews();
+
+        List<Macro> activeMacros = macroRepository.getActiveMacros();
+        int macrosPerRow = macroRepository.getMacrosPerRow(2); // Default to 2 macros per row
+
+        if (activeMacros.isEmpty()) {
+            activeMacrosRowsContainer.setVisibility(View.GONE);
+            return;
+        } else {
+            activeMacrosRowsContainer.setVisibility(View.VISIBLE);
+        }
+
+        LinearLayout currentRow = null;
+        int marginHorizontalPx = (int) getResources().getDimension(R.dimen.macro_button_margin_horizontal);
+
+        for (int i = 0; i < activeMacros.size(); i++) {
+            Macro macro = activeMacros.get(i);
+            if (i % macrosPerRow == 0) {
+                currentRow = new LinearLayout(this);
+                LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                currentRow.setLayoutParams(rowParams);
+                currentRow.setOrientation(LinearLayout.HORIZONTAL);
+                activeMacrosRowsContainer.addView(currentRow);
+            }
+
+            MaterialButton button = new MaterialButton(this); // Using MaterialButton for consistent styling
+            button.setText(macro.getName());
+            button.setEllipsize(TextUtils.TruncateAt.END); // Ellipsize long text
+            button.setMaxLines(2); // Allow up to 2 lines, then ellipsize
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    0, // width
+                    LinearLayout.LayoutParams.WRAP_CONTENT, // height
+                    1.0f // weight
+            );
+            params.setMargins(marginHorizontalPx, 0, marginHorizontalPx, 0);
+            button.setLayoutParams(params);
+
+            button.setOnClickListener(v -> {
+                if (!sharedPreferences.getBoolean("inputstick_enabled", true)) {
+                    Toast.makeText(MainActivity.this, "InputStick is disabled in settings.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!InputStickBroadcast.isSupported(MainActivity.this, true)) { // true to show dialog if not supported
+                    Toast.makeText(MainActivity.this, "InputStick Utility not installed or needs update.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                Toast.makeText(MainActivity.this, "Executing: " + macro.getName(), Toast.LENGTH_SHORT).show();
+                macroExecutorService.execute(() -> {
+                    boolean success = macroExecutor.executeMacro(macro, MainActivity.this);
+                    // Optionally, provide feedback on completion
+                    mainHandler.post(() -> {
+                        if (success) {
+                            // Toast.makeText(MainActivity.this, macro.getName() + " finished.", Toast.LENGTH_SHORT).show();
+                            AppLogManager.getInstance().addEntry("INFO", "Macro executed: " + macro.getName(), null);
+                        } else {
+                            // Toast.makeText(MainActivity.this, macro.getName() + " cancelled.", Toast.LENGTH_SHORT).show();
+                             AppLogManager.getInstance().addEntry("WARN", "Macro cancelled or failed: " + macro.getName(), null);
+                        }
+                    });
+                });
+            });
+
+            if (currentRow != null) {
+                currentRow.addView(button);
+            }
+        }
+        // If the last row is not full, add empty views to maintain alignment (optional, depending on desired look)
+        if (currentRow != null && activeMacros.size() % macrosPerRow != 0) {
+            int remainingSlots = macrosPerRow - (activeMacros.size() % macrosPerRow);
+            for (int i = 0; i < remainingSlots; i++) {
+                View emptyView = new View(this);
+                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    0, // width
+                    LinearLayout.LayoutParams.WRAP_CONTENT, // height
+                    1.0f // weight
+                );
+                params.setMargins(marginHorizontalPx, 0, marginHorizontalPx, 0);
+                emptyView.setLayoutParams(params);
+                currentRow.addView(emptyView);
+            }
+        }
     }
     
     @Override
@@ -615,6 +732,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } catch (Exception e) {
                 Log.e(TAG, "Error releasing MediaRecorder", e);
             }
+        }
+        if (macroExecutorService != null && !macroExecutorService.isShutdown()) {
+            macroExecutorService.shutdown();
         }
     }
     

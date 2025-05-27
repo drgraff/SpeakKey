@@ -20,5 +20,9 @@
             android:id="@+id/nav_prompts"
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="Prompts" />
+        <item
+            android:id="@+id/nav_macros"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="Macros" />
     </group>
 </menu>
