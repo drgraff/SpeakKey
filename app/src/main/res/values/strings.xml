@@ -52,4 +52,22 @@
     <string name="error_chatgpt">Error getting response from ChatGPT</string>
     <string name="error_inputstick">Error connecting to InputStick</string>
     <string name="error_bluetooth">Bluetooth is not enabled</string>
+
+    <!-- Prompts Feature -->
+    <string name="prompt_label_hint">Prompt Label</string>
+    <string name="prompt_text_hint">Prompt Text</string>
+    <string name="save_button_text">Save</string>
+    <string name="add_prompt_title">Add New Prompt</string>
+    <string name="edit_prompt_title">Edit Prompt</string>
+    <string name="prompts_activity_title">Prompts</string>
+    <string name="empty_prompts_text">No prompts found. Tap the \'+\' button to create one.</string>
+    <string name="untitled_prompt_label">Untitled Prompt</string>
+    <string name="content_description_add_new_prompt">Add new prompt</string>
+    <string name="content_description_edit_prompt">Edit Prompt</string>
+    <string name="content_description_delete_prompt">Delete Prompt</string>
+    <string name="prompt_label_required_message">Prompt label cannot be empty.</string>
+    <string name="prompt_saved_message">Prompt saved.</string>
+    <string name="prompt_deleted_message">Prompt deleted.</string>
+    <string name="prompt_not_found_message">Prompt not found.</string>
+
 </resources>

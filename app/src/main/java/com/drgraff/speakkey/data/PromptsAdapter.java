@@ -1,33 +1,35 @@
 package com.drgraff.speakkey.data;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.drgraff.speakkey.R; // Ensure R is imported from the correct package
+import com.drgraff.speakkey.R;
+import com.drgraff.speakkey.ui.prompts.PromptEditorActivity; // Corrected import path
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptViewHolder> {
 
     private List<Prompt> prompts;
-    private final OnPromptInteractionListener listener;
+    private final PromptManager promptManager;
+    private final Context context; // Context for starting activity
 
-    public interface OnPromptInteractionListener {
-        void onPromptActivateToggle(Prompt prompt, boolean isActive);
-        void onEditPrompt(Prompt prompt);
-        void onDeletePrompt(Prompt prompt);
-    }
-
-    public PromptsAdapter(List<Prompt> prompts, OnPromptInteractionListener listener) {
-        this.prompts = prompts;
-        this.listener = listener;
+    // Constructor updated
+    public PromptsAdapter(Context context, List<Prompt> prompts, PromptManager promptManager) {
+        this.context = context;
+        this.prompts = prompts != null ? prompts : new ArrayList<>();
+        this.promptManager = promptManager;
     }
 
     @NonNull
@@ -41,24 +43,39 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
     @Override
     public void onBindViewHolder(@NonNull PromptViewHolder holder, int position) {
         Prompt currentPrompt = prompts.get(position);
-        holder.promptTextView.setText(currentPrompt.getText());
-        holder.promptActiveCheckbox.setChecked(currentPrompt.isActive());
 
-        holder.promptActiveCheckbox.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onPromptActivateToggle(currentPrompt, holder.promptActiveCheckbox.isChecked());
-            }
+        String label = currentPrompt.getLabel();
+        if (label == null || label.trim().isEmpty()) {
+            holder.promptLabelTextView.setText("Untitled Prompt"); // Or use R.string.untitled_prompt
+        } else {
+            holder.promptLabelTextView.setText(label);
+        }
+
+        holder.promptActiveSwitch.setChecked(currentPrompt.isActive());
+
+        holder.promptActiveSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            currentPrompt.setActive(isChecked);
+            promptManager.updatePrompt(currentPrompt); // Persist the change
+            // Optional: Add a Toast or log
+            // Toast.makeText(context, "Prompt " + (isChecked ? "activated" : "deactivated"), Toast.LENGTH_SHORT).show();
         });
 
         holder.editPromptButton.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onEditPrompt(currentPrompt);
-            }
+            Intent intent = new Intent(context, PromptEditorActivity.class);
+            intent.putExtra(PromptEditorActivity.EXTRA_PROMPT_ID, currentPrompt.getId());
+            context.startActivity(intent);
         });
 
         holder.deletePromptButton.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDeletePrompt(currentPrompt);
+            // Get position before removing from list
+            int adapterPosition = holder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                Prompt promptToDelete = prompts.get(adapterPosition); // Get prompt before removing
+                promptManager.deletePrompt(promptToDelete.getId());
+                prompts.remove(adapterPosition);
+                notifyItemRemoved(adapterPosition);
+                notifyItemRangeChanged(adapterPosition, prompts.size() - adapterPosition); // Update positions
+                Toast.makeText(context, "Prompt deleted: " + promptToDelete.getLabel(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -68,23 +85,27 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
         return prompts != null ? prompts.size() : 0;
     }
 
-    public void updatePrompts(List<Prompt> newPrompts) {
-        this.prompts = newPrompts;
+    public void setPrompts(List<Prompt> newPrompts) {
+        this.prompts.clear();
+        if (newPrompts != null) {
+            this.prompts.addAll(newPrompts);
+        }
         notifyDataSetChanged(); // Consider DiffUtil for more complex scenarios
     }
 
+    // ViewHolder updated
     static class PromptViewHolder extends RecyclerView.ViewHolder {
-        TextView promptTextView;
-        CheckBox promptActiveCheckbox;
+        TextView promptLabelTextView; // Changed from promptTextView
+        SwitchCompat promptActiveSwitch; // Changed from CheckBox
         ImageButton editPromptButton;
         ImageButton deletePromptButton;
 
         PromptViewHolder(View itemView) {
             super(itemView);
-            promptTextView = itemView.findViewById(R.id.prompt_text_view);
-            promptActiveCheckbox = itemView.findViewById(R.id.prompt_active_checkbox);
-            editPromptButton = itemView.findViewById(R.id.edit_prompt_button);
-            deletePromptButton = itemView.findViewById(R.id.delete_prompt_button);
+            promptLabelTextView = itemView.findViewById(R.id.prompt_label_text_view); // Updated ID
+            promptActiveSwitch = itemView.findViewById(R.id.prompt_active_switch); // Updated ID
+            editPromptButton = itemView.findViewById(R.id.prompt_edit_button);
+            deletePromptButton = itemView.findViewById(R.id.prompt_delete_button);
         }
     }
 }

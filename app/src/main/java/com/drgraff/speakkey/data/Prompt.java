@@ -6,15 +6,17 @@ public class Prompt {
     private long id; // Using System.currentTimeMillis() for simplicity
     private String text;
     private boolean isActive;
+    private String label;
 
     // Default constructor for GSON
     public Prompt() {
     }
 
-    public Prompt(long id, String text, boolean isActive) {
+    public Prompt(long id, String text, boolean isActive, String label) {
         this.id = id;
         this.text = text;
         this.isActive = isActive;
+        this.label = label;
     }
 
     public long getId() {
@@ -41,16 +43,37 @@ public class Prompt {
         isActive = active;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Prompt prompt = (Prompt) o;
-        return id == prompt.id; // ID is sufficient for equality
+        return id == prompt.id &&
+                isActive == prompt.isActive &&
+                Objects.equals(text, prompt.text) &&
+                Objects.equals(label, prompt.label);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, text, isActive, label);
+    }
+
+    @Override
+    public String toString() {
+        return "Prompt{" +
+                "id=" + id +
+                ", text='" + text + '\'' +
+                ", isActive=" + isActive +
+                ", label='" + label + '\'' +
+                '}';
     }
 }

@@ -35,10 +35,10 @@ public class PromptManager {
         sharedPreferences.edit().putString(PROMPTS_KEY, json).apply();
     }
 
-    public void addPrompt(String text) {
+    public void addPrompt(String text, String label) {
         List<Prompt> prompts = getPrompts();
         long newId = System.currentTimeMillis(); // Simple unique ID
-        prompts.add(new Prompt(newId, text, false)); // New prompts are inactive by default
+        prompts.add(new Prompt(newId, text, false, label)); // New prompts are inactive by default
         savePrompts(prompts);
     }
 
