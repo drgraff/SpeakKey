@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Button btnSendWhisper, btnClearRecording, btnClearTranscription;
     private Button btnSendChatGpt, btnClearChatGpt;
     private Button btnSendInputStick;
+    private Button btnSendWhisperToInputStick; // Added
     private EditText whisperText, chatGptText;
     private View recordingIndicator;
     private TextView recordingTime;
@@ -165,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // InputStick section
         btnSendInputStick = findViewById(R.id.btn_send_inputstick);
         chkAutoSendInputStick = findViewById(R.id.chk_auto_send_inputstick);
+        btnSendWhisperToInputStick = findViewById(R.id.btn_send_whisper_to_inputstick); // Added
         
         // Recording indicator
         recordingIndicator = findViewById(R.id.recording_indicator);
@@ -262,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chkAutoSendToChatGpt.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean("auto_send_to_chatgpt", isChecked).apply();
         });
+        btnSendWhisperToInputStick.setOnClickListener(v -> sendWhisperToInputStick()); // Added
     }
     
     private void requestPermissions() {
@@ -754,6 +757,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             currentEditingEditText.setText(editedText);
             // Optionally, you can clear the reference if it's no longer needed immediately
             // currentEditingEditText = null; 
+        }
+    }
+
+    private void sendWhisperToInputStick() {
+        if (!sharedPreferences.getBoolean("inputstick_enabled", true)) {
+            Toast.makeText(this, "InputStick is disabled in settings", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String textToSend = whisperText.getText().toString(); // Ensure whisperText is the correct EditText for Whisper transcription
+        if (textToSend.isEmpty()) {
+            Toast.makeText(this, "No Whisper text to send to InputStick", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if InputStickUtility is installed and supported
+        // The true parameter shows a dialog if not installed/updated.
+        if (com.drgraff.speakkey.inputstick.InputStickBroadcast.isSupported(this, true)) {
+            // Send the text using InputStickBroadcast
+            com.drgraff.speakkey.inputstick.InputStickBroadcast.type(this, textToSend, "en-US"); // Using "en-US" as default layout
+            Toast.makeText(MainActivity.this, "Whisper text sent via InputStick broadcast", Toast.LENGTH_SHORT).show();
+            // Ensure AppLogManager is accessible or initialized if you use it here
+            AppLogManager.getInstance().addEntry("INFO", "InputStick: Whisper text broadcasted", "Length: " + textToSend.length());
+        } else {
+            // isSupported() already shows a dialog.
+            AppLogManager.getInstance().addEntry("WARN", "InputStick: Utility not supported or user cancelled download for sending Whisper text.", null);
         }
     }
 }
