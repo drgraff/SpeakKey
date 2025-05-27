@@ -9,6 +9,11 @@
             android:summary="@string/settings_api_key_summary"
             android:inputType="textPassword" />
 
+        <Preference
+            android:key="pref_check_models_button"
+            android:title="Check Available ChatGPT Models"
+            android:summary="Tap to fetch the latest list of models from OpenAI" />
+
         <ListPreference
             android:key="chatgpt_model"
             android:title="@string/settings_model_title"

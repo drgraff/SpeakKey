@@ -9,6 +9,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List; // Added for List<ModelInfo>
+import com.drgraff.speakkey.api.OpenAIModelData.*; // Added for model data classes
 
 /**
  * API client for OpenAI's ChatGPT API
@@ -79,6 +81,44 @@ public class ChatGptApi {
             }
         } catch (IOException e) {
             throw new Exception("Error getting completion due to network issue: " + e.getMessage(), e);
+        }
+    }
+
+    public List<ModelInfo> listModels() throws Exception {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IllegalArgumentException("API key is required for listing models");
+        }
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openai.com/") // Ensure this base URL is appropriate
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        ChatGptApiService apiService = retrofit.create(ChatGptApiService.class);
+        String authToken = "Bearer " + this.apiKey;
+
+        Call<OpenAIModelsResponse> call = apiService.listModels(authToken);
+
+        try {
+            Response<OpenAIModelsResponse> response = call.execute();
+            if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                return response.body().getData();
+            } else {
+                String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                Log.e(TAG, "Error listing models: " + response.code() + " " + response.message() + " - " + errorBody);
+                throw new Exception("Error listing models: " + response.code() + " " + response.message() + " - " + errorBody);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error listing models due to network issue: " + e.getMessage(), e);
+            throw new Exception("Error listing models due to network issue: " + e.getMessage(), e);
         }
     }
 }
