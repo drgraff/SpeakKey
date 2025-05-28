@@ -86,8 +86,8 @@ public class SettingsActivity extends AppCompatActivity {
 
             EditTextPreference formatDelayPreference = findPreference("pref_inputstick_format_delay_ms");
             if (formatDelayPreference != null) {
-                String currentValue = sharedPreferences.getString("pref_inputstick_format_delay_ms", "100");
-                formatDelayPreference.setSummary(currentValue + " ms");
+                // String currentValue = sharedPreferences.getString("pref_inputstick_format_delay_ms", "100"); // Line removed
+                // formatDelayPreference.setSummary(currentValue + " ms"); // Line removed
             }
 
             String apiKey = sharedPreferences.getString("openai_api_key", "");
@@ -273,8 +273,8 @@ public class SettingsActivity extends AppCompatActivity {
             } else if (key.equals("pref_inputstick_format_delay_ms")) {
                 Preference delayPref = findPreference(key);
                 if (delayPref instanceof EditTextPreference) {
-                    String currentValue = sharedPreferences.getString(key, "100");
-                    delayPref.setSummary(currentValue + " ms");
+                    // String currentValue = sharedPreferences.getString(key, "100"); // Line removed
+                    // delayPref.setSummary(currentValue + " ms"); // Line removed
                 }
             }
         }
