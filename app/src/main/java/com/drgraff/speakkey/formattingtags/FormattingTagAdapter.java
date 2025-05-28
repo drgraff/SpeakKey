@@ -13,8 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.drgraff.speakkey.R;
-// Import EditFormattingTagActivity once it's created
-// import com.drgraff.speakkey.formattingtags.EditFormattingTagActivity;
+import com.drgraff.speakkey.formattingtags.EditFormattingTagActivity; // Added
 
 import java.util.List;
 
@@ -72,16 +71,20 @@ public class FormattingTagAdapter extends RecyclerView.Adapter<FormattingTagAdap
 
         holder.editButton.setOnClickListener(v -> {
             // Intent intent = new Intent(context, EditFormattingTagActivity.class);
-            // intent.putExtra(EditFormattingTagActivity.EXTRA_TAG_ID, currentTag.getId());
-            // context.startActivity(intent);
-            // For now, as EditFormattingTagActivity doesn't exist, we can log or Toast
-            Log.d(TAG, "Edit button clicked for tag ID: " + currentTag.getId());
-            Toast.makeText(context, "Edit for tag: " + currentTag.getName(), Toast.LENGTH_SHORT).show();
-            // TODO: Replace with actual Intent when EditFormattingTagActivity is available
-             if (context instanceof FormattingTagsActivity) {
-                Intent intent = new Intent(context, EditFormattingTagActivity.class); // Assuming EditFormattingTagActivity will be created
-                intent.putExtra("EXTRA_TAG_ID", currentTag.getId());
+            FormattingTag currentTag = formattingTags.get(holder.getAdapterPosition()); // Get current tag safely
+            if (currentTag == null) return; // Should not happen if list is consistent
+
+            Intent intent = new Intent(context, EditFormattingTagActivity.class);
+            intent.putExtra(EditFormattingTagActivity.EXTRA_TAG_ID, currentTag.getId());
+
+            if (context instanceof FormattingTagsActivity) {
                 ((FormattingTagsActivity) context).startActivityForResult(intent, FormattingTagsActivity.REQUEST_CODE_EDIT_TAG);
+            } else {
+                // Fallback if context is not the activity, though less ideal for startActivityForResult
+                // This might indicate a context issue if it ever happens.
+                // For now, simple startActivity, but this path should ideally not be taken.
+                context.startActivity(intent);
+                Log.w(TAG, "Starting EditFormattingTagActivity from a non-Activity context or context not equipped for result.");
             }
         });
 

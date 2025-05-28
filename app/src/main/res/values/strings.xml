@@ -91,4 +91,12 @@
     <string name="opening_tag_text_required_message">Opening tag text is required.</string>
     <string name="keystroke_sequence_required_message">Keystroke sequence is required.</string>
     <string name="untitled_formatting_tag_label">Untitled Tag</string>
+
+    <!-- Keystroke Picker for Formatting Tags -->
+    <string name="label_modifier_ctrl">Ctrl</string>
+    <string name="label_modifier_alt">Alt</string>
+    <string name="label_modifier_shift">Shift</string>
+    <string name="label_modifier_meta">Meta/Gui</string>
+    <string name="label_main_key">Main Key:</string>
+    <string name="prompt_select_key">Select Key...</string>
 </resources>
