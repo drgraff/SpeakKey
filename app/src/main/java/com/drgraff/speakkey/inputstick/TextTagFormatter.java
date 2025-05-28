@@ -49,7 +49,7 @@ public class TextTagFormatter {
         int i = 0;
         while (i < text.length()) {
             boolean tagFound = false;
-            if (!activeTags.isEmpty()) {
+            if (activeTags != null && !activeTags.isEmpty()) { // Added null check for activeTags
                 for (FormattingTag tag : activeTags) {
                     // Check for opening tag
                     if (tag.getOpeningTagText() != null && !tag.getOpeningTagText().isEmpty() &&
@@ -62,17 +62,7 @@ public class TextTagFormatter {
                         tagFound = true;
                         break; 
                     }
-                    // Check for closing tag
-                    if (tag.getClosingTagText() != null && !tag.getClosingTagText().isEmpty() &&
-                            text.startsWith(tag.getClosingTagText(), i)) {
-                        sendTextSegment(context, currentSegment.toString());
-                        currentSegment.setLength(0);
-                        sendCustomKeystrokes(context, tag.getKeystrokeSequence()); // Assuming keystrokes toggle
-                        applyDelay(delayMs);
-                        i += tag.getClosingTagText().length();
-                        tagFound = true;
-                        break; 
-                    }
+                    // The block for checking closingTagText has been removed.
                 }
             }
 

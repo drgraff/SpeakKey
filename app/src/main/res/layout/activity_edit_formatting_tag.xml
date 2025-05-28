@@ -53,34 +53,65 @@
                 android:inputType="textNoSuggestions" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Modifiers:"
+            android:layout_marginTop="16dp"
+            style="?android:attr/textAppearanceMedium" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_tag_closing_text"
-                android:layout_width="match_parent"
+            <CheckBox
+                android:id="@+id/checkbox_modifier_ctrl"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="@string/formatting_tag_closing_text_hint"
-                android:inputType="textNoSuggestions" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:text="@string/label_modifier_ctrl" />
 
-        <com.google.android.material.textfield.TextInputLayout
+            <CheckBox
+                android:id="@+id/checkbox_modifier_alt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/label_modifier_alt" />
+
+            <CheckBox
+                android:id="@+id/checkbox_modifier_shift"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/label_modifier_shift" />
+
+            <CheckBox
+                android:id="@+id/checkbox_modifier_meta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/label_modifier_meta" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_main_key"
+            android:layout_marginTop="16dp"
+            style="?android:attr/textAppearanceMedium" />
+
+        <Spinner
+            android:id="@+id/spinner_main_key"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_tag_keystroke_sequence"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/formatting_tag_keystrokes_hint"
-                android:inputType="textNoSuggestions" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_marginTop="8dp"
+            android:prompt="@string/prompt_select_key"
+            android:spinnerMode="dropdown" />
 
         <Button
             android:id="@+id/button_save_formatting_tag"
+            android:layout_marginTop="24dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/save_button_text"

@@ -51,7 +51,7 @@ public class FormattingTagManager {
         ContentValues values = new ContentValues();
         values.put(FormattingTagDbHelper.COLUMN_NAME, tag.getName());
         values.put(FormattingTagDbHelper.COLUMN_OPENING_TAG_TEXT, tag.getOpeningTagText());
-        values.put(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT, tag.getClosingTagText());
+        // values.put(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT, tag.getClosingTagText()); // Removed
         values.put(FormattingTagDbHelper.COLUMN_KEYSTROKE_SEQUENCE, tag.getKeystrokeSequence());
         values.put(FormattingTagDbHelper.COLUMN_IS_ACTIVE, tag.isActive() ? 1 : 0);
 
@@ -130,7 +130,7 @@ public class FormattingTagManager {
         ContentValues values = new ContentValues();
         values.put(FormattingTagDbHelper.COLUMN_NAME, tag.getName());
         values.put(FormattingTagDbHelper.COLUMN_OPENING_TAG_TEXT, tag.getOpeningTagText());
-        values.put(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT, tag.getClosingTagText());
+        // values.put(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT, tag.getClosingTagText()); // Removed
         values.put(FormattingTagDbHelper.COLUMN_KEYSTROKE_SEQUENCE, tag.getKeystrokeSequence());
         values.put(FormattingTagDbHelper.COLUMN_IS_ACTIVE, tag.isActive() ? 1 : 0);
 
@@ -167,16 +167,16 @@ public class FormattingTagManager {
         int idIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_ID);
         int nameIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_NAME);
         int openingTagIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_OPENING_TAG_TEXT);
-        int closingTagIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT);
+        // int closingTagIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT); // Removed
         int keystrokeIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_KEYSTROKE_SEQUENCE);
         int isActiveIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_IS_ACTIVE);
 
-        if (idIndex != -1) tag.setId(cursor.getLong(idIndex));
-        if (nameIndex != -1) tag.setName(cursor.getString(nameIndex));
-        if (openingTagIndex != -1) tag.setOpeningTagText(cursor.getString(openingTagIndex));
-        if (closingTagIndex != -1) tag.setClosingTagText(cursor.getString(closingTagIndex));
-        if (keystrokeIndex != -1) tag.setKeystrokeSequence(cursor.getString(keystrokeIndex));
-        if (isActiveIndex != -1) tag.setActive(cursor.getInt(isActiveIndex) == 1);
+        tag.setId(cursor.getLong(idIndex));
+        tag.setName(cursor.getString(nameIndex));
+        tag.setOpeningTagText(cursor.getString(openingTagIndex));
+        // tag.setClosingTagText(cursor.getString(closingTagIndex)); // Removed
+        tag.setKeystrokeSequence(cursor.getString(keystrokeIndex));
+        tag.setActive(cursor.getInt(isActiveIndex) == 1);
         
         return tag;
     }
