@@ -45,6 +45,8 @@ public class FormattingTagAdapter extends RecyclerView.Adapter<FormattingTagAdap
         holder.tagNameTextView.setText(currentTag.getName());
         holder.tagOpeningTextView.setText(currentTag.getOpeningTagText());
         holder.tagKeystrokesTextView.setText(currentTag.getKeystrokeSequence());
+        // Set the delay text
+        holder.textTagDelayMs.setText(String.valueOf(currentTag.getDelayMs()) + " ms");
         holder.tagActiveSwitch.setChecked(currentTag.isActive());
 
         // Remove previous listeners to prevent multiple triggers
@@ -131,7 +133,7 @@ public class FormattingTagAdapter extends RecyclerView.Adapter<FormattingTagAdap
 
 
     static class FormattingTagViewHolder extends RecyclerView.ViewHolder {
-        TextView tagNameTextView, tagOpeningTextView, tagKeystrokesTextView;
+        TextView tagNameTextView, tagOpeningTextView, tagKeystrokesTextView, textTagDelayMs; // Added textTagDelayMs
         SwitchCompat tagActiveSwitch;
         ImageButton editButton, deleteButton;
 
@@ -140,6 +142,7 @@ public class FormattingTagAdapter extends RecyclerView.Adapter<FormattingTagAdap
             tagNameTextView = itemView.findViewById(R.id.tag_name_text_view);
             tagOpeningTextView = itemView.findViewById(R.id.tag_opening_text_view);
             tagKeystrokesTextView = itemView.findViewById(R.id.tag_keystrokes_text_view);
+            textTagDelayMs = itemView.findViewById(R.id.text_tag_delay_ms); // Initialize textTagDelayMs
             tagActiveSwitch = itemView.findViewById(R.id.tag_active_switch);
             editButton = itemView.findViewById(R.id.tag_edit_button);
             deleteButton = itemView.findViewById(R.id.tag_delete_button);

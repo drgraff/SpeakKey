@@ -28,8 +28,9 @@ public class EditFormattingTagActivity extends AppCompatActivity {
 
     public static final String EXTRA_TAG_ID = "com.drgraff.speakkey.EXTRA_TAG_ID";
     private static final long INVALID_TAG_ID = -1;
+    private static final String DEFAULT_DELAY_MS = "0"; // Default delay for new tags
 
-    private TextInputEditText editTextName, editTextOpeningTag; // editTextKeystrokeSequence removed
+    private TextInputEditText editTextName, editTextOpeningTag, editTagDelayMs; // editTextKeystrokeSequence removed
     private CheckBox checkBoxCtrl, checkBoxAlt, checkBoxShift, checkBoxMeta; // Added
     private Spinner spinnerMainKey; // Added
     private List<KeystrokeDisplay> keySpinnerItems; // Added For Spinner data
@@ -69,6 +70,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
 
         editTextName = findViewById(R.id.edit_tag_name);
         editTextOpeningTag = findViewById(R.id.edit_tag_opening_text);
+        editTagDelayMs = findViewById(R.id.edit_tag_delay_ms); // Added for delay
         // editTextKeystrokeSequence = findViewById(R.id.edit_tag_keystroke_sequence); // Removed
 
         checkBoxCtrl = findViewById(R.id.checkbox_modifier_ctrl); // Added
@@ -91,6 +93,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             if (currentTag != null) {
                 editTextName.setText(currentTag.getName());
                 editTextOpeningTag.setText(currentTag.getOpeningTagText());
+                editTagDelayMs.setText(String.valueOf(currentTag.getDelayMs())); // Load delay
                 // editTextKeystrokeSequence.setText(currentTag.getKeystrokeSequence()); // Removed
                 parseAndSetKeystrokeUI(currentTag.getKeystrokeSequence()); // Added call
                 // Ensure Activity title is also set for editing here
@@ -104,12 +107,15 @@ public class EditFormattingTagActivity extends AppCompatActivity {
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle(R.string.add_new_formatting_tag_title);
                 }
+                editTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag after error
                 currentTagId = INVALID_TAG_ID; // Reset to ensure it behaves as 'add new'
             }
         } else {
+            // This is a new tag
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(R.string.add_new_formatting_tag_title);
             }
+            editTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag
         }
 
         buttonSave.setOnClickListener(v -> saveFormattingTag());
@@ -118,6 +124,32 @@ public class EditFormattingTagActivity extends AppCompatActivity {
     private void saveFormattingTag() {
         String name = editTextName.getText().toString().trim();
         String openingText = editTextOpeningTag.getText().toString().trim();
+        String delayString = editTagDelayMs.getText().toString().trim();
+        int delayMs = 0; // Default to 0 if parsing fails or field is empty after validation
+
+        // Validate and parse delayMs
+        if (delayString.isEmpty()) {
+            editTagDelayMs.setError("Delay cannot be empty. Enter 0 if no delay is needed.");
+            editTagDelayMs.requestFocus();
+            Toast.makeText(this, "Delay cannot be empty. Enter 0 if no delay is needed.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            delayMs = Integer.parseInt(delayString);
+            if (delayMs < 0) {
+                editTagDelayMs.setError("Delay must be a non-negative number.");
+                editTagDelayMs.requestFocus();
+                Toast.makeText(this, "Delay must be a non-negative number.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } catch (NumberFormatException e) {
+            editTagDelayMs.setError("Invalid number format for delay.");
+            editTagDelayMs.requestFocus();
+            Toast.makeText(this, "Invalid number format for delay.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // String keystrokes = editTextKeystrokeSequence.getText().toString().trim(); // Removed
 
         // Construct Keystroke String from New UI
@@ -178,6 +210,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             // Editing existing tag
             currentTag.setName(name);
             currentTag.setOpeningTagText(openingText);
+            currentTag.setDelayMs(delayMs); // Set delay
             // currentTag.setClosingTagText(closingText); // Removed
             currentTag.setKeystrokeSequence(keystrokes);
             // currentTag.setActive(true); // Assuming active, or add a switch
@@ -185,7 +218,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
         } else {
             // Adding new tag
             // ID 0 is fine as SQLite will auto-increment. isActive defaults to true in DB.
-            FormattingTag newTag = new FormattingTag(0, name, openingText, keystrokes, true); // Removed closingText
+            FormattingTag newTag = new FormattingTag(0, name, openingText, keystrokes, true, delayMs); // Removed closingText, Added delayMs
             tagManager.addTag(newTag);
         }
 

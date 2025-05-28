@@ -39,6 +39,15 @@
             android:layout_marginTop="2dp"
             android:text="CTRL+K" />
 
+        <TextView
+            android:id="@+id/text_tag_delay_ms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorTertiary"
+            android:layout_marginTop="2dp"
+            android:text="100 ms" />  <!-- Placeholder text -->
+
     </LinearLayout>
 
     <androidx.appcompat.widget.SwitchCompat

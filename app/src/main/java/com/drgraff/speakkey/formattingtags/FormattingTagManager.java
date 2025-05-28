@@ -54,6 +54,7 @@ public class FormattingTagManager {
         // values.put(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT, tag.getClosingTagText()); // Removed
         values.put(FormattingTagDbHelper.COLUMN_KEYSTROKE_SEQUENCE, tag.getKeystrokeSequence());
         values.put(FormattingTagDbHelper.COLUMN_IS_ACTIVE, tag.isActive() ? 1 : 0);
+        values.put(FormattingTagDbHelper.COLUMN_DELAY_MS, tag.getDelayMs()); // Add delayMs
 
         try {
             long insertId = database.insert(FormattingTagDbHelper.TABLE_FORMATTING_TAGS, null, values);
@@ -133,6 +134,7 @@ public class FormattingTagManager {
         // values.put(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT, tag.getClosingTagText()); // Removed
         values.put(FormattingTagDbHelper.COLUMN_KEYSTROKE_SEQUENCE, tag.getKeystrokeSequence());
         values.put(FormattingTagDbHelper.COLUMN_IS_ACTIVE, tag.isActive() ? 1 : 0);
+        values.put(FormattingTagDbHelper.COLUMN_DELAY_MS, tag.getDelayMs()); // Add delayMs
 
         try {
             return database.update(FormattingTagDbHelper.TABLE_FORMATTING_TAGS,
@@ -170,6 +172,7 @@ public class FormattingTagManager {
         // int closingTagIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_CLOSING_TAG_TEXT); // Removed
         int keystrokeIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_KEYSTROKE_SEQUENCE);
         int isActiveIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_IS_ACTIVE);
+        int delayMsIndex = cursor.getColumnIndex(FormattingTagDbHelper.COLUMN_DELAY_MS);
 
         tag.setId(cursor.getLong(idIndex));
         tag.setName(cursor.getString(nameIndex));
@@ -177,6 +180,11 @@ public class FormattingTagManager {
         // tag.setClosingTagText(cursor.getString(closingTagIndex)); // Removed
         tag.setKeystrokeSequence(cursor.getString(keystrokeIndex));
         tag.setActive(cursor.getInt(isActiveIndex) == 1);
+        if (delayMsIndex != -1) { // Check if column exists
+            tag.setDelayMs(cursor.getInt(delayMsIndex));
+        } else {
+            tag.setDelayMs(0); // Default to 0 if column not found (e.g. during migration)
+        }
         
         return tag;
     }

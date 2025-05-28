@@ -20,12 +20,11 @@ public class TextTagFormatter {
     }
 
     /**
-     * Parses text for <b> and <i> tags and sends appropriate keystrokes via InputStick.
+     * Parses text for formatting tags and sends appropriate keystrokes via InputStick.
      * @param context Context for InputStickBroadcast
      * @param text The text to format and send
-     * @param delayMs Delay in milliseconds after sending a formatting keystroke sequence
      */
-    public void formatAndSend(Context context, String text, int delayMs) {
+    public void formatAndSend(Context context, String text) {
         if (text == null || text.isEmpty()) {
             return;
         }
@@ -57,10 +56,10 @@ public class TextTagFormatter {
                         sendTextSegment(context, currentSegment.toString());
                         currentSegment.setLength(0);
                         sendCustomKeystrokes(context, tag.getKeystrokeSequence());
-                        applyDelay(delayMs);
+                        applyDelay(tag.getDelayMs()); // Use per-tag delay
                         i += tag.getOpeningTagText().length();
                         tagFound = true;
-                        break; 
+                        break;
                     }
                     // The block for checking closingTagText has been removed.
                 }
