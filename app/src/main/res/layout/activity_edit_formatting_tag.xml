@@ -53,6 +53,19 @@
                 android:inputType="textNoSuggestions" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_tag_delay_ms"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Keystroke Delay (ms)"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

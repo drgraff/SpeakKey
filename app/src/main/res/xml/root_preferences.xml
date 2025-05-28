@@ -71,28 +71,6 @@
             android:title="Enable Text Formatting Tags"
             android:summary="Convert tags (e.g., 'b', 'i') to Ctrl+B, Ctrl+I"
             android:defaultValue="false" />
-
-        <EditTextPreference
-            android:key="pref_inputstick_format_delay_ms"
-            android:title="Formatting Keystroke Delay (ms)"
-            android:summary="Delay after sending formatting keystrokes"
-            android:inputType="number"
-            android:defaultValue="100"
-            app:useSimpleSummaryProvider="true" />
-
-        <EditTextPreference
-            android:key="pref_custom_tag_1_name"
-            android:title="Custom Tag 1 Name"
-            android:summary="Name of the custom tag (e.g., 'mybold')"
-            android:defaultValue="custom1"
-            app:useSimpleSummaryProvider="true" />
-
-        <EditTextPreference
-            android:key="pref_custom_tag_1_keystrokes"
-            android:title="Custom Tag 1 Keystrokes"
-            android:summary="Keystrokes (e.g., 'CTRL_LEFT+KEY_B')"
-            android:defaultValue=""
-            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>
