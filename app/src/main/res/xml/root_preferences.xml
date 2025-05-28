@@ -79,6 +79,20 @@
             android:inputType="number"
             android:defaultValue="100"
             app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:key="pref_custom_tag_1_name"
+            android:title="Custom Tag 1 Name"
+            android:summary="Name of the custom tag (e.g., 'mybold')"
+            android:defaultValue="custom1"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:key="pref_custom_tag_1_keystrokes"
+            android:title="Custom Tag 1 Keystrokes"
+            android:summary="Keystrokes (e.g., 'CTRL_LEFT+KEY_B')"
+            android:defaultValue=""
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>
