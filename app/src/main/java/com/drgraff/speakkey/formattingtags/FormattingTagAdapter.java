@@ -70,19 +70,21 @@ public class FormattingTagAdapter extends RecyclerView.Adapter<FormattingTagAdap
         });
 
         holder.editButton.setOnClickListener(v -> {
-            // Intent intent = new Intent(context, EditFormattingTagActivity.class);
-            FormattingTag currentTag = formattingTags.get(holder.getAdapterPosition()); // Get current tag safely
-            if (currentTag == null) return; // Should not happen if list is consistent
+            // Get position safely at click time
+            int positionOnClick = holder.getAdapterPosition();
+            if (positionOnClick == RecyclerView.NO_POSITION) {
+                return; // Item removed or not bound
+            }
+            FormattingTag clickedTag = formattingTags.get(positionOnClick); 
+
+            if (clickedTag == null) return; 
 
             Intent intent = new Intent(context, EditFormattingTagActivity.class);
-            intent.putExtra(EditFormattingTagActivity.EXTRA_TAG_ID, currentTag.getId());
+            intent.putExtra(EditFormattingTagActivity.EXTRA_TAG_ID, clickedTag.getId());
 
             if (context instanceof FormattingTagsActivity) {
                 ((FormattingTagsActivity) context).startActivityForResult(intent, FormattingTagsActivity.REQUEST_CODE_EDIT_TAG);
             } else {
-                // Fallback if context is not the activity, though less ideal for startActivityForResult
-                // This might indicate a context issue if it ever happens.
-                // For now, simple startActivity, but this path should ideally not be taken.
                 context.startActivity(intent);
                 Log.w(TAG, "Starting EditFormattingTagActivity from a non-Activity context or context not equipped for result.");
             }
