@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton; // Added for ImageButton
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // UI elements
     private DrawerLayout drawerLayout;
     private Button btnStartRecording, btnPauseRecording, btnStopRecording;
-    private Button btnSendWhisper, btnClearRecording, btnClearTranscription;
+    private Button btnSendWhisper, btnClearRecording; // Removed btnClearTranscription
+    private ImageButton btnClearTranscriptionIcon; // Added
     private Button btnSendChatGpt, btnClearChatGpt, btnClearAll; // Added btnClearAll
     private Button btnSendInputStick;
     private Button btnSendWhisperToInputStick; // Added
@@ -160,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         whisperText = findViewById(R.id.whisper_text);
         btnSendWhisper = findViewById(R.id.btn_send_whisper);
         btnClearRecording = findViewById(R.id.btn_clear_recording);
-        btnClearTranscription = findViewById(R.id.btn_clear_transcription);
+        btnClearTranscriptionIcon = findViewById(R.id.btn_clear_transcription_icon); // Initialize new ImageButton
         chkAutoSendWhisper = findViewById(R.id.chk_auto_send_whisper);
         
         // ChatGPT section
@@ -256,7 +258,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         btnSendWhisper.setOnClickListener(v -> transcribeAudio());
         btnClearRecording.setOnClickListener(v -> clearRecording());
-        btnClearTranscription.setOnClickListener(v -> clearTranscription());
+        // btnClearTranscription.setOnClickListener(v -> clearTranscription()); // Removed old listener
+
+        if (btnClearTranscriptionIcon != null) {
+            btnClearTranscriptionIcon.setOnClickListener(v -> clearTranscription());
+        }
         
         btnSendChatGpt.setOnClickListener(v -> sendToChatGpt());
         btnClearChatGpt.setOnClickListener(v -> clearChatGptResponse());
