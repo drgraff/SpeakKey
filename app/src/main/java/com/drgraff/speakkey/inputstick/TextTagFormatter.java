@@ -89,14 +89,22 @@ public class TextTagFormatter {
         // For the purpose of this subtask, creating the structure is key.
         // A more robust way is to send raw reports or use a specific API if InputStickBroadcast supports it.
         // Let's assume a hypothetical method or sequence:
-        InputStickBroadcast.reportKeyboard(context, HIDKeycodes.MOD_CTRL_LEFT, HIDKeycodes.KEY_B, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Press Ctrl+B
+        // for pressing/releasing modifier and character keys individually if this fails.
+        // and may need to be replaced with the correct API calls from InputStickBroadcast
+        // The 'reportKeyboard' method and its signature used below are an assumption
+        // TODO: Verify InputStick API for sending Ctrl+Key combinations.
+        InputStickBroadcast.reportKeyboard(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_B, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Press Ctrl+B
         InputStickBroadcast.reportKeyboard(context, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Release all
     }
 
     private void sendCtrlI(Context context) {
         Log.d(TAG, "Sending Ctrl+I");
         // Placeholder similar to sendCtrlB
-        InputStickBroadcast.reportKeyboard(context, HIDKeycodes.MOD_CTRL_LEFT, HIDKeycodes.KEY_I, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Press Ctrl+I
+        // for pressing/releasing modifier and character keys individually if this fails.
+        // and may need to be replaced with the correct API calls from InputStickBroadcast
+        // The 'reportKeyboard' method and its signature used below are an assumption
+        // TODO: Verify InputStick API for sending Ctrl+Key combinations.
+        InputStickBroadcast.reportKeyboard(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_I, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Press Ctrl+I
         InputStickBroadcast.reportKeyboard(context, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Release all
     }
 
