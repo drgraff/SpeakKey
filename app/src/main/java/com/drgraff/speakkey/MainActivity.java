@@ -65,9 +65,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // UI elements
     private DrawerLayout drawerLayout;
     private Button btnStartRecording, btnPauseRecording, btnStopRecording;
-    private Button btnSendWhisper, btnClearRecording; // Removed btnClearTranscription
+    private Button btnSendWhisper; // Removed btnClearTranscription, Removed btnClearRecording
     private ImageButton btnClearTranscriptionIcon; // Added
-    private Button btnSendChatGpt, btnClearAll; // Removed btnClearChatGpt, Added btnClearAll
+    private ImageButton btnClearAllWhisperIcon; // Added to replace btnClearAll
+    private Button btnSendChatGpt; // Removed btnClearChatGpt
     private ImageButton btnClearChatGptIcon; // Added
     private Button btnSendInputStick;
     private Button btnSendWhisperToInputStick; // Added
@@ -162,7 +163,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Whisper section
         whisperText = findViewById(R.id.whisper_text);
         btnSendWhisper = findViewById(R.id.btn_send_whisper);
-        btnClearRecording = findViewById(R.id.btn_clear_recording);
+        // btnClearRecording = findViewById(R.id.btn_clear_recording); // Removed
+        btnClearAllWhisperIcon = findViewById(R.id.btn_clear_all_whisper_icon); // Added
         btnClearTranscriptionIcon = findViewById(R.id.btn_clear_transcription_icon); // Initialize new ImageButton
         chkAutoSendWhisper = findViewById(R.id.chk_auto_send_whisper);
         
@@ -177,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chkAutoSendInputStick = findViewById(R.id.chk_auto_send_inputstick);
         btnSendWhisperToInputStick = findViewById(R.id.btn_send_whisper_to_inputstick);
         chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick);
-        btnClearAll = findViewById(R.id.btn_clear_all); // Initialize btnClearAll
+        // btnClearAll = findViewById(R.id.btn_clear_all); // Removed
 
         // Set up click listeners
         // setupClickListeners(); // Moved down
@@ -258,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnStopRecording.setOnClickListener(v -> stopRecording());
         
         btnSendWhisper.setOnClickListener(v -> transcribeAudio());
-        btnClearRecording.setOnClickListener(v -> clearRecording());
+        // btnClearRecording.setOnClickListener(v -> clearRecording()); // Removed
         // btnClearTranscription.setOnClickListener(v -> clearTranscription()); // Removed old listener
 
         if (btnClearTranscriptionIcon != null) {
@@ -290,8 +292,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             sharedPreferences.edit().putBoolean("auto_send_whisper_to_inputstick", isChecked).apply();
         });
 
-        if (btnClearAll != null) {
-            btnClearAll.setOnClickListener(v -> {
+        // Listener for the new ImageButton btnClearAllWhisperIcon
+        if (btnClearAllWhisperIcon != null) {
+            btnClearAllWhisperIcon.setOnClickListener(v -> {
                 clearRecording(); // Clears the audio file and recording duration
 
                 if (whisperText != null) {
@@ -305,6 +308,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "All fields cleared", Toast.LENGTH_SHORT).show();
             });
         }
+        // The old btnClearAll listener is removed by not including it here.
     }
     
     private void requestPermissions() {
