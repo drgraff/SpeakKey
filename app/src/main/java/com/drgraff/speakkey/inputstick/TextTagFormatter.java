@@ -89,23 +89,39 @@ public class TextTagFormatter {
         // For the purpose of this subtask, creating the structure is key.
         // A more robust way is to send raw reports or use a specific API if InputStickBroadcast supports it.
         // Let's assume a hypothetical method or sequence:
-        // for pressing/releasing modifier and character keys individually if this fails.
-        // and may need to be replaced with the correct API calls from InputStickBroadcast
-        // The 'reportKeyboard' method and its signature used below are an assumption
-        // TODO: Verify InputStick API for sending Ctrl+Key combinations.
-        InputStickBroadcast.reportKeyboard(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_B, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Press Ctrl+B
-        InputStickBroadcast.reportKeyboard(context, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Release all
+        // TODO: Implement actual InputStick Ctrl+B sending logic here.
+        // The InputStickBroadcast API needs to be used to:
+        // 1. Press Left Control key.
+        // 2. Press B key.
+        // 3. Release B key.
+        // 4. Release Left Control key.
+        // Example (hypothetical API calls, actual methods may vary):
+        // InputStickBroadcast.pressKey(context, HIDKeycodes.CTRL_LEFT);
+        // InputStickBroadcast.pressKey(context, HIDKeycodes.KEY_B);
+        // InputStickBroadcast.releaseKey(context, HIDKeycodes.KEY_B);
+        // InputStickBroadcast.releaseKey(context, HIDKeycodes.CTRL_LEFT);
+        // Or, if a combined method exists:
+        // InputStickBroadcast.sendShortcut(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_B);
+        Log.w(TAG, "Ctrl+B sending logic not yet implemented with correct InputStick API calls for InputStickBroadcast.");
     }
 
     private void sendCtrlI(Context context) {
         Log.d(TAG, "Sending Ctrl+I");
         // Placeholder similar to sendCtrlB
-        // for pressing/releasing modifier and character keys individually if this fails.
-        // and may need to be replaced with the correct API calls from InputStickBroadcast
-        // The 'reportKeyboard' method and its signature used below are an assumption
-        // TODO: Verify InputStick API for sending Ctrl+Key combinations.
-        InputStickBroadcast.reportKeyboard(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_I, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Press Ctrl+I
-        InputStickBroadcast.reportKeyboard(context, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0, (byte)0); // Release all
+        // TODO: Implement actual InputStick Ctrl+I sending logic here.
+        // The InputStickBroadcast API needs to be used to:
+        // 1. Press Left Control key.
+        // 2. Press I key.
+        // 3. Release I key.
+        // 4. Release Left Control key.
+        // Example (hypothetical API calls, actual methods may vary):
+        // InputStickBroadcast.pressKey(context, HIDKeycodes.CTRL_LEFT);
+        // InputStickBroadcast.pressKey(context, HIDKeycodes.KEY_I);
+        // InputStickBroadcast.releaseKey(context, HIDKeycodes.KEY_I);
+        // InputStickBroadcast.releaseKey(context, HIDKeycodes.CTRL_LEFT);
+        // Or, if a combined method exists:
+        // InputStickBroadcast.sendShortcut(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_I);
+        Log.w(TAG, "Ctrl+I sending logic not yet implemented with correct InputStick API calls for InputStickBroadcast.");
     }
 
     private void applyDelay(int delayMs) {
