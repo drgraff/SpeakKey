@@ -84,12 +84,6 @@ public class SettingsActivity extends AppCompatActivity {
             prefCheckModelsButton = findPreference("pref_check_models_button");
             // Preference checkUpdatesPreference = findPreference("pref_check_for_updates"); // Removed
 
-            EditTextPreference formatDelayPreference = findPreference("pref_inputstick_format_delay_ms");
-            if (formatDelayPreference != null) {
-                String currentValue = sharedPreferences.getString("pref_inputstick_format_delay_ms", "100");
-                formatDelayPreference.setSummary(currentValue + " ms");
-            }
-
             String apiKey = sharedPreferences.getString("openai_api_key", "");
             if (!apiKey.isEmpty()) {
                 chatGptApi = new ChatGptApi(apiKey, sharedPreferences.getString("chatgpt_model", "gpt-3.5-turbo"));
@@ -269,12 +263,6 @@ public class SettingsActivity extends AppCompatActivity {
                     if (listPref.getEntry() != null) {
                         listPref.setSummary(listPref.getEntry());
                     }
-                }
-            } else if (key.equals("pref_inputstick_format_delay_ms")) {
-                Preference delayPref = findPreference(key);
-                if (delayPref instanceof EditTextPreference) {
-                    String currentValue = sharedPreferences.getString(key, "100");
-                    delayPref.setSummary(currentValue + " ms");
                 }
             }
         }
