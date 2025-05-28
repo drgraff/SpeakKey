@@ -67,7 +67,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Button btnStartRecording, btnPauseRecording, btnStopRecording;
     private Button btnSendWhisper, btnClearRecording; // Removed btnClearTranscription
     private ImageButton btnClearTranscriptionIcon; // Added
-    private Button btnSendChatGpt, btnClearChatGpt, btnClearAll; // Added btnClearAll
+    private Button btnSendChatGpt, btnClearAll; // Removed btnClearChatGpt, Added btnClearAll
+    private ImageButton btnClearChatGptIcon; // Added
     private Button btnSendInputStick;
     private Button btnSendWhisperToInputStick; // Added
     private EditText whisperText, chatGptText;
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // ChatGPT section
         chatGptText = findViewById(R.id.chatgpt_text);
         btnSendChatGpt = findViewById(R.id.btn_send_chatgpt);
-        btnClearChatGpt = findViewById(R.id.btn_clear_chatgpt);
+        btnClearChatGptIcon = findViewById(R.id.btn_clear_chatgpt_icon); // Initialize new ImageButton
         chkAutoSendToChatGpt = findViewById(R.id.chk_auto_send_to_chatgpt);
         
         // InputStick section
@@ -265,7 +266,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         
         btnSendChatGpt.setOnClickListener(v -> sendToChatGpt());
-        btnClearChatGpt.setOnClickListener(v -> clearChatGptResponse());
+        // btnClearChatGpt.setOnClickListener(v -> clearChatGptResponse()); // Removed old listener
+
+        if (btnClearChatGptIcon != null) {
+            btnClearChatGptIcon.setOnClickListener(v -> clearChatGptResponse());
+        }
         
         btnSendInputStick.setOnClickListener(v -> sendToInputStick());
         
