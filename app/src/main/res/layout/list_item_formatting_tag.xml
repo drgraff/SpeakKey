@@ -55,7 +55,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/content_description_edit_formatting_tag"
         android:padding="8dp"
-        android:src="@drawable/ic_menu_edit" />
+        android:src="@android:drawable/ic_menu_edit" />
 
     <ImageButton
         android:id="@+id/tag_delete_button"
@@ -64,6 +64,6 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/content_description_delete_formatting_tag"
         android:padding="8dp"
-        android:src="@drawable/ic_menu_delete" />
+        android:src="@android:drawable/ic_menu_delete" />
 
 </LinearLayout>

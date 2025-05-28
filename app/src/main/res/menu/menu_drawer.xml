@@ -26,7 +26,7 @@
             android:title="Macros" />
         <item
             android:id="@+id/nav_formatting_tags"
-            android:icon="@android:drawable/ic_menu_label"
+            android:icon="@android:drawable/ic_menu_agenda"
             android:title="@string/formatting_tags_activity_title" />
     </group>
 </menu>
