@@ -57,6 +57,19 @@
             android:parentActivityName=".data.PromptsActivity" />
 
         <activity
+            android:name=".formattingtags.FormattingTagsActivity"
+            android:exported="false"
+            android:label="@string/formatting_tags_activity_title"
+            android:theme="@style/Theme.SpeakKey.NoActionBar"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".formattingtags.EditFormattingTagActivity"
+            android:exported="false"
+            android:label="@string/edit_formatting_tag_title"
+            android:theme="@style/Theme.SpeakKey.NoActionBar"
+            android:parentActivityName=".formattingtags.FormattingTagsActivity" />
+
+        <activity
             android:name="com.speakkey.ui.macros.MacroListActivity"
             android:label="Manage Macros"
             android:theme="@style/Theme.SpeakKey.NoActionBar" />
