@@ -69,7 +69,7 @@
         <SwitchPreferenceCompat
             android:key="pref_inputstick_format_tags_enabled"
             android:title="Enable Text Formatting Tags"
-            android:summary="Convert tags like <b>, <i> to Ctrl+B, Ctrl+I"
+            android:summary="Convert tags (e.g., 'b', 'i') to Ctrl+B, Ctrl+I"
             android:defaultValue="false" />
 
         <EditTextPreference
