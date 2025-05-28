@@ -28,7 +28,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
             android:layout_marginTop="2dp"
-            android:text="<tag>" />
+            android:text="&lt;tag&gt;" />
             
         <TextView
             android:id="@+id/tag_keystrokes_text_view"
