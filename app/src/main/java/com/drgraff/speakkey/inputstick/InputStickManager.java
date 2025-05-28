@@ -1,8 +1,10 @@
 package com.drgraff.speakkey.inputstick;
 
 import android.content.Context;
+import android.content.SharedPreferences; // Added
 import android.util.Log;
 import android.widget.Toast;
+import androidx.preference.PreferenceManager; // Added
 
 import com.drgraff.speakkey.R;
 import com.inputstick.api.broadcast.InputStickBroadcast;
@@ -45,8 +47,27 @@ public class InputStickManager {
             return;
         }
 
-        // Use the US English layout by default
-        InputStickBroadcast.type(context, text, "en-US");
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean formatEnabled = sharedPreferences.getBoolean("pref_inputstick_format_tags_enabled", false);
+        String delayMsStr = sharedPreferences.getString("pref_inputstick_format_delay_ms", "100"); // Read as String
+        int delayMs = 100; // Default delay
+        try {
+            delayMs = Integer.parseInt(delayMsStr);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Failed to parse formatting delay, using default: " + delayMsStr, e);
+        }
+
+        if (formatEnabled) {
+            Log.d(TAG, "InputStick text formatting is enabled. Delay: " + delayMs + "ms");
+            TextTagFormatter formatter = new TextTagFormatter();
+            // Assuming TextTagFormatter and its methods are in the same package or imported.
+            // The formatAndSend method should ideally run on a background thread.
+            // For now, direct call. If InputStickManager itself is not on a BG thread, this needs review.
+            formatter.formatAndSend(context, text, delayMs);
+        } else {
+            Log.d(TAG, "InputStick text formatting is disabled. Sending raw text.");
+            InputStickBroadcast.type(context, text, "en-US");
+        }
     }
 
     /**

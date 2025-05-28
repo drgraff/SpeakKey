@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.EditTextPreference; // Added for explicit type check
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -82,6 +83,12 @@ public class SettingsActivity extends AppCompatActivity {
             chatGptModelPreference = findPreference("chatgpt_model");
             prefCheckModelsButton = findPreference("pref_check_models_button");
             // Preference checkUpdatesPreference = findPreference("pref_check_for_updates"); // Removed
+
+            EditTextPreference formatDelayPreference = findPreference("pref_inputstick_format_delay_ms");
+            if (formatDelayPreference != null) {
+                String currentValue = sharedPreferences.getString("pref_inputstick_format_delay_ms", "100");
+                formatDelayPreference.setSummary(currentValue + " ms");
+            }
 
             String apiKey = sharedPreferences.getString("openai_api_key", "");
             if (!apiKey.isEmpty()) {
@@ -262,6 +269,12 @@ public class SettingsActivity extends AppCompatActivity {
                     if (listPref.getEntry() != null) {
                         listPref.setSummary(listPref.getEntry());
                     }
+                }
+            } else if (key.equals("pref_inputstick_format_delay_ms")) {
+                Preference delayPref = findPreference(key);
+                if (delayPref instanceof EditTextPreference) {
+                    String currentValue = sharedPreferences.getString(key, "100");
+                    delayPref.setSummary(currentValue + " ms");
                 }
             }
         }
