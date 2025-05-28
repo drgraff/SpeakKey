@@ -1,11 +1,15 @@
 package com.drgraff.speakkey.inputstick;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
+// import android.content.SharedPreferences; // Removed
+// import androidx.preference.PreferenceManager; // Removed
 import android.util.Log;
 import com.inputstick.api.broadcast.InputStickBroadcast;
-import com.inputstick.api.hid.HIDKeycodes; // Assuming this class exists and provides keycodes
+import com.inputstick.api.hid.HIDKeycodes;
+import com.drgraff.speakkey.formattingtags.FormattingTag; // Added
+import com.drgraff.speakkey.formattingtags.FormattingTagManager; // Added
+
+import java.util.List; // Added
 
 public class TextTagFormatter {
 
@@ -26,60 +30,57 @@ public class TextTagFormatter {
             return;
         }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String customTagName = sharedPreferences.getString("pref_custom_tag_1_name", null);
-        String customTagKeystrokes = sharedPreferences.getString("pref_custom_tag_1_keystrokes", null);
-        boolean customTagEnabled = customTagName != null && !customTagName.isEmpty() && customTagKeystrokes != null && !customTagKeystrokes.isEmpty();
-
-        // This is a simplified parser. A more robust solution might use regex or a proper parser.
-        // This version focuses on <b> and <i> tags and assumes they are not nested incorrectly.
-        // It toggles formatting on/off.
+        FormattingTagManager tagManager = new FormattingTagManager(context);
+        List<FormattingTag> activeTags;
+        try {
+            tagManager.open();
+            activeTags = tagManager.getActiveTags();
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening FormattingTagManager or getting active tags, sending plain text.", e);
+            sendTextSegment(context, text); // Send plain text if DB ops fail
+            return;
+        } finally {
+            if (tagManager.isOpen()) {
+                tagManager.close();
+            }
+        }
 
         StringBuilder currentSegment = new StringBuilder();
         int i = 0;
         while (i < text.length()) {
-            if (text.startsWith("<b>", i)) {
-                sendTextSegment(context, currentSegment.toString());
-                currentSegment.setLength(0); // Clear segment
-                sendCtrlB(context);
-                applyDelay(delayMs);
-                i += 3; // Length of "<b>"
-            } else if (text.startsWith("</b>", i)) {
-                sendTextSegment(context, currentSegment.toString());
-                currentSegment.setLength(0);
-                sendCtrlB(context); // Toggle off
-                applyDelay(delayMs);
-                i += 4; // Length of "</b>"
-            } else if (text.startsWith("<i>", i)) {
-                sendTextSegment(context, currentSegment.toString());
-                currentSegment.setLength(0);
-                sendCtrlI(context);
-                applyDelay(delayMs);
-                i += 3; // Length of "<i>"
-            } else if (text.startsWith("</i>", i)) {
-                sendTextSegment(context, currentSegment.toString());
-                currentSegment.setLength(0);
-                sendCtrlI(context); // Toggle off
-                applyDelay(delayMs);
-                i += 4; // Length of "</i>"
-            } else if (customTagEnabled && text.startsWith("<" + customTagName + ">", i)) {
-                sendTextSegment(context, currentSegment.toString());
-                currentSegment.setLength(0);
-                sendCustomKeystrokes(context, customTagKeystrokes);
-                applyDelay(delayMs);
-                i += ("<" + customTagName + ">").length();
-            } else if (customTagEnabled && text.startsWith("</" + customTagName + ">", i)) {
-                sendTextSegment(context, currentSegment.toString());
-                currentSegment.setLength(0);
-                sendCustomKeystrokes(context, customTagKeystrokes); // Assuming custom keys toggle formatting
-                applyDelay(delayMs);
-                i += ("</" + customTagName + ">").length();
-            } else {
+            boolean tagFound = false;
+            if (!activeTags.isEmpty()) {
+                for (FormattingTag tag : activeTags) {
+                    // Check for opening tag
+                    if (tag.getOpeningTagText() != null && !tag.getOpeningTagText().isEmpty() &&
+                            text.startsWith(tag.getOpeningTagText(), i)) {
+                        sendTextSegment(context, currentSegment.toString());
+                        currentSegment.setLength(0);
+                        sendCustomKeystrokes(context, tag.getKeystrokeSequence());
+                        applyDelay(delayMs);
+                        i += tag.getOpeningTagText().length();
+                        tagFound = true;
+                        break; 
+                    }
+                    // Check for closing tag
+                    if (tag.getClosingTagText() != null && !tag.getClosingTagText().isEmpty() &&
+                            text.startsWith(tag.getClosingTagText(), i)) {
+                        sendTextSegment(context, currentSegment.toString());
+                        currentSegment.setLength(0);
+                        sendCustomKeystrokes(context, tag.getKeystrokeSequence()); // Assuming keystrokes toggle
+                        applyDelay(delayMs);
+                        i += tag.getClosingTagText().length();
+                        tagFound = true;
+                        break; 
+                    }
+                }
+            }
+
+            if (!tagFound) {
                 currentSegment.append(text.charAt(i));
                 i++;
             }
         }
-
         // Send any remaining text
         sendTextSegment(context, currentSegment.toString());
     }
@@ -91,24 +92,7 @@ public class TextTagFormatter {
         }
     }
 
-    private void sendCtrlB(Context context) {
-        Log.d(TAG, "Sending Ctrl+B");
-        // Assumes InputStickBroadcast can handle raw keyboard reports or similar
-        // The actual implementation depends on InputStickBroadcast API capabilities
-        // This is a placeholder for what might be required:
-        // InputStickBroadcast.press(context, HIDKeycodes.MOD_CTRL_LEFT);
-        // InputStickBroadcast.press(context, HIDKeycodes.KEY_B);
-        // InputStickBroadcast.release(context, HIDKeycodes.KEY_B);
-        // InputStickBroadcast.release(context, HIDKeycodes.MOD_CTRL_LEFT);
-        
-        Log.d(TAG, "Sending Ctrl+B using pressAndRelease.");
-        InputStickBroadcast.pressAndRelease(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_B);
-    }
-
-    private void sendCtrlI(Context context) {
-        Log.d(TAG, "Sending Ctrl+I using pressAndRelease.");
-        InputStickBroadcast.pressAndRelease(context, HIDKeycodes.CTRL_LEFT, HIDKeycodes.KEY_I);
-    }
+    // sendCtrlB and sendCtrlI are no longer needed as <b> and <i> are handled by custom tags.
 
     private int getHidKeyCode(String keyName) {
         if (keyName == null) return 0; // Or throw an exception

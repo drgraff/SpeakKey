@@ -72,4 +72,23 @@
     <string name="prompt_deleted_message">Prompt deleted.</string>
     <string name="prompt_not_found_message">Prompt not found.</string>
 
+    <!-- Formatting Tags Feature -->
+    <string name="formatting_tags_activity_title">Formatting Tags</string>
+    <string name="add_new_formatting_tag_title">Add Formatting Tag</string>
+    <string name="edit_formatting_tag_title">Edit Formatting Tag</string>
+    <string name="empty_formatting_tags_text">No formatting tags defined. Tap the \'+\' button to add one.</string>
+    <string name="content_description_add_new_formatting_tag">Add new formatting tag</string>
+    <string name="formatting_tag_name_hint">Tag Name (e.g., Bold)</string>
+    <string name="formatting_tag_opening_text_hint">Opening Tag (e.g., &lt;b&gt;)</string>
+    <string name="formatting_tag_closing_text_hint">Closing Tag (e.g., &lt;/b&gt;)</string>
+    <string name="formatting_tag_keystrokes_hint">Keystrokes (e.g., CTRL_LEFT+KEY_B)</string>
+    <string name="formatting_tag_label_active">Active</string>
+    <string name="content_description_edit_formatting_tag">Edit formatting tag</string>
+    <string name="content_description_delete_formatting_tag">Delete formatting tag</string>
+    <string name="formatting_tag_deleted_message">Formatting tag deleted</string>
+    <string name="formatting_tag_saved_message">Formatting tag saved</string>
+    <string name="tag_name_required_message">Tag name is required.</string>
+    <string name="opening_tag_text_required_message">Opening tag text is required.</string>
+    <string name="keystroke_sequence_required_message">Keystroke sequence is required.</string>
+    <string name="untitled_formatting_tag_label">Untitled Tag</string>
 </resources>
