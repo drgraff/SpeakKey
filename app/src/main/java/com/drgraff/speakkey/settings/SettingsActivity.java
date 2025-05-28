@@ -81,6 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
             sharedPreferences = getPreferenceManager().getSharedPreferences();
             chatGptModelPreference = findPreference("chatgpt_model");
             prefCheckModelsButton = findPreference("pref_check_models_button");
+            // Preference checkUpdatesPreference = findPreference("pref_check_for_updates"); // Removed
 
             String apiKey = sharedPreferences.getString("openai_api_key", "");
             if (!apiKey.isEmpty()) {
@@ -100,6 +101,8 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 });
             }
+
+            // Removed the if (checkUpdatesPreference != null) block
         }
 
         private void fetchModelsAndUpdatePreference() {
