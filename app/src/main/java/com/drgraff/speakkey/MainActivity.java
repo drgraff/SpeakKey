@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawerLayout;
     private Button btnStartRecording, btnPauseRecording, btnStopRecording;
     private Button btnSendWhisper, btnClearRecording, btnClearTranscription;
-    private Button btnSendChatGpt, btnClearChatGpt;
+    private Button btnSendChatGpt, btnClearChatGpt, btnClearAll; // Added btnClearAll
     private Button btnSendInputStick;
     private Button btnSendWhisperToInputStick; // Added
     private EditText whisperText, chatGptText;
@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chkAutoSendInputStick = findViewById(R.id.chk_auto_send_inputstick);
         btnSendWhisperToInputStick = findViewById(R.id.btn_send_whisper_to_inputstick);
         chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick);
+        btnClearAll = findViewById(R.id.btn_clear_all); // Initialize btnClearAll
 
         // Set up click listeners
         // setupClickListeners(); // Moved down
@@ -277,6 +278,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chk_auto_send_whisper_to_inputstick.setOnCheckedChangeListener((buttonView, isChecked) -> { // Added
             sharedPreferences.edit().putBoolean("auto_send_whisper_to_inputstick", isChecked).apply();
         });
+
+        if (btnClearAll != null) {
+            btnClearAll.setOnClickListener(v -> {
+                clearRecording(); // Clears the audio file and recording duration
+
+                if (whisperText != null) {
+                    whisperText.setText("");
+                }
+
+                if (chatGptText != null) {
+                    chatGptText.setText("");
+                }
+                
+                Toast.makeText(MainActivity.this, "All fields cleared", Toast.LENGTH_SHORT).show();
+            });
+        }
     }
     
     private void requestPermissions() {

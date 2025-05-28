@@ -14,6 +14,7 @@
     <string name="clear_chatgpt_response">Clear Response</string>
     <string name="send_to_inputstick">Send to InputStick</string>
     <string name="save_edit">Save</string> <!-- String for Save button in full-screen edit dialog -->
+    <string name="clear_all_button_text">Clear All</string>
     
     <!-- Settings -->
     <string name="title_activity_settings">Settings</string>
