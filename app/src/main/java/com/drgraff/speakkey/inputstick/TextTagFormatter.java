@@ -187,7 +187,10 @@ public class TextTagFormatter {
             case "KEY_CAPS_LOCK": return HIDKeycodes.KEY_CAPS_LOCK;
             case "KEY_PRINT_SCREEN": return HIDKeycodes.KEY_PRINT_SCREEN;
             case "KEY_SCROLL_LOCK": return HIDKeycodes.KEY_SCROLL_LOCK;
-            case "KEY_PAUSE": return HIDKeycodes.KEY_PAUSE; // Assuming HIDKeycodes.java uses KEY_PAUSE
+            case "KEY_PASUE": // The constant name in HIDKeycodes.java
+                return HIDKeycodes.KEY_PASUE;
+            case "KEY_PAUSE": // User-friendly correct spelling
+                return HIDKeycodes.KEY_PASUE; // Map to the actual constant
             case "KEY_INSERT": return HIDKeycodes.KEY_INSERT;
             case "KEY_HOME": return HIDKeycodes.KEY_HOME;
             case "KEY_PAGE_UP": return HIDKeycodes.KEY_PAGE_UP;
