@@ -16,6 +16,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
+    <queries>
+        <package android:name="com.inputstick.apps.inputstickutility" />
+    </queries>
+
     <permission
         android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
@@ -49,6 +53,44 @@
             android:exported="false"
             android:label="@string/title_activity_settings"
             android:parentActivityName="com.drgraff.speakkey.MainActivity" />
+        <activity
+            android:name="com.drgraff.speakkey.utils.LogActivity"
+            android:label="Application Logs"
+            android:parentActivityName="com.drgraff.speakkey.MainActivity"
+            android:theme="@style/Theme.SpeakKey" >
+        </activity>
+        <activity
+            android:name="com.drgraff.speakkey.data.PromptsActivity"
+            android:label="Manage Prompts"
+            android:parentActivityName="com.drgraff.speakkey.MainActivity"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" >
+        </activity>
+        <activity
+            android:name="com.drgraff.speakkey.ui.prompts.PromptEditorActivity"
+            android:exported="false"
+            android:label="Edit Prompt"
+            android:parentActivityName="com.drgraff.speakkey.data.PromptsActivity"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+        <activity
+            android:name="com.drgraff.speakkey.formattingtags.FormattingTagsActivity"
+            android:exported="false"
+            android:label="@string/formatting_tags_activity_title"
+            android:parentActivityName="com.drgraff.speakkey.MainActivity"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+        <activity
+            android:name="com.drgraff.speakkey.formattingtags.EditFormattingTagActivity"
+            android:exported="false"
+            android:label="@string/edit_formatting_tag_title"
+            android:parentActivityName="com.drgraff.speakkey.formattingtags.FormattingTagsActivity"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+        <activity
+            android:name="com.speakkey.ui.macros.MacroListActivity"
+            android:label="Manage Macros"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+        <activity
+            android:name="com.speakkey.ui.macros.MacroEditorActivity"
+            android:label="Edit Macro"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="custom_toolbar_background">@color/material_dark_surface</color>
+    <color name="custom_toolbar_icon_tint">@color/gray</color>
     <color name="edit_text_background">#484848</color>
+    <color name="material_dark_surface">#121212</color>
+    <style name="AppAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="buttonBarPositiveButtonStyle">@style/AlertDialog.Button.Positive</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertDialog.Button.Negative</item>
+        
+        
+    </style>
     <style name="Theme.AppCompat.DayNight" parent="Theme.AppCompat"/>
     <style name="Theme.AppCompat.DayNight.DarkActionBar" parent="Theme.AppCompat"/>
     <style name="Theme.AppCompat.DayNight.Dialog" parent="Theme.AppCompat.Dialog"/>
@@ -46,6 +55,7 @@
         
         
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="alertDialogTheme">@style/AppAlertDialogTheme</item>
     </style>
     <style name="ThemeOverlay.AppCompat.DayNight" parent="ThemeOverlay.AppCompat.Dark"/>
     <style name="ThemeOverlay.Material3.DynamicColors.DayNight" parent="ThemeOverlay.Material3.DynamicColors.Dark"/>

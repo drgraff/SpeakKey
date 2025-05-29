@@ -28,103 +28,184 @@
 17-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:12:5-73
 17-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:12:22-70
 18
-19    <permission
-19-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
-20        android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
-20-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
-21        android:protectionLevel="signature" />
-21-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+19    <queries>
+19-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:82:5-84:15
+20        <package android:name="com.inputstick.apps.inputstickutility" />
+20-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:83:9-73
+20-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:83:18-70
+21    </queries>
 22
-23    <uses-permission android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
-23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
-23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
-24
-25    <application
-25-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-40:19
-26        android:allowBackup="true"
-26-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:15:9-35
-27        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
-27-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
-28        android:debuggable="true"
-29        android:extractNativeLibs="false"
-30        android:icon="@mipmap/mic_pencil_icon"
-30-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:16:9-47
-31        android:label="@string/app_name"
-31-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:17:9-41
-32        android:roundIcon="@mipmap/mic_pencil_icon"
-32-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:18:9-52
-33        android:supportsRtl="true"
-33-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:19:9-35
-34        android:theme="@style/Theme.SpeakKey" >
-34-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:20:9-46
-35        <activity
-35-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:23:9-33:20
-36            android:name="com.drgraff.speakkey.MainActivity"
-36-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:24:13-41
-37            android:exported="true"
-37-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:25:13-36
-38            android:label="@string/app_name"
-38-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:26:13-45
-39            android:theme="@style/Theme.SpeakKey.NoActionBar"
-39-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:27:13-62
-40            android:windowSoftInputMode="adjustResize" >
-40-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:28:13-55
-41            <intent-filter>
-41-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:29:13-32:29
-42                <action android:name="android.intent.action.MAIN" />
-42-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:30:17-69
-42-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:30:25-66
-43
-44                <category android:name="android.intent.category.LAUNCHER" />
-44-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:31:17-77
-44-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:31:27-74
-45            </intent-filter>
-46        </activity>
-47        <activity
-47-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:35:9-39:58
-48            android:name="com.drgraff.speakkey.settings.SettingsActivity"
-48-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:36:13-54
-49            android:exported="false"
-49-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:37:13-37
-50            android:label="@string/title_activity_settings"
-50-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:38:13-60
-51            android:parentActivityName="com.drgraff.speakkey.MainActivity" />
-51-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:39:13-55
-52
-53        <provider
-53-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
-54            android:name="androidx.startup.InitializationProvider"
-54-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
-55            android:authorities="com.drgraff.speakkey.androidx-startup"
-55-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
-56            android:exported="false" >
-56-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
-57            <meta-data
-57-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
-58                android:name="androidx.emoji2.text.EmojiCompatInitializer"
-58-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
-59                android:value="androidx.startup" />
-59-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
-60            <meta-data
-60-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
-61                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
-61-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
-62                android:value="androidx.startup" />
-62-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
-63        </provider>
-64
-65        <uses-library
-65-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:25:9-27:40
-66            android:name="androidx.window.extensions"
-66-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:26:13-54
-67            android:required="false" />
-67-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:27:13-37
-68        <uses-library
-68-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:28:9-30:40
-69            android:name="androidx.window.sidecar"
-69-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:29:13-51
-70            android:required="false" />
-70-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:30:13-37
-71    </application>
-72
-73</manifest>
+23    <permission
+23-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+24        android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+24-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+25        android:protectionLevel="signature" />
+25-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+26
+27    <uses-permission android:name="com.drgraff.speakkey.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+27-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+27-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+28
+29    <application
+29-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-80:19
+30        android:allowBackup="true"
+30-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:15:9-35
+31        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+31-->[androidx.core:core:1.9.0] /home/runner/.gradle/caches/8.14/transforms/3aaa0bfc07aa69c5c3815738da9d0c4f/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+32        android:debuggable="true"
+33        android:extractNativeLibs="false"
+34        android:icon="@mipmap/mic_pencil_icon"
+34-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:16:9-47
+35        android:label="@string/app_name"
+35-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:17:9-41
+36        android:roundIcon="@mipmap/mic_pencil_icon"
+36-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:18:9-52
+37        android:supportsRtl="true"
+37-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:19:9-35
+38        android:theme="@style/Theme.SpeakKey" >
+38-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:20:9-46
+39        <activity
+39-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:23:9-33:20
+40            android:name="com.drgraff.speakkey.MainActivity"
+40-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:24:13-41
+41            android:exported="true"
+41-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:25:13-36
+42            android:label="@string/app_name"
+42-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:26:13-45
+43            android:theme="@style/Theme.SpeakKey.NoActionBar"
+43-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:27:13-62
+44            android:windowSoftInputMode="adjustResize" >
+44-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:28:13-55
+45            <intent-filter>
+45-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:29:13-32:29
+46                <action android:name="android.intent.action.MAIN" />
+46-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:30:17-69
+46-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:30:25-66
+47
+48                <category android:name="android.intent.category.LAUNCHER" />
+48-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:31:17-77
+48-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:31:27-74
+49            </intent-filter>
+50        </activity>
+51        <activity
+51-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:35:9-39:58
+52            android:name="com.drgraff.speakkey.settings.SettingsActivity"
+52-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:36:13-54
+53            android:exported="false"
+53-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:37:13-37
+54            android:label="@string/title_activity_settings"
+54-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:38:13-60
+55            android:parentActivityName="com.drgraff.speakkey.MainActivity" />
+55-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:39:13-55
+56        <activity
+56-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:40:9-45:20
+57            android:name="com.drgraff.speakkey.utils.LogActivity"
+57-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:41:13-46
+58            android:label="Application Logs"
+58-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:42:13-45
+59            android:parentActivityName="com.drgraff.speakkey.MainActivity"
+59-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:44:13-55
+60            android:theme="@style/Theme.SpeakKey" >
+60-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:43:13-50
+61        </activity>
+62        <activity
+62-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:46:9-51:20
+63            android:name="com.drgraff.speakkey.data.PromptsActivity"
+63-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:47:13-49
+64            android:label="Manage Prompts"
+64-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:48:13-43
+65            android:parentActivityName="com.drgraff.speakkey.MainActivity"
+65-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:50:13-55
+66            android:theme="@style/Theme.SpeakKey.NoActionBar" >
+66-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:49:13-62
+67        </activity>
+68        <activity
+68-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:52:9-57:66
+69            android:name="com.drgraff.speakkey.ui.prompts.PromptEditorActivity"
+69-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:53:13-80
+70            android:exported="false"
+70-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:54:13-37
+71            android:label="Edit Prompt"
+71-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:55:13-40
+72            android:parentActivityName="com.drgraff.speakkey.data.PromptsActivity"
+72-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:57:13-63
+73            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+73-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:56:13-62
+74        <activity
+74-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:59:9-64:58
+75            android:name="com.drgraff.speakkey.formattingtags.FormattingTagsActivity"
+75-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:60:13-66
+76            android:exported="false"
+76-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:61:13-37
+77            android:label="@string/formatting_tags_activity_title"
+77-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:62:13-67
+78            android:parentActivityName="com.drgraff.speakkey.MainActivity"
+78-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:64:13-55
+79            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+79-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:63:13-62
+80        <activity
+80-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:65:9-70:83
+81            android:name="com.drgraff.speakkey.formattingtags.EditFormattingTagActivity"
+81-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:66:13-69
+82            android:exported="false"
+82-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:67:13-37
+83            android:label="@string/edit_formatting_tag_title"
+83-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:68:13-62
+84            android:parentActivityName="com.drgraff.speakkey.formattingtags.FormattingTagsActivity"
+84-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:70:13-80
+85            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+85-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:69:13-62
+86        <activity
+86-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:72:9-75:65
+87            android:name="com.speakkey.ui.macros.MacroListActivity"
+87-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:73:13-68
+88            android:label="Manage Macros"
+88-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:74:13-42
+89            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+89-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:75:13-62
+90        <activity
+90-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:76:9-79:65
+91            android:name="com.speakkey.ui.macros.MacroEditorActivity"
+91-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:77:13-70
+92            android:label="Edit Macro"
+92-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:78:13-39
+93            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+93-->/home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:79:13-62
+94
+95        <provider
+95-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+96            android:name="androidx.startup.InitializationProvider"
+96-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+97            android:authorities="com.drgraff.speakkey.androidx-startup"
+97-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+98            android:exported="false" >
+98-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+99            <meta-data
+99-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+100                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+100-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+101                android:value="androidx.startup" />
+101-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/8.14/transforms/1b10e0fe552388184de858b40c60b556/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+102            <meta-data
+102-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+103                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+103-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+104                android:value="androidx.startup" />
+104-->[androidx.lifecycle:lifecycle-process:2.4.1] /home/runner/.gradle/caches/8.14/transforms/0b800b71ef70d4ae01c922fb616b667f/transformed/jetified-lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+105        </provider>
+106
+107        <uses-library
+107-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:25:9-27:40
+108            android:name="androidx.window.extensions"
+108-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:26:13-54
+109            android:required="false" />
+109-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:27:13-37
+110        <uses-library
+110-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:28:9-30:40
+111            android:name="androidx.window.sidecar"
+111-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:29:13-51
+112            android:required="false" />
+112-->[androidx.window:window:1.0.0] /home/runner/.gradle/caches/8.14/transforms/2635a3725f3040eadeea0e631aae7e9d/transformed/jetified-window-1.0.0/AndroidManifest.xml:30:13-37
+113    </application>
+114
+115</manifest>

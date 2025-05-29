@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -24,13 +25,16 @@ public final class ContentMainBinding implements ViewBinding {
   private final ScrollView rootView;
 
   @NonNull
-  public final Button btnClearChatgpt;
+  public final LinearLayout activeMacrosRowsContainer;
 
   @NonNull
-  public final Button btnClearRecording;
+  public final ImageButton btnClearAllWhisperIcon;
 
   @NonNull
-  public final Button btnClearTranscription;
+  public final ImageButton btnClearChatgptIcon;
+
+  @NonNull
+  public final ImageButton btnClearTranscriptionIcon;
 
   @NonNull
   public final Button btnPauseRecording;
@@ -43,6 +47,9 @@ public final class ContentMainBinding implements ViewBinding {
 
   @NonNull
   public final Button btnSendWhisper;
+
+  @NonNull
+  public final Button btnSendWhisperToInputstick;
 
   @NonNull
   public final Button btnStartRecording;
@@ -63,7 +70,13 @@ public final class ContentMainBinding implements ViewBinding {
   public final CheckBox chkAutoSendInputstick;
 
   @NonNull
+  public final CheckBox chkAutoSendToChatgpt;
+
+  @NonNull
   public final CheckBox chkAutoSendWhisper;
+
+  @NonNull
+  public final CheckBox chkAutoSendWhisperToInputstick;
 
   @NonNull
   public final LinearLayout inputstickControls;
@@ -89,33 +102,43 @@ public final class ContentMainBinding implements ViewBinding {
   @NonNull
   public final EditText whisperText;
 
-  private ContentMainBinding(@NonNull ScrollView rootView, @NonNull Button btnClearChatgpt,
-      @NonNull Button btnClearRecording, @NonNull Button btnClearTranscription,
+  @NonNull
+  public final LinearLayout whisperToInputstickControls;
+
+  private ContentMainBinding(@NonNull ScrollView rootView,
+      @NonNull LinearLayout activeMacrosRowsContainer, @NonNull ImageButton btnClearAllWhisperIcon,
+      @NonNull ImageButton btnClearChatgptIcon, @NonNull ImageButton btnClearTranscriptionIcon,
       @NonNull Button btnPauseRecording, @NonNull Button btnSendChatgpt,
       @NonNull Button btnSendInputstick, @NonNull Button btnSendWhisper,
-      @NonNull Button btnStartRecording, @NonNull Button btnStopRecording,
-      @NonNull LinearLayout chatgptControls, @NonNull TextView chatgptLabel,
-      @NonNull EditText chatgptText, @NonNull CheckBox chkAutoSendInputstick,
-      @NonNull CheckBox chkAutoSendWhisper, @NonNull LinearLayout inputstickControls,
-      @NonNull LinearLayout recordingControls, @NonNull View recordingIndicator,
-      @NonNull LinearLayout recordingIndicatorLayout, @NonNull TextView recordingTime,
-      @NonNull LinearLayout whisperControls, @NonNull TextView whisperLabel,
-      @NonNull EditText whisperText) {
+      @NonNull Button btnSendWhisperToInputstick, @NonNull Button btnStartRecording,
+      @NonNull Button btnStopRecording, @NonNull LinearLayout chatgptControls,
+      @NonNull TextView chatgptLabel, @NonNull EditText chatgptText,
+      @NonNull CheckBox chkAutoSendInputstick, @NonNull CheckBox chkAutoSendToChatgpt,
+      @NonNull CheckBox chkAutoSendWhisper, @NonNull CheckBox chkAutoSendWhisperToInputstick,
+      @NonNull LinearLayout inputstickControls, @NonNull LinearLayout recordingControls,
+      @NonNull View recordingIndicator, @NonNull LinearLayout recordingIndicatorLayout,
+      @NonNull TextView recordingTime, @NonNull LinearLayout whisperControls,
+      @NonNull TextView whisperLabel, @NonNull EditText whisperText,
+      @NonNull LinearLayout whisperToInputstickControls) {
     this.rootView = rootView;
-    this.btnClearChatgpt = btnClearChatgpt;
-    this.btnClearRecording = btnClearRecording;
-    this.btnClearTranscription = btnClearTranscription;
+    this.activeMacrosRowsContainer = activeMacrosRowsContainer;
+    this.btnClearAllWhisperIcon = btnClearAllWhisperIcon;
+    this.btnClearChatgptIcon = btnClearChatgptIcon;
+    this.btnClearTranscriptionIcon = btnClearTranscriptionIcon;
     this.btnPauseRecording = btnPauseRecording;
     this.btnSendChatgpt = btnSendChatgpt;
     this.btnSendInputstick = btnSendInputstick;
     this.btnSendWhisper = btnSendWhisper;
+    this.btnSendWhisperToInputstick = btnSendWhisperToInputstick;
     this.btnStartRecording = btnStartRecording;
     this.btnStopRecording = btnStopRecording;
     this.chatgptControls = chatgptControls;
     this.chatgptLabel = chatgptLabel;
     this.chatgptText = chatgptText;
     this.chkAutoSendInputstick = chkAutoSendInputstick;
+    this.chkAutoSendToChatgpt = chkAutoSendToChatgpt;
     this.chkAutoSendWhisper = chkAutoSendWhisper;
+    this.chkAutoSendWhisperToInputstick = chkAutoSendWhisperToInputstick;
     this.inputstickControls = inputstickControls;
     this.recordingControls = recordingControls;
     this.recordingIndicator = recordingIndicator;
@@ -124,6 +147,7 @@ public final class ContentMainBinding implements ViewBinding {
     this.whisperControls = whisperControls;
     this.whisperLabel = whisperLabel;
     this.whisperText = whisperText;
+    this.whisperToInputstickControls = whisperToInputstickControls;
   }
 
   @Override
@@ -153,21 +177,27 @@ public final class ContentMainBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.btn_clear_chatgpt;
-      Button btnClearChatgpt = ViewBindings.findChildViewById(rootView, id);
-      if (btnClearChatgpt == null) {
+      id = R.id.active_macros_rows_container;
+      LinearLayout activeMacrosRowsContainer = ViewBindings.findChildViewById(rootView, id);
+      if (activeMacrosRowsContainer == null) {
         break missingId;
       }
 
-      id = R.id.btn_clear_recording;
-      Button btnClearRecording = ViewBindings.findChildViewById(rootView, id);
-      if (btnClearRecording == null) {
+      id = R.id.btn_clear_all_whisper_icon;
+      ImageButton btnClearAllWhisperIcon = ViewBindings.findChildViewById(rootView, id);
+      if (btnClearAllWhisperIcon == null) {
         break missingId;
       }
 
-      id = R.id.btn_clear_transcription;
-      Button btnClearTranscription = ViewBindings.findChildViewById(rootView, id);
-      if (btnClearTranscription == null) {
+      id = R.id.btn_clear_chatgpt_icon;
+      ImageButton btnClearChatgptIcon = ViewBindings.findChildViewById(rootView, id);
+      if (btnClearChatgptIcon == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_clear_transcription_icon;
+      ImageButton btnClearTranscriptionIcon = ViewBindings.findChildViewById(rootView, id);
+      if (btnClearTranscriptionIcon == null) {
         break missingId;
       }
 
@@ -192,6 +222,12 @@ public final class ContentMainBinding implements ViewBinding {
       id = R.id.btn_send_whisper;
       Button btnSendWhisper = ViewBindings.findChildViewById(rootView, id);
       if (btnSendWhisper == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_send_whisper_to_inputstick;
+      Button btnSendWhisperToInputstick = ViewBindings.findChildViewById(rootView, id);
+      if (btnSendWhisperToInputstick == null) {
         break missingId;
       }
 
@@ -231,9 +267,21 @@ public final class ContentMainBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.chk_auto_send_to_chatgpt;
+      CheckBox chkAutoSendToChatgpt = ViewBindings.findChildViewById(rootView, id);
+      if (chkAutoSendToChatgpt == null) {
+        break missingId;
+      }
+
       id = R.id.chk_auto_send_whisper;
       CheckBox chkAutoSendWhisper = ViewBindings.findChildViewById(rootView, id);
       if (chkAutoSendWhisper == null) {
+        break missingId;
+      }
+
+      id = R.id.chk_auto_send_whisper_to_inputstick;
+      CheckBox chkAutoSendWhisperToInputstick = ViewBindings.findChildViewById(rootView, id);
+      if (chkAutoSendWhisperToInputstick == null) {
         break missingId;
       }
 
@@ -285,12 +333,20 @@ public final class ContentMainBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ContentMainBinding((ScrollView) rootView, btnClearChatgpt, btnClearRecording,
-          btnClearTranscription, btnPauseRecording, btnSendChatgpt, btnSendInputstick,
-          btnSendWhisper, btnStartRecording, btnStopRecording, chatgptControls, chatgptLabel,
-          chatgptText, chkAutoSendInputstick, chkAutoSendWhisper, inputstickControls,
-          recordingControls, recordingIndicator, recordingIndicatorLayout, recordingTime,
-          whisperControls, whisperLabel, whisperText);
+      id = R.id.whisper_to_inputstick_controls;
+      LinearLayout whisperToInputstickControls = ViewBindings.findChildViewById(rootView, id);
+      if (whisperToInputstickControls == null) {
+        break missingId;
+      }
+
+      return new ContentMainBinding((ScrollView) rootView, activeMacrosRowsContainer,
+          btnClearAllWhisperIcon, btnClearChatgptIcon, btnClearTranscriptionIcon, btnPauseRecording,
+          btnSendChatgpt, btnSendInputstick, btnSendWhisper, btnSendWhisperToInputstick,
+          btnStartRecording, btnStopRecording, chatgptControls, chatgptLabel, chatgptText,
+          chkAutoSendInputstick, chkAutoSendToChatgpt, chkAutoSendWhisper,
+          chkAutoSendWhisperToInputstick, inputstickControls, recordingControls, recordingIndicator,
+          recordingIndicatorLayout, recordingTime, whisperControls, whisperLabel, whisperText,
+          whisperToInputstickControls);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
