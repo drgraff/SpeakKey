@@ -11,11 +11,14 @@ import com.inputstick.api.broadcast.InputStickBroadcast;
 import com.inputstick.api.hid.HIDKeycodes; // Added for getHidKeyCode
 import com.drgraff.speakkey.utils.AppLogManager; // Added for AppLogManager
 import java.util.List; // Added for List<InputAction>
+import java.util.concurrent.ExecutorService; // Added for ExecutorService
+import java.util.concurrent.Executors; // Added for Executors
 // Toast is already imported via android.widget.Toast
 
 public class InputStickManager {
     private static final String TAG = "InputStickManager";
     private final Context context;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(); // Added ExecutorService
 
     public InputStickManager(Context context) {
         this.context = context;
@@ -46,68 +49,67 @@ public class InputStickManager {
      * @param text Text to be typed
      */
     public void typeText(String text) {
-        // 1. At the very beginning of the method
+        // Initial checks and logging on the calling thread
         AppLogManager.getInstance().addEntry("INFO", TAG, "typeText() entered. Text snippet: " + (text != null && text.length() > 20 ? text.substring(0, 20) : text));
-        Toast.makeText(context, "IM.typeText() called", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "IM.typeText() called", Toast.LENGTH_SHORT).show(); // This Toast remains on UI thread
 
         if (text == null || text.isEmpty()) {
             Log.e(TAG, "Text is null or empty");
-            AppLogManager.getInstance().addEntry("WARN", TAG, "typeText() received null or empty text.");
+            AppLogManager.getInstance().addEntry("WARN", TAG, "typeText() called with null or empty text.");
             return;
         }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean formatEnabled = sharedPreferences.getBoolean("pref_inputstick_format_tags_enabled", false);
-        
-        // 2. Immediately after reading formatEnabled preference
-        AppLogManager.getInstance().addEntry("INFO", TAG, "Preference pref_inputstick_format_tags_enabled: " + formatEnabled);
-        Toast.makeText(context, "Format Enabled Pref: " + formatEnabled, Toast.LENGTH_SHORT).show();
+        final Context runnableContext = this.context; // Use final context for runnable
 
-        // String delayMsStr = sharedPreferences.getString("pref_inputstick_format_delay_ms", "100"); // Removed
-        // int delayMs = 100; // Removed
-        // try { // Removed
-        //     delayMs = Integer.parseInt(delayMsStr); // Removed
-        // } catch (NumberFormatException e) { // Removed
-        //     Log.e(TAG, "Failed to parse formatting delay, using default: " + delayMsStr, e); // Removed
-        // } // Removed
+        executor.execute(() -> {
+            // All logic from here onwards goes into the background thread
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(runnableContext);
+            boolean formatEnabled = sharedPreferences.getBoolean("pref_inputstick_format_tags_enabled", false);
 
-        if (formatEnabled) {
-            // 3. Inside the if (formatEnabled) block, just before TextTagFormatter instantiation
-            AppLogManager.getInstance().addEntry("INFO", TAG, "formatEnabled is true. Attempting to parse actions...");
-            Toast.makeText(context, "Formatting: ON - Calling parser", Toast.LENGTH_SHORT).show();
+            // Toast for preference removed, AppLogManager entry updated for background context
+            AppLogManager.getInstance().addEntry("INFO", TAG, "Background: Preference pref_inputstick_format_tags_enabled: " + formatEnabled);
+            // Toast.makeText(context, "Format Enabled Pref: " + formatEnabled, Toast.LENGTH_SHORT).show(); // Removed
 
-            Log.d(TAG, "InputStick text formatting is enabled."); // Existing Logcat
-            TextTagFormatter formatter = new TextTagFormatter();
-            List<InputAction> actions = formatter.parseTextToActions(context, text);
+            if (formatEnabled) {
+                // Toast for formatting ON removed, AppLogManager entry updated for background context
+                AppLogManager.getInstance().addEntry("INFO", TAG, "Background: formatEnabled is true. Attempting to parse actions...");
+                // Toast.makeText(context, "Formatting: ON - Calling parser", Toast.LENGTH_SHORT).show(); // Removed
 
-            for (InputAction action : actions) {
-                if (action.getType() == ActionType.TYPE_TEXT) {
-                    TypeTextAction typeTextAction = (TypeTextAction) action;
-                    Log.d(TAG, "Executing TypeTextAction: " + typeTextAction.getText());
-                    sendTextSegment(typeTextAction.getText()); // Call local method
-                } else if (action.getType() == ActionType.SEND_KEYSTROKES) {
-                    SendKeystrokesAction sendKeystrokesAction = (SendKeystrokesAction) action;
-                    Log.d(TAG, "Executing SendKeystrokesAction: " + sendKeystrokesAction.getKeystrokeSequence() + " with delay: " + sendKeystrokesAction.getDelayMs() + "ms");
-                    sendCustomKeystrokes(sendKeystrokesAction.getKeystrokeSequence()); // Call local method
-                    if (sendKeystrokesAction.getDelayMs() > 0) {
-                        try {
-                            // Apply delay directly here as it's part of action processing
-                            Thread.sleep(sendKeystrokesAction.getDelayMs());
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            Log.e(TAG, "Delay interrupted", e);
+                Log.d(TAG, "Background: InputStick text formatting is enabled."); // Existing Logcat, updated for context
+                TextTagFormatter formatter = new TextTagFormatter();
+                // Pass runnableContext to parseTextToActions as it might do context-based operations (though it doesn't currently for Toasts)
+                List<InputAction> actions = formatter.parseTextToActions(runnableContext, text);
+
+                for (InputAction action : actions) {
+                    if (action.getType() == ActionType.TYPE_TEXT) {
+                        TypeTextAction typeTextAction = (TypeTextAction) action;
+                        AppLogManager.getInstance().addEntry("INFO", TAG, "Background: Executing TypeTextAction: " + typeTextAction.getText());
+                        sendTextSegment(typeTextAction.getText()); 
+                    } else if (action.getType() == ActionType.SEND_KEYSTROKES) {
+                        SendKeystrokesAction sendKeystrokesAction = (SendKeystrokesAction) action;
+                        AppLogManager.getInstance().addEntry("INFO", TAG, "Background: Executing SendKeystrokesAction: " + sendKeystrokesAction.getKeystrokeSequence() + " with delay: " + sendKeystrokesAction.getDelayMs() + "ms");
+                        sendCustomKeystrokes(sendKeystrokesAction.getKeystrokeSequence()); 
+                        if (sendKeystrokesAction.getDelayMs() > 0) {
+                            try {
+                                Thread.sleep(sendKeystrokesAction.getDelayMs());
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                Log.e(TAG, "Background: Delay interrupted", e);
+                                AppLogManager.getInstance().addEntry("WARN", TAG, "Background: Delay interrupted for keystroke: " + sendKeystrokesAction.getKeystrokeSequence());
+                            }
                         }
                     }
                 }
-            }
-        } else {
-            // 4. Inside the else block (when formatEnabled is false), at the beginning
-            AppLogManager.getInstance().addEntry("INFO", TAG, "formatEnabled is false. Sending raw text.");
-            Toast.makeText(context, "Formatting: OFF - Raw text", Toast.LENGTH_SHORT).show();
+            } else {
+                // Toast for formatting OFF removed, AppLogManager entry updated for background context
+                AppLogManager.getInstance().addEntry("INFO", TAG, "Background: formatEnabled is false. Sending raw text.");
+                // Toast.makeText(context, "Formatting: OFF - Raw text", Toast.LENGTH_SHORT).show(); // Removed
 
-            Log.d(TAG, "InputStick text formatting is disabled. Sending raw text."); // Existing Logcat
-            InputStickBroadcast.type(context, text, "en-US");
-        }
+                Log.d(TAG, "Background: InputStick text formatting is disabled. Sending raw text."); // Existing Logcat, updated for context
+                // sendTextSegment is fine as it uses this.context, which is final runnableContext effectively
+                sendTextSegment(text); 
+            }
+        });
     }
 
     /**
