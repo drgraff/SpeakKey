@@ -92,6 +92,11 @@
     <string name="keystroke_sequence_required_message">Keystroke sequence is required.</string>
     <string name="untitled_formatting_tag_label">Untitled Tag</string>
 
+    <!-- Formatting Tag Delays -->
+    <string name="pref_title_formatting_tag_delay_enabled">Enable Formatting Tag Delays</string>
+    <string name="pref_summary_formatting_tag_delay_enabled">Insert a delay before and after sending special keystrokes for formatting tags. The actual delay duration is configured per tag.</string>
+    <string name="pref_key_formatting_tag_delay_enabled">formatting_tag_delay_enabled</string> <!-- For programmatic access -->
+
     <!-- Keystroke Picker for Formatting Tags -->
     <string name="label_modifier_ctrl">Ctrl</string>
     <string name="label_modifier_alt">Alt</string>

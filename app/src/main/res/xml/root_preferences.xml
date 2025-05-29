@@ -71,6 +71,12 @@
             android:title="Enable Text Formatting Tags"
             android:summary="Convert tags (e.g., 'b', 'i') to Ctrl+B, Ctrl+I"
             android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/pref_key_formatting_tag_delay_enabled"
+            app:title="@string/pref_title_formatting_tag_delay_enabled"
+            app:summary="@string/pref_summary_formatting_tag_delay_enabled"
+            app:defaultValue="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

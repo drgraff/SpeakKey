@@ -59,7 +59,7 @@
             android:layout_marginBottom="8dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_tag_delay_ms"
+                android:id="@+id/editTextTagDelayMs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Keystroke Delay (ms)"

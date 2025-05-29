@@ -1,11 +1,14 @@
 package com.drgraff.speakkey.inputstick;
 
 import android.content.Context;
+import android.content.SharedPreferences; // Added import
+import androidx.preference.PreferenceManager; // Added import
 import android.util.Log;
 // import android.widget.Toast; // Removed Toast import
 import com.drgraff.speakkey.utils.AppLogManager; // Added for AppLogManager
 // Removed: com.inputstick.api.broadcast.InputStickBroadcast;
 // Removed: com.inputstick.api.hid.HIDKeycodes;
+import com.drgraff.speakkey.R; // Added import
 import com.drgraff.speakkey.formattingtags.FormattingTag;
 import com.drgraff.speakkey.formattingtags.FormattingTagManager;
 
@@ -31,6 +34,9 @@ public class TextTagFormatter {
         if (text == null || text.isEmpty()) {
             return actions;
         }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean formattingTagDelayEnabled = sharedPreferences.getBoolean(context.getString(R.string.pref_key_formatting_tag_delay_enabled), true);
 
         FormattingTagManager tagManager = new FormattingTagManager(context);
         List<FormattingTag> activeTags;
@@ -89,7 +95,7 @@ public class TextTagFormatter {
                             currentSegment.setLength(0);
                         }
                         // Add keystroke action for the matched tag
-                        actions.add(new SendKeystrokesAction(tag.getKeystrokeSequence(), tag.getDelayMs()));
+                        actions.add(new SendKeystrokesAction(tag.getKeystrokeSequence(), formattingTagDelayEnabled ? tag.getDelayMs() : 0));
                         i += tag.getOpeningTagText().length();
                         tagFound = true;
                         break;
