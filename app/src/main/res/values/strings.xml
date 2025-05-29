@@ -42,6 +42,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="nav_menu_home">Home</string>
     <string name="nav_menu_settings">Settings</string>
+    <string name="nav_menu_about">About</string>
     
     <!-- Recording -->
     <string name="recording_time">Recording: %1$d:%2$02d</string>
@@ -104,4 +105,20 @@
     <string name="label_modifier_meta">Meta/Gui</string>
     <string name="label_main_key">Main Key:</string>
     <string name="prompt_select_key">Select Key...</string>
+
+    <!-- About Activity -->
+    <string name="about_activity_title">About SpeakKey</string>
+    <string name="about_app_icon_description">App Icon</string>
+    <string name="about_app_description">SpeakKey revolutionizes your workflow by seamlessly converting your voice into text and transmitting it as keystrokes to your computer using InputStick hardware. Go beyond simple dictation with powerful features designed for efficiency and customization:
+
+• Advanced Voice-to-Text: Quickly and accurately capture your thoughts.
+• ChatGPT Integration: Leverage AI to transform, summarize, or generate text using customizable prompts.
+• Macros: Automate repetitive tasks by creating sequences of text input and special keystrokes.
+• Formatting Tags: Embed special tags within your text that automatically convert to specific keyboard shortcuts (e.g., for bolding, italics, or custom commands).
+• InputStick Powered: Reliably sends keystrokes to your PC, emulating a USB keyboard.
+
+SpeakKey streamlines data entry, coding, writing, and any task involving text input on a computer, making it an indispensable tool for productivity.</string>
+    <string name="about_inputstick_acknowledgement">This app utilizes InputStick hardware and its API for emulating keyboard input.</string>
+    <string name="about_inputstick_link_text">Visit inputstick.com for more information.</string>
+    <string name="about_author_statement">SpeakKey was created by David Graff in 2025.</string>
 </resources>
