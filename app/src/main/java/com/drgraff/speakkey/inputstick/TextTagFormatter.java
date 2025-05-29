@@ -48,14 +48,24 @@ public class TextTagFormatter {
             }
         }
 
+        Log.d(TAG, "Number of active tags found: " + (activeTags != null ? activeTags.size() : 0));
+        if (activeTags != null && !activeTags.isEmpty()) {
+            for (FormattingTag tag : activeTags) {
+                Log.d(TAG, "Active Tag: Name='" + tag.getName() + "', OpeningText='" + tag.getOpeningTagText() + "', Keystrokes='" + tag.getKeystrokeSequence() + "'");
+            }
+        }
+
         StringBuilder currentSegment = new StringBuilder();
         int i = 0;
         while (i < text.length()) {
+            Log.d(TAG, "Processing text at index " + i + ": '" + text.substring(i, Math.min(i + 10, text.length())) + "...'");
             boolean tagFound = false;
             if (activeTags != null && !activeTags.isEmpty()) {
                 for (FormattingTag tag : activeTags) {
+                    Log.d(TAG, "  Attempting to match tag: '" + tag.getOpeningTagText() + "'");
                     if (tag.getOpeningTagText() != null && !tag.getOpeningTagText().isEmpty() &&
                             text.startsWith(tag.getOpeningTagText(), i)) {
+                        Log.d(TAG, "    MATCHED tag: '" + tag.getOpeningTagText() + "'");
                         // Add current text segment if not empty
                         if (currentSegment.length() > 0) {
                             actions.add(new TypeTextAction(currentSegment.toString()));
@@ -78,6 +88,14 @@ public class TextTagFormatter {
         // Add any remaining text segment
         if (currentSegment.length() > 0) {
             actions.add(new TypeTextAction(currentSegment.toString()));
+        }
+
+        Log.d(TAG, "Generated " + actions.size() + " actions:");
+        for (int j = 0; j < actions.size(); j++) {
+            InputAction currentAction = actions.get(j);
+            Log.d(TAG, "  Action " + j + ": " + currentAction.getType() +
+                       (currentAction.getType() == ActionType.TYPE_TEXT ? " - Text: '" + ((TypeTextAction)currentAction).getText() + "'" : "") +
+                       (currentAction.getType() == ActionType.SEND_KEYSTROKES ? " - Keystrokes: '" + ((SendKeystrokesAction)currentAction).getKeystrokeSequence() + "'" : ""));
         }
         return actions;
     }
