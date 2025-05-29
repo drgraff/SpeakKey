@@ -30,7 +30,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
     private static final long INVALID_TAG_ID = -1;
     private static final String DEFAULT_DELAY_MS = "0"; // Default delay for new tags
 
-    private TextInputEditText editTextName, editTextOpeningTag, editTagDelayMs; // editTextKeystrokeSequence removed
+    private TextInputEditText editTextName, editTextOpeningTag, editTextTagDelayMs; // editTextKeystrokeSequence removed, changed editTagDelayMs to editTextTagDelayMs
     private CheckBox checkBoxCtrl, checkBoxAlt, checkBoxShift, checkBoxMeta; // Added
     private Spinner spinnerMainKey; // Added
     private List<KeystrokeDisplay> keySpinnerItems; // Added For Spinner data
@@ -70,7 +70,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
 
         editTextName = findViewById(R.id.edit_tag_name);
         editTextOpeningTag = findViewById(R.id.edit_tag_opening_text);
-        editTagDelayMs = findViewById(R.id.edit_tag_delay_ms); // Added for delay
+        editTextTagDelayMs = findViewById(R.id.editTextTagDelayMs); // Changed ID and variable
         // editTextKeystrokeSequence = findViewById(R.id.edit_tag_keystroke_sequence); // Removed
 
         checkBoxCtrl = findViewById(R.id.checkbox_modifier_ctrl); // Added
@@ -93,7 +93,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             if (currentTag != null) {
                 editTextName.setText(currentTag.getName());
                 editTextOpeningTag.setText(currentTag.getOpeningTagText());
-                editTagDelayMs.setText(String.valueOf(currentTag.getDelayMs())); // Load delay
+                editTextTagDelayMs.setText(String.valueOf(currentTag.getDelayMs())); // Load delay, changed variable
                 // editTextKeystrokeSequence.setText(currentTag.getKeystrokeSequence()); // Removed
                 parseAndSetKeystrokeUI(currentTag.getKeystrokeSequence()); // Added call
                 // Ensure Activity title is also set for editing here
@@ -107,7 +107,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setTitle(R.string.add_new_formatting_tag_title);
                 }
-                editTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag after error
+                editTextTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag after error, changed variable
                 currentTagId = INVALID_TAG_ID; // Reset to ensure it behaves as 'add new'
             }
         } else {
@@ -115,7 +115,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(R.string.add_new_formatting_tag_title);
             }
-            editTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag
+            editTextTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag, changed variable
         }
 
         buttonSave.setOnClickListener(v -> saveFormattingTag());
@@ -124,13 +124,13 @@ public class EditFormattingTagActivity extends AppCompatActivity {
     private void saveFormattingTag() {
         String name = editTextName.getText().toString().trim();
         String openingText = editTextOpeningTag.getText().toString().trim();
-        String delayString = editTagDelayMs.getText().toString().trim();
+        String delayString = editTextTagDelayMs.getText().toString().trim(); // Changed variable
         int delayMs = 0; // Default to 0 if parsing fails or field is empty after validation
 
         // Validate and parse delayMs
         if (delayString.isEmpty()) {
-            editTagDelayMs.setError("Delay cannot be empty. Enter 0 if no delay is needed.");
-            editTagDelayMs.requestFocus();
+            editTextTagDelayMs.setError("Delay cannot be empty. Enter 0 if no delay is needed."); // Changed variable
+            editTextTagDelayMs.requestFocus(); // Changed variable
             Toast.makeText(this, "Delay cannot be empty. Enter 0 if no delay is needed.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -138,14 +138,14 @@ public class EditFormattingTagActivity extends AppCompatActivity {
         try {
             delayMs = Integer.parseInt(delayString);
             if (delayMs < 0) {
-                editTagDelayMs.setError("Delay must be a non-negative number.");
-                editTagDelayMs.requestFocus();
+                editTextTagDelayMs.setError("Delay must be a non-negative number."); // Changed variable
+                editTextTagDelayMs.requestFocus(); // Changed variable
                 Toast.makeText(this, "Delay must be a non-negative number.", Toast.LENGTH_SHORT).show();
                 return;
             }
         } catch (NumberFormatException e) {
-            editTagDelayMs.setError("Invalid number format for delay.");
-            editTagDelayMs.requestFocus();
+            editTextTagDelayMs.setError("Invalid number format for delay."); // Changed variable
+            editTextTagDelayMs.requestFocus(); // Changed variable
             Toast.makeText(this, "Invalid number format for delay.", Toast.LENGTH_SHORT).show();
             return;
         }
