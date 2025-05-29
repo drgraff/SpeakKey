@@ -719,7 +719,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (hasActivePrompts) {
                     activePromptsText.append("\n"); // Newline separator
                 }
-                activePromptsText.append(prompt.getName()); // Or prompt.getText() or another relevant field
+                activePromptsText.append(prompt.getLabel());
                 hasActivePrompts = true;
             }
         }
