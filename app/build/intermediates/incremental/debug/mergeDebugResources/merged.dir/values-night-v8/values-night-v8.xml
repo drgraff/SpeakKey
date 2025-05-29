@@ -57,6 +57,9 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="alertDialogTheme">@style/AppAlertDialogTheme</item>
     </style>
+    <style name="Theme.SpeakKey.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">@color/gray</item> 
+    </style>
     <style name="ThemeOverlay.AppCompat.DayNight" parent="ThemeOverlay.AppCompat.Dark"/>
     <style name="ThemeOverlay.Material3.DynamicColors.DayNight" parent="ThemeOverlay.Material3.DynamicColors.Dark"/>
     <style name="Widget.MaterialComponents.ActionBar.PrimarySurface" parent="Widget.MaterialComponents.ActionBar.Surface"/>
