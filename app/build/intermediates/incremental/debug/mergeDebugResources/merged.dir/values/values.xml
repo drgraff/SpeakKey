@@ -670,6 +670,8 @@
     <color name="cardview_light_background">#FFFFFFFF</color>
     <color name="cardview_shadow_end_color">#03000000</color>
     <color name="cardview_shadow_start_color">#37000000</color>
+    <color name="custom_toolbar_background">@color/primary</color>
+    <color name="custom_toolbar_icon_tint">@color/textPrimary</color>
     <color name="design_bottom_navigation_shadow_color">#14000000</color>
     <color name="design_dark_default_color_background">#121212</color>
     <color name="design_dark_default_color_error">#CF6679</color>
@@ -1384,6 +1386,7 @@
     <dimen name="m3_timepicker_display_stroke_width">2dp</dimen>
     <dimen name="m3_timepicker_window_elevation">@dimen/m3_sys_elevation_level3</dimen>
     <dimen name="m3_toolbar_text_size_title">20dp</dimen>
+    <dimen name="macro_button_margin_horizontal">4dp</dimen>
     <dimen name="material_bottom_sheet_max_width">640dp</dimen>
     <dimen name="material_clock_display_height">80dp</dimen>
     <dimen name="material_clock_display_padding">24dp</dimen>
@@ -1862,6 +1865,8 @@
     <string name="abc_shareactionprovider_share_with_application">Share with <ns2:g example="Mail" id="application_name">%s</ns2:g></string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
     <string name="action_settings">Settings</string>
+    <string name="add_new_formatting_tag_title">Add Formatting Tag</string>
+    <string name="add_prompt_title">Add New Prompt</string>
     <string name="androidx_startup" translatable="false">androidx.startup</string>
     <string name="app_name">SpeakKey</string>
     <string name="appbar_scrolling_view_behavior" translatable="false">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
@@ -1874,11 +1879,23 @@
     <string name="character_counter_content_description">Characters entered %1$d of %2$d</string>
     <string name="character_counter_overflowed_content_description">Character limit exceeded %1$d of %2$d</string>
     <string name="character_counter_pattern" translatable="false">%1$d/%2$d</string>
+    <string name="clear_all_button_text">Clear All</string>
+    <string name="clear_all_content_description">Clear all text fields</string>
     <string name="clear_chatgpt_response">Clear Response</string>
     <string name="clear_recording">Clear Recording</string>
     <string name="clear_text_end_icon_content_description">Clear text</string>
-    <string name="clear_transcription">Clear Transcription</string>
+    <string name="clear_transcription">Clear Transcript</string>
+    <string name="content_description_add_new_formatting_tag">Add new formatting tag</string>
+    <string name="content_description_add_new_prompt">Add new prompt</string>
+    <string name="content_description_delete_formatting_tag">Delete formatting tag</string>
+    <string name="content_description_delete_prompt">Delete Prompt</string>
+    <string name="content_description_edit_formatting_tag">Edit formatting tag</string>
+    <string name="content_description_edit_prompt">Edit Prompt</string>
     <string name="copy">Copy</string>
+    <string name="edit_formatting_tag_title">Edit Formatting Tag</string>
+    <string name="edit_prompt_title">Edit Prompt</string>
+    <string name="empty_formatting_tags_text">No formatting tags defined. Tap the \'+\' button to add one.</string>
+    <string name="empty_prompts_text">No prompts found. Tap the \'+\' button to create one.</string>
     <string description="Screen reader announcement for when a checkbox is on error. [CHAR LIMIT=NONE]" name="error_a11y_label">
     Error: invalid
   </string>
@@ -1893,9 +1910,23 @@
     <string name="exposed_dropdown_menu_content_description">Show dropdown menu</string>
     <string name="fab_transformation_scrim_behavior" translatable="false">com.google.android.material.transformation.FabTransformationScrimBehavior</string>
     <string name="fab_transformation_sheet_behavior" translatable="false">com.google.android.material.transformation.FabTransformationSheetBehavior</string>
+    <string name="formatting_tag_closing_text_hint">Closing Tag (e.g., &lt;/b>)</string>
+    <string name="formatting_tag_deleted_message">Formatting tag deleted</string>
+    <string name="formatting_tag_keystrokes_hint">Keystrokes (e.g., CTRL_LEFT+KEY_B)</string>
+    <string name="formatting_tag_label_active">Active</string>
+    <string name="formatting_tag_name_hint">Tag Name (e.g., Bold)</string>
+    <string name="formatting_tag_opening_text_hint">Opening Tag (e.g., &lt;b>)</string>
+    <string name="formatting_tag_saved_message">Formatting tag saved</string>
+    <string name="formatting_tags_activity_title">Formatting Tags</string>
     <string name="hide_bottom_view_on_scroll_behavior" translatable="false">com.google.android.material.behavior.HideBottomViewOnScrollBehavior</string>
     <string description="Content description for an icon that appears in the title area of a dialog" name="icon_content_description">Dialog Icon</string>
     <string name="item_view_role_description">Tab</string>
+    <string name="keystroke_sequence_required_message">Keystroke sequence is required.</string>
+    <string name="label_main_key">Main Key:</string>
+    <string name="label_modifier_alt">Alt</string>
+    <string name="label_modifier_ctrl">Ctrl</string>
+    <string name="label_modifier_meta">Meta/Gui</string>
+    <string name="label_modifier_shift">Shift</string>
     <string name="m3_sys_motion_easing_emphasized" translatable="false">path(M 0,0 C 0.05, 0, 0.133333, 0.06, 0.166666, 0.4 C 0.208333, 0.82, 0.25, 1, 1, 1)</string>
     <string name="m3_sys_motion_easing_emphasized_accelerate" translatable="false">cubic-bezier(0.3, 0.0, 0.8, 0.2)</string>
     <string name="m3_sys_motion_easing_emphasized_decelerate" translatable="false">cubic-bezier(0.1, 0.7, 0.1, 1.0)</string>
@@ -2005,17 +2036,31 @@
     <string name="nav_menu_home">Home</string>
     <string name="nav_menu_settings">Settings</string>
     <string name="not_set">Not set</string>
+    <string name="opening_tag_text_required_message">Opening tag text is required.</string>
     <string name="password_toggle_content_description">Show password</string>
     <string name="path_password_eye" translatable="false">M12,4.5C7,4.5 2.73,7.61 1,12c1.73,4.39 6,7.5 11,7.5s9.27,-3.11 11,-7.5c-1.73,-4.39 -6,-7.5 -11,-7.5zM12,17c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5 -2.24,5 -5,5zM12,9c-1.66,0 -3,1.34 -3,3s1.34,3 3,3 3,-1.34 3,-3 -1.34,-3 -3,-3z</string>
     <string name="path_password_eye_mask_strike_through" translatable="false">M2,4.27 L19.73,22 L22.27,19.46 L4.54,1.73 L4.54,1 L23,1 L23,23 L1,23 L1,4.27 Z</string>
     <string name="path_password_eye_mask_visible" translatable="false">M2,4.27 L2,4.27 L4.54,1.73 L4.54,1.73 L4.54,1 L23,1 L23,23 L1,23 L1,4.27 Z</string>
     <string name="path_password_strike_through" translatable="false">M3.27,4.27 L19.74,20.74</string>
-    <string name="pause_recording">Pause Recording</string>
+    <string name="pause_recording">Pause Record</string>
+    <string name="pref_key_formatting_tag_delay_enabled">formatting_tag_delay_enabled</string>
+    <string name="pref_summary_formatting_tag_delay_enabled">Insert a delay before and after sending special keystrokes for formatting tags. The actual delay duration is configured per tag.</string>
+    <string name="pref_title_formatting_tag_delay_enabled">Enable Formatting Tag Delays</string>
     <string name="preference_copied">
         \"<ns2:g example="Version 1.1" id="summary">%1$s</ns2:g>\" copied to clipboard.
     </string>
+    <string name="prompt_deleted_message">Prompt deleted.</string>
+    <string name="prompt_label_hint">Prompt Label</string>
+    <string name="prompt_label_required_message">Prompt label cannot be empty.</string>
+    <string name="prompt_not_found_message">Prompt not found.</string>
+    <string name="prompt_saved_message">Prompt saved.</string>
+    <string name="prompt_select_key">Select Key...</string>
+    <string name="prompt_text_hint">Prompt Text</string>
+    <string name="prompts_activity_title">Prompts</string>
     <string name="recording_permission_required">Recording permission is required</string>
     <string name="recording_time">Recording: %1$d:%2$02d</string>
+    <string name="save_button_text">Save</string>
+    <string name="save_edit">Save</string>
     <string name="search_menu_title">Search</string>
     <string name="searchbar_scrolling_view_behavior" translatable="false">
     com.google.android.material.search.SearchBar$ScrollingViewBehavior
@@ -2043,15 +2088,24 @@
     <string name="settings_whisper_endpoint_title">Whisper Endpoint</string>
     <string description="Title of the side sheet&apos;s accessibility pane that is spoken by TalkBack when the side sheet appears on screen. [CHAR_LIMIT=NONE]" name="side_sheet_accessibility_pane_title">Side Sheet</string>
     <string name="side_sheet_behavior" translatable="false">com.google.android.material.sidesheet.SideSheetBehavior</string>
-    <string name="start_recording">Start Recording</string>
+    <string name="start_recording">Start Record</string>
     <string name="status_bar_notification_info_overflow">999+</string>
-    <string name="stop_recording">Stop Recording</string>
+    <string name="stop_recording">Stop Record</string>
     <string name="summary_collapsed_preference_list"><ns2:g id="current_items">%1$s</ns2:g>, <ns2:g id="added_items">%2$s</ns2:g></string>
+    <string name="tag_name_required_message">Tag name is required.</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="untitled_formatting_tag_label">Untitled Tag</string>
+    <string name="untitled_prompt_label">Untitled Prompt</string>
     <string name="v7_preference_off">OFF</string>
     <string name="v7_preference_on">ON</string>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>
     <style name="AlertDialog.AppCompat.Light" parent="Base.AlertDialog.AppCompat.Light"/>
+    <style name="AlertDialog.Button.Negative" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    <style name="AlertDialog.Button.Positive" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
     <style name="Animation.AppCompat.Dialog" parent="Base.Animation.AppCompat.Dialog"/>
     <style name="Animation.AppCompat.DropDownUp" parent="Base.Animation.AppCompat.DropDownUp"/>
     <style name="Animation.AppCompat.Tooltip" parent="Base.Animation.AppCompat.Tooltip"/>

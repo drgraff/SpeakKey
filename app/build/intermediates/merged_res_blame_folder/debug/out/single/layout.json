@@ -4,16 +4,68 @@
         "source": "com.drgraff.speakkey.app-main-51:/layout/app_bar_main.xml"
     },
     {
-        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/nav_header_main.xml",
-        "source": "com.drgraff.speakkey.app-main-51:/layout/nav_header_main.xml"
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_formatting_tags.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_formatting_tags.xml"
     },
     {
         "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_settings.xml",
         "source": "com.drgraff.speakkey.app-main-51:/layout/activity_settings.xml"
     },
     {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/list_item_macro.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/list_item_macro.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/dialog_edit_text_fullscreen.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/dialog_edit_text_fullscreen.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/nav_header_main.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/nav_header_main.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_prompts.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_prompts.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_log.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_log.xml"
+    },
+    {
         "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/content_main.xml",
         "source": "com.drgraff.speakkey.app-main-51:/layout/content_main.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/list_item_prompt.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/list_item_prompt.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_edit_prompt.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_edit_prompt.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/list_item_macro_action.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/list_item_macro_action.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/list_item_log.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/list_item_log.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_macros.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_macros.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_edit_macro.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_edit_macro.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/list_item_formatting_tag.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/list_item_formatting_tag.xml"
+    },
+    {
+        "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_edit_formatting_tag.xml",
+        "source": "com.drgraff.speakkey.app-main-51:/layout/activity_edit_formatting_tag.xml"
     },
     {
         "merged": "com.drgraff.speakkey.app-mergeDebugResources-48:/layout/activity_main.xml",

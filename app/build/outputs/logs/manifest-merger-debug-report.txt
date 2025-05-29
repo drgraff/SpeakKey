@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-42:12
-INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-42:12
-INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-42:12
-INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-42:12
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:2:1-86:12
 MERGED from [androidx.databinding:viewbinding:8.2.2] /home/runner/.gradle/caches/8.14/transforms/aa310aa32fdf13746e697c7610e6e89a/transformed/jetified-viewbinding-8.2.2/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.navigation:navigation-ui-ktx:2.5.3] /home/runner/.gradle/caches/8.14/transforms/b3f4adf7209852d80e19402d7c8f23d5/transformed/navigation-ui-ktx-2.5.3/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.navigation:navigation-ui:2.5.3] /home/runner/.gradle/caches/8.14/transforms/a03db52df12bbe0507fe65c1c27ab991/transformed/navigation-ui-2.5.3/AndroidManifest.xml:17:1-24:12
@@ -101,8 +101,8 @@ ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:
 	android:name
 		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:12:22-70
 application
-ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-40:19
-INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-40:19
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-80:19
+INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:14:5-80:19
 MERGED from [com.google.android.material:material:1.8.0] /home/runner/.gradle/caches/8.14/transforms/c50bc4128cf189b525fa007b1c5191af/transformed/material-1.8.0/AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.8.0] /home/runner/.gradle/caches/8.14/transforms/c50bc4128cf189b525fa007b1c5191af/transformed/material-1.8.0/AndroidManifest.xml:24:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/runner/.gradle/caches/8.14/transforms/98dcddcc999bb33f1739f46960d90670/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -169,6 +169,84 @@ ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:
 		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:37:13-37
 	android:name
 		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:36:13-54
+activity#com.drgraff.speakkey.utils.LogActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:40:9-45:20
+	android:parentActivityName
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:44:13-55
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:42:13-45
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:43:13-50
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:41:13-46
+activity#com.drgraff.speakkey.data.PromptsActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:46:9-51:20
+	android:parentActivityName
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:50:13-55
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:48:13-43
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:49:13-62
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:47:13-49
+activity#com.drgraff.speakkey.ui.prompts.PromptEditorActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:52:9-57:66
+	android:parentActivityName
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:57:13-63
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:55:13-40
+	android:exported
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:54:13-37
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:56:13-62
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:53:13-80
+activity#com.drgraff.speakkey.formattingtags.FormattingTagsActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:59:9-64:58
+	android:parentActivityName
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:64:13-55
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:62:13-67
+	android:exported
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:61:13-37
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:63:13-62
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:60:13-66
+activity#com.drgraff.speakkey.formattingtags.EditFormattingTagActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:65:9-70:83
+	android:parentActivityName
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:70:13-80
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:68:13-62
+	android:exported
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:67:13-37
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:69:13-62
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:66:13-69
+activity#com.speakkey.ui.macros.MacroListActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:72:9-75:65
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:74:13-42
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:75:13-62
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:73:13-68
+activity#com.speakkey.ui.macros.MacroEditorActivity
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:76:9-79:65
+	android:label
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:78:13-39
+	android:theme
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:79:13-62
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:77:13-70
+queries
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:82:5-84:15
+package#com.inputstick.apps.inputstickutility
+ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:83:9-73
+	android:name
+		ADDED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml:83:18-70
 uses-sdk
 INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/runner/work/SpeakKey/SpeakKey/app/src/main/AndroidManifest.xml
