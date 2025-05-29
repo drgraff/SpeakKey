@@ -87,15 +87,32 @@ public class InputStickManager {
                         sendTextSegment(typeTextAction.getText()); 
                     } else if (action.getType() == ActionType.SEND_KEYSTROKES) {
                         SendKeystrokesAction sendKeystrokesAction = (SendKeystrokesAction) action;
-                        AppLogManager.getInstance().addEntry("INFO", TAG, "Background: Executing SendKeystrokesAction: " + sendKeystrokesAction.getKeystrokeSequence() + " with delay: " + sendKeystrokesAction.getDelayMs() + "ms");
-                        sendCustomKeystrokes(sendKeystrokesAction.getKeystrokeSequence()); 
+                        AppLogManager.getInstance().addEntry("INFO", TAG, "Background: Executing SendKeystrokesAction: " + sendKeystrokesAction.getKeystrokeSequence() + " with delay (applied before and after): " + sendKeystrokesAction.getDelayMs() + "ms");
+
+                        // Delay BEFORE sending keystrokes
                         if (sendKeystrokesAction.getDelayMs() > 0) {
                             try {
+                                AppLogManager.getInstance().addEntry("DEBUG", TAG, "Background: Applying BEFORE delay: " + sendKeystrokesAction.getDelayMs() + "ms for " + sendKeystrokesAction.getKeystrokeSequence());
                                 Thread.sleep(sendKeystrokesAction.getDelayMs());
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
-                                Log.e(TAG, "Background: Delay interrupted", e);
-                                AppLogManager.getInstance().addEntry("WARN", TAG, "Background: Delay interrupted for keystroke: " + sendKeystrokesAction.getKeystrokeSequence());
+                                Log.e(TAG, "Background: BEFORE delay interrupted for keystroke: " + sendKeystrokesAction.getKeystrokeSequence(), e);
+                                AppLogManager.getInstance().addEntry("WARN", TAG, "Background: BEFORE delay interrupted for " + sendKeystrokesAction.getKeystrokeSequence());
+                                // Optionally, decide if to continue or return
+                            }
+                        }
+
+                        sendCustomKeystrokes(sendKeystrokesAction.getKeystrokeSequence()); 
+
+                        // Delay AFTER sending keystrokes
+                        if (sendKeystrokesAction.getDelayMs() > 0) {
+                            try {
+                                AppLogManager.getInstance().addEntry("DEBUG", TAG, "Background: Applying AFTER delay: " + sendKeystrokesAction.getDelayMs() + "ms for " + sendKeystrokesAction.getKeystrokeSequence());
+                                Thread.sleep(sendKeystrokesAction.getDelayMs());
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                Log.e(TAG, "Background: AFTER delay interrupted for keystroke: " + sendKeystrokesAction.getKeystrokeSequence(), e);
+                                AppLogManager.getInstance().addEntry("WARN", TAG, "Background: AFTER delay interrupted for " + sendKeystrokesAction.getKeystrokeSequence());
                             }
                         }
                     }
