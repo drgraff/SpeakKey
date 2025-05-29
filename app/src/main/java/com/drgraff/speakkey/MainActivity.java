@@ -40,7 +40,7 @@ import com.speakkey.data.Macro; // Added for Macro buttons
 import com.speakkey.data.MacroRepository; // Added for Macro buttons
 import com.speakkey.service.MacroExecutor; // Added for Macro Execution
 import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
-// import com.drgraff.speakkey.inputstick.InputStickManager; // Removed
+import com.drgraff.speakkey.inputstick.InputStickManager; // Reinstated
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.formattingtags.FormattingTagsActivity; // Added for Formatting Tags
 import com.speakkey.ui.macros.MacroListActivity; // Added for Macros
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // APIs
     private WhisperApi whisperApi;
     private ChatGptApi chatGptApi;
-    // private InputStickManager inputStickManager; // Removed
+    private InputStickManager inputStickManager; // Reinstated
     
     // Settings
     private SharedPreferences sharedPreferences;
@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         whisperApi = new WhisperApi(apiKey, whisperEndpoint, language);
         chatGptApi = new ChatGptApi(apiKey, model);
-        // inputStickManager = new InputStickManager(this); // Removed
+        inputStickManager = new InputStickManager(this); // Reinstated
     }
     
     private void setupClickListeners() {
@@ -630,14 +630,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         // Check if InputStickUtility is installed and supported
-        if (com.drgraff.speakkey.inputstick.InputStickBroadcast.isSupported(this, true)) {
-            // Send the text using InputStickBroadcast
-            com.drgraff.speakkey.inputstick.InputStickBroadcast.type(this, text, "en-US"); // Using "en-US" as default layout
-            Toast.makeText(MainActivity.this, "Text sent via InputStick broadcast", Toast.LENGTH_SHORT).show();
-            AppLogManager.getInstance().addEntry("INFO", "InputStick: Text broadcasted", "Length: " + text.length());
+        if (InputStickBroadcast.isSupported(this, true)) { // No need for fully qualified name if InputStickBroadcast is imported
+            if (inputStickManager != null) {
+                inputStickManager.typeText(text); // Use InputStickManager
+                Toast.makeText(MainActivity.this, "Text sent via InputStickManager", Toast.LENGTH_SHORT).show(); // Updated Toast
+                AppLogManager.getInstance().addEntry("INFO", "InputStick: Text sent via InputStickManager", "Length: " + text.length());
+            } else {
+                // Fallback or error if inputStickManager is unexpectedly null
+                Log.e(TAG, "InputStickManager is null. Falling back to direct broadcast.");
+                AppLogManager.getInstance().addEntry("ERROR", "InputStick: InputStickManager is null. Falling back to direct broadcast.", null);
+                InputStickBroadcast.type(this, text, "en-US");
+                Toast.makeText(MainActivity.this, "Text sent (fallback direct broadcast)", Toast.LENGTH_SHORT).show();
+            }
         } else {
             // isSupported() already shows a dialog if not installed/updated.
-            // Optionally, add another toast or log if needed, but DownloadDialog should handle user notification.
             AppLogManager.getInstance().addEntry("WARN", "InputStick: Utility not supported or user cancelled download.", null);
         }
     }
@@ -828,12 +834,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Check if InputStickUtility is installed and supported
         // The true parameter shows a dialog if not installed/updated.
-        if (com.drgraff.speakkey.inputstick.InputStickBroadcast.isSupported(this, true)) {
-            // Send the text using InputStickBroadcast
-            com.drgraff.speakkey.inputstick.InputStickBroadcast.type(this, textToSend, "en-US"); // Using "en-US" as default layout
-            Toast.makeText(MainActivity.this, "Whisper text sent via InputStick broadcast", Toast.LENGTH_SHORT).show();
-            // Ensure AppLogManager is accessible or initialized if you use it here
-            AppLogManager.getInstance().addEntry("INFO", "InputStick: Whisper text broadcasted", "Length: " + textToSend.length());
+        if (InputStickBroadcast.isSupported(this, true)) { // No need for fully qualified name
+            if (inputStickManager != null) {
+                inputStickManager.typeText(textToSend); // Use InputStickManager
+                Toast.makeText(MainActivity.this, "Whisper text sent via InputStickManager", Toast.LENGTH_SHORT).show(); // Updated Toast
+                AppLogManager.getInstance().addEntry("INFO", "InputStick: Whisper text sent via InputStickManager", "Length: " + textToSend.length());
+            } else {
+                // Fallback or error if inputStickManager is unexpectedly null
+                Log.e(TAG, "InputStickManager is null. Falling back to direct broadcast for Whisper text.");
+                AppLogManager.getInstance().addEntry("ERROR", "InputStick: InputStickManager is null. Falling back to direct broadcast for Whisper text.", null);
+                InputStickBroadcast.type(this, textToSend, "en-US");
+                Toast.makeText(MainActivity.this, "Whisper text sent (fallback direct broadcast)", Toast.LENGTH_SHORT).show();
+            }
         } else {
             // isSupported() already shows a dialog.
             AppLogManager.getInstance().addEntry("WARN", "InputStick: Utility not supported or user cancelled download for sending Whisper text.", null);
