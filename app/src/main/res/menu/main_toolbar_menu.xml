@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_toolbar_record"
+        android:icon="@mipmap/mic_pencil_icon"
+        android:title="@string/action_record_title"
+        app:showAsAction="ifRoom" />
+        <!-- Using mic_pencil_icon as requested, though typically action icons are more specific -->
+
+</menu>

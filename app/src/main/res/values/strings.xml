@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">SpeakKey</string>
     <string name="action_settings">Settings</string>
+    <string name="action_record_title">Record</string> <!-- Added for Toolbar icon -->
     
     <!-- Main UI -->
     <string name="start_recording">Start Record</string>
