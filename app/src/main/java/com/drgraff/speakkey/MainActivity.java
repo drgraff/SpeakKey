@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText whisperText, chatGptText;
     private View recordingIndicator;
     private TextView recordingTime;
+    private TextView activePromptsDisplay; // ADD THIS
     private CheckBox chkAutoSendWhisper, chkAutoSendInputStick, chkAutoSendToChatGpt; // Added chkAutoSendToChatGpt
     private CheckBox chk_auto_send_whisper_to_inputstick; // Added
     private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private WhisperApi whisperApi;
     private ChatGptApi chatGptApi;
     private InputStickManager inputStickManager; // Reinstated
+    private PromptManager promptManager; // ADD THIS
     
     // Settings
     private SharedPreferences sharedPreferences;
@@ -137,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize APIs and MacroRepository
         initializeApis();
         macroRepository = new MacroRepository(getApplicationContext()); // Initialize MacroRepository
+        promptManager = new PromptManager(this); // Initialize PromptManager
         
         // Request permissions
         requestPermissions();
@@ -182,6 +185,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnSendWhisperToInputStick = findViewById(R.id.btn_send_whisper_to_inputstick);
         chk_auto_send_whisper_to_inputstick = findViewById(R.id.chk_auto_send_whisper_to_inputstick);
         // btnClearAll = findViewById(R.id.btn_clear_all); // Removed
+
+        activePromptsDisplay = findViewById(R.id.active_prompts_display); // ADD THIS
+        activePromptsDisplay.setOnClickListener(v -> { // Optional: make it clickable to go to Prompts screen
+            Intent intent = new Intent(MainActivity.this, com.drgraff.speakkey.data.PromptsActivity.class);
+            startActivity(intent);
+        });
 
         // Set up click listeners
         // setupClickListeners(); // Moved down
@@ -694,6 +703,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Refresh active macros
         displayActiveMacros();
+        updateActivePromptsDisplay(); // ADD THIS
+    }
+
+    private void updateActivePromptsDisplay() {
+        if (promptManager == null) { // Should be initialized in onCreate
+            promptManager = new PromptManager(this);
+        }
+        List<Prompt> allPrompts = promptManager.getPrompts();
+        StringBuilder activePromptsText = new StringBuilder();
+        boolean hasActivePrompts = false;
+
+        for (Prompt prompt : allPrompts) {
+            if (prompt.isActive()) {
+                if (hasActivePrompts) {
+                    activePromptsText.append("\n"); // Newline separator
+                }
+                activePromptsText.append(prompt.getName()); // Or prompt.getText() or another relevant field
+                hasActivePrompts = true;
+            }
+        }
+
+        if (activePromptsDisplay != null) { // Check if initialized
+            if (hasActivePrompts) {
+                activePromptsDisplay.setText(activePromptsText.toString());
+                activePromptsDisplay.setVisibility(View.VISIBLE);
+            } else {
+                activePromptsDisplay.setText(""); // Or "No active prompts"
+                activePromptsDisplay.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void displayActiveMacros() {
