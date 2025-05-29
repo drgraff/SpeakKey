@@ -14,4 +14,8 @@
     <color name="green">#4CAF50</color>
     
     <color name="edit_text_background">@android:color/white</color> <!-- Default text box background color -->
+
+    <!-- Custom Toolbar Colors - Light Theme -->
+    <color name="custom_toolbar_background">@color/primary</color>
+    <color name="custom_toolbar_icon_tint">@color/textPrimary</color>
 </resources>

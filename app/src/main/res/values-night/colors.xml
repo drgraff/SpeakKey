@@ -2,4 +2,9 @@
 <resources>
     <!-- Colors specific for dark theme -->
     <color name="edit_text_background">#484848</color> <!-- Dark gray color for text boxes in dark mode -->
+
+    <!-- Custom Toolbar Colors - Dark Theme -->
+    <color name="material_dark_surface">#121212</color>
+    <color name="custom_toolbar_background">@color/material_dark_surface</color>
+    <color name="custom_toolbar_icon_tint">@color/gray</color>
 </resources>
