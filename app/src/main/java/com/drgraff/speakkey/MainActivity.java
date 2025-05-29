@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Menu; // ADD THIS
+import android.view.MenuInflater; // ADD THIS
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -153,6 +155,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Display active macros
         displayActiveMacros(); // Call after macroRepository is initialized
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.action_toolbar_record) {
+            if (btnStartRecording != null) {
+                btnStartRecording.performClick(); // Trigger the Start Recording button's action
+            }
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
     
     private void initializeUiElements() {
