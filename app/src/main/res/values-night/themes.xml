@@ -23,4 +23,8 @@
         <!-- You might also need to set colorPrimary for button backgrounds if they are not appearing correctly -->
         <!-- <item name="colorPrimary">@color/primaryLight</item> -->
     </style>
+
+    <style name="Theme.SpeakKey.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="colorControlNormal">@color/gray</item> <!-- Override for dark mode -->
+    </style>
 </resources>
