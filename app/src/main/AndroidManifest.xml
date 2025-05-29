@@ -41,7 +41,7 @@
             android:name=".ui.AboutActivity"
             android:label="@string/about_activity_title"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.SpeakKey" />
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
         <activity
             android:name=".utils.LogActivity"
             android:label="Application Logs"
