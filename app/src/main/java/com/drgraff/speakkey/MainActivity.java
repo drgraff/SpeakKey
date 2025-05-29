@@ -44,6 +44,7 @@ import com.drgraff.speakkey.inputstick.InputStickManager; // Reinstated
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.formattingtags.FormattingTagsActivity; // Added for Formatting Tags
 import com.speakkey.ui.macros.MacroListActivity; // Added for Macros
+import com.drgraff.speakkey.ui.AboutActivity; // ADD THIS
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
@@ -668,6 +669,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_formatting_tags) { // New block
             Intent intent = new Intent(this, com.drgraff.speakkey.formattingtags.FormattingTagsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_about) { // ADD THIS BLOCK
+            Intent intent = new Intent(this, AboutActivity.class);
             startActivity(intent);
         }
         
