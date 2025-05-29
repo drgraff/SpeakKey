@@ -2,6 +2,8 @@ package com.drgraff.speakkey.inputstick;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast; // Added for Toast messages
+import com.drgraff.speakkey.utils.AppLogManager; // Added for AppLogManager
 // Removed: com.inputstick.api.broadcast.InputStickBroadcast;
 // Removed: com.inputstick.api.hid.HIDKeycodes;
 import com.drgraff.speakkey.formattingtags.FormattingTag;
@@ -35,8 +37,22 @@ public class TextTagFormatter {
         try {
             tagManager.open();
             activeTags = tagManager.getActiveTags();
+            
+            // Added Toast and AppLogManager entries for active tags
+            int activeTagCount = (activeTags != null ? activeTags.size() : 0);
+            Toast.makeText(context, "Active Tags Found: " + activeTagCount, Toast.LENGTH_LONG).show();
+            AppLogManager.getInstance().addEntry("INFO", TAG + " - Active Tags", "Number of active tags found: " + activeTagCount);
+            if (activeTags != null) {
+                for (FormattingTag tagDetail : activeTags) { // Renamed 'tag' to 'tagDetail' to avoid conflict with outer scope if any
+                    AppLogManager.getInstance().addEntry("INFO", TAG + " - Tag Detail", "Name='" + tagDetail.getName() + "', OpeningText='" + tagDetail.getOpeningTagText() + "', Keystrokes='" + tagDetail.getKeystrokeSequence() + "'");
+                }
+            }
+
         } catch (Exception e) {
             Log.e(TAG, "Error opening FormattingTagManager or getting active tags, creating TypeTextAction for whole text.", e);
+            // Added Toast and AppLogManager entries for error
+            AppLogManager.getInstance().addEntry("ERROR", TAG + " - Tag Loading Error", "Error loading formatting tags: " + e.getMessage() + (e.getCause() != null ? " - Cause: " + e.getCause().toString() : ""));
+            Toast.makeText(context, "Error loading formatting tags. Check App Log.", Toast.LENGTH_LONG).show();
             // If DB ops fail, treat the whole text as a single segment to type
             if (text != null && !text.isEmpty()) {
                 actions.add(new TypeTextAction(text));
@@ -48,6 +64,7 @@ public class TextTagFormatter {
             }
         }
 
+        // Existing Logcat logging for active tags (can remain)
         Log.d(TAG, "Number of active tags found: " + (activeTags != null ? activeTags.size() : 0));
         if (activeTags != null && !activeTags.isEmpty()) {
             for (FormattingTag tag : activeTags) {
