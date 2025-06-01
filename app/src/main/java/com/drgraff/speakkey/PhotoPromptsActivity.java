@@ -1,6 +1,8 @@
 package com.drgraff.speakkey;
 
+import android.app.Activity; // Added
 import android.app.ProgressDialog;
+import android.content.Intent; // Added
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +33,7 @@ import com.drgraff.speakkey.data.PhotoPromptsAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Collections; // Added
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
