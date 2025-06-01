@@ -84,6 +84,63 @@ public class ChatGptApi {
         }
     }
 
+    /**
+     * Gets a completion from the ChatGPT API for vision models (text and image input).
+     *
+     * @param contentParts List of content parts (text or image URLs)
+     * @param visionModelName The specific vision model to use
+     * @param maxTokens Optional maximum number of tokens for the response
+     * @return Completion from ChatGPT
+     * @throws Exception if API call fails
+     */
+    public String getVisionCompletion(List<ChatGptRequest.ContentPart> contentParts, String visionModelName, Integer maxTokens) throws Exception {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IllegalArgumentException("API key is required");
+        }
+        if (contentParts == null || contentParts.isEmpty()) {
+            throw new IllegalArgumentException("Content parts cannot be empty");
+        }
+        if (visionModelName == null || visionModelName.isEmpty()) {
+            throw new IllegalArgumentException("Vision model name is required");
+        }
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openai.com/")
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        ChatGptApiService apiService = retrofit.create(ChatGptApiService.class);
+
+        ChatGptRequest.Message userMessage = new ChatGptRequest.Message("user", contentParts);
+        // Use the constructor that accepts maxTokens
+        ChatGptRequest request = new ChatGptRequest(visionModelName, Collections.singletonList(userMessage), maxTokens);
+
+
+        String authToken = "Bearer " + this.apiKey;
+        Call<ChatGptResponse> call = apiService.getChatCompletion(authToken, request);
+
+        try {
+            Response<ChatGptResponse> response = call.execute();
+            if (response.isSuccessful() && response.body() != null && response.body().getChoices() != null && !response.body().getChoices().isEmpty()) {
+                return response.body().getChoices().get(0).getMessage().getContent();
+            } else {
+                String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                throw new Exception("Error getting vision completion: " + response.code() + " " + response.message() + " - " + errorBody);
+            }
+        } catch (IOException e) {
+            throw new Exception("Error getting vision completion due to network issue: " + e.getMessage(), e);
+        }
+    }
+
+
     public List<ModelInfo> listModels() throws Exception {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IllegalArgumentException("API key is required for listing models");

@@ -73,6 +73,13 @@
                 android:padding="8dp"
                 android:background="#f0f0f0"/>
 
+            <CheckBox
+                android:id="@+id/chk_auto_send_chatgpt_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto-send to ChatGPT"
+                android:layout_marginBottom="4dp"/>
+
             <Button
                 android:id="@+id/btn_send_to_chatgpt_photo"
                 android:layout_width="match_parent"
@@ -80,15 +87,39 @@
                 android:text="Send to ChatGPT"
                 android:layout_marginBottom="8dp"/>
 
-            <EditText
-                android:id="@+id/edittext_chatgpt_response_photo"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="ChatGPT Response"
-                android:inputType="textMultiLine"
-                android:minLines="3"
-                android:layout_marginBottom="8dp"
-                android:background="@android:drawable/edit_text"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <EditText
+                    android:id="@+id/edittext_chatgpt_response_photo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="ChatGPT Response"
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
+                    android:background="@android:drawable/edit_text"/>
+
+                <ImageButton
+                    android:id="@+id/btn_clear_chatgpt_response_photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:contentDescription="Clear ChatGPT Response"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"/>
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/chk_auto_send_inputstick_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Auto-send to InputStick"
+                android:layout_marginBottom="4dp"/>
 
             <Button
                 android:id="@+id/btn_send_to_inputstick_photo"
