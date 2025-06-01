@@ -29,6 +29,10 @@
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="@string/formatting_tags_activity_title" />
         <item
+            android:id="@+id/nav_photos"
+            android:icon="@android:drawable/ic_menu_camera"
+            android:title="@string/nav_menu_photos" />
+        <item
             android:id="@+id/nav_about"
             android:icon="@android:drawable/ic_menu_info_details"
             android:title="@string/nav_menu_about" />

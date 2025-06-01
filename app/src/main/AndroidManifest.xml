@@ -10,6 +10,12 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
+    <!-- Camera Permission -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Declare camera hardware feature -->
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/mic_pencil_icon"
@@ -17,6 +23,16 @@
         android:roundIcon="@mipmap/mic_pencil_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.SpeakKey">
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <activity
             android:name=".MainActivity"
@@ -79,6 +95,12 @@
         <activity
             android:name="com.speakkey.ui.macros.MacroEditorActivity"
             android:label="Edit Macro"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+
+        <activity
+            android:name=".PhotosActivity"
+            android:label="Photos"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.SpeakKey.NoActionBar" />
     </application>
 

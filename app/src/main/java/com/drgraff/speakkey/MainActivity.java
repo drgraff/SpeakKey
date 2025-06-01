@@ -45,6 +45,7 @@ import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
 import com.drgraff.speakkey.inputstick.InputStickManager; // Reinstated
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.formattingtags.FormattingTagsActivity; // Added for Formatting Tags
+import com.drgraff.speakkey.PhotosActivity; // Added for Photos
 import com.speakkey.ui.macros.MacroListActivity; // Added for Macros
 import com.drgraff.speakkey.ui.AboutActivity; // ADD THIS
 import com.drgraff.speakkey.utils.AppLogManager;
@@ -171,7 +172,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_toolbar_record) {
+        if (id == R.id.action_toolbar_photos) {
+            Intent intent = new Intent(this, PhotosActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_toolbar_record) {
             if (btnStartRecording != null) {
                 btnStartRecording.performClick(); // Trigger the Start Recording button's action
             }
@@ -704,6 +709,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_formatting_tags) { // New block
             Intent intent = new Intent(this, com.drgraff.speakkey.formattingtags.FormattingTagsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_photos) {
+            Intent intent = new Intent(this, PhotosActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_about) { // ADD THIS BLOCK
             Intent intent = new Intent(this, AboutActivity.class);

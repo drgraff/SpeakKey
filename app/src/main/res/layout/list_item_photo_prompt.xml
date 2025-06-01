@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/photo_prompt_label_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Photo Prompt Label" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/photo_prompt_active_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:minHeight="48dp"/>
+
+        <ImageButton
+            android:id="@+id/photo_prompt_edit_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Edit Photo Prompt"
+            android:padding="4dp"
+            app:srcCompat="@android:drawable/ic_menu_edit" />
+            <!-- Using standard ic_menu_edit, ensure you have this or replace -->
+
+        <ImageButton
+            android:id="@+id/photo_prompt_delete_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete Photo Prompt"
+            android:padding="4dp"
+            app:srcCompat="@android:drawable/ic_menu_delete" />
+            <!-- Using standard ic_menu_delete, ensure you have this or replace -->
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/photo_prompt_text_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        tools:text="This is the actual text of the photo prompt, which can be a bit longer." />
+
+</LinearLayout>
