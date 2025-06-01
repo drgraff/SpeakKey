@@ -225,8 +225,8 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
         }
         modelAdapter.notifyDataSetChanged();
 
-        String selectedModelId = sharedPreferences.getString(PREF_KEY_SELECTED_PHOTO_MODEL, null);
-        if (selectedModelId != null && !modelList.isEmpty()) {
+        String selectedModelId = sharedPreferences.getString(PREF_KEY_SELECTED_PHOTO_MODEL, "gpt-4-vision-preview");
+        if (selectedModelId != null && !modelList.isEmpty()) { // selectedModelId will not be null due to default
             int spinnerPosition = modelAdapter.getPosition(selectedModelId);
             if (spinnerPosition >= 0) {
                 spinnerPhotoModels.setSelection(spinnerPosition);

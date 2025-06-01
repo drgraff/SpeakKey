@@ -158,6 +158,7 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
 
     <!-- Photo Prompts Feature -->
     <string name="photo_prompts_title">Photo Prompts</string>
+    <string name="photo_prompts_model_selection_instruction">Choose a model for photo processing:</string>
     <string name="photo_prompts_label_model_selection">Photo Model:</string>
     <string name="photo_prompts_btn_check_models">Check ChatGPT Photo Models</string>
     <string name="photo_prompts_empty_text">No photo prompts created yet. Click the \'+\' button to add one.</string>
