@@ -102,6 +102,20 @@
             android:label="Photos"
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.SpeakKey.NoActionBar" />
+
+        <activity
+            android:name=".PhotoPromptsActivity"
+            android:exported="false"
+            android:label="@string/photo_prompts_title"
+            android:parentActivityName=".PhotosActivity"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+
+        <activity
+            android:name=".ui.prompts.PhotoPromptEditorActivity"
+            android:exported="false"
+            android:label="@string/photo_prompt_editor_title_add"
+            android:parentActivityName=".PhotoPromptsActivity"
+            android:theme="@style/Theme.SpeakKey.NoActionBar" />
     </application>
 
     <queries>
