@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PhotosActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.SpeakKey.AppBarOverlay">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_photos"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/Theme.SpeakKey.PopupOverlay" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Button
+                android:id="@+id/btn_take_photo_area"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Take Photo"
+                android:layout_marginBottom="8dp"/>
+
+            <ImageView
+                android:id="@+id/image_view_photo"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"
+                android:background="#e0e0e0"
+                android:scaleType="centerInside"
+                android:contentDescription="Captured Photo"/>
+
+            <Button
+                android:id="@+id/btn_clear_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear Photo"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btn_photo_prompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Photo Prompts"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/text_active_photo_prompts_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Active Photo Prompts Display"
+                android:layout_marginBottom="8dp"
+                android:padding="8dp"
+                android:background="#f0f0f0"/>
+
+            <Button
+                android:id="@+id/btn_send_to_chatgpt_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Send to ChatGPT"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/edittext_chatgpt_response_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="ChatGPT Response"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:layout_marginBottom="8dp"
+                android:background="@android:drawable/edit_text"/>
+
+            <Button
+                android:id="@+id/btn_send_to_inputstick_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Send to InputStick"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
