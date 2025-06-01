@@ -62,10 +62,10 @@ public class PhotosActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 102;
     private static final String KEY_PHOTO_PATH = "currentPhotoPath";
     private static final String PREF_AUTO_SEND_CHATGPT_PHOTO = "auto_send_chatgpt_photo_enabled";
-    private static final String PREF_AUTO_SEND_INPUTSTICK_PHOTO = "auto_send_inputstick_photo_enabled"; // Added
+    private static final String PREF_AUTO_SEND_INPUTSTICK_PHOTO = "auto_send_inputstick_photo_enabled";
 
     private ImageView imageViewPhoto;
-    private Button btnTakePhotoArea; // This is the initial "Take Photo" button
+    private ImageButton btnTakePhotoArea; // Changed from Button to ImageButton
     private Button btnClearPhoto;
     private Button btnPhotoPrompts;
     private TextView textActivePhotoPromptsDisplay;
