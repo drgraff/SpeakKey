@@ -74,13 +74,13 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle("Photo Prompts");
+            actionBar.setTitle(getString(R.string.photo_prompts_title));
         }
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String apiKey = sharedPreferences.getString("openai_api_key", "");
         if (apiKey.isEmpty()) {
-            Toast.makeText(this, "OpenAI API Key is not set.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.photo_prompts_toast_api_key_not_set), Toast.LENGTH_LONG).show();
             // Consider disabling model fetching functionality
         }
         // Initialize ChatGptApi - assuming default model is not critical here or handled by ChatGptApi constructor
@@ -105,7 +105,10 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
         spinnerPhotoModels.setAdapter(modelAdapter);
 
         if (apiKey.isEmpty()) {
+            // Toast is already shown a few lines above.
             btnCheckPhotoModels.setEnabled(false);
+        } else {
+            btnCheckPhotoModels.setEnabled(true); // Ensure it's enabled if key IS present
         }
 
         fabAddPhotoPrompt.setOnClickListener(v -> {
@@ -134,12 +137,12 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
 
     private void fetchPhotoModelsAndUpdateSpinner() {
         if (chatGptApi == null || sharedPreferences.getString("openai_api_key", "").isEmpty()) {
-            Toast.makeText(this, "API Key not set. Cannot fetch models.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.photo_prompts_toast_api_key_cant_fetch), Toast.LENGTH_SHORT).show();
             return;
         }
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Fetching photo models...");
+        progressDialog.setMessage(getString(R.string.photo_prompts_progress_fetching_models));
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -160,7 +163,7 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
                         progressDialog.dismiss();
                     }
                     if (visionModelIds.isEmpty()) {
-                        Toast.makeText(PhotoPromptsActivity.this, "No specific photo/vision models found, showing all compatible.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(PhotoPromptsActivity.this, getString(R.string.photo_prompts_toast_no_specific_models), Toast.LENGTH_LONG).show();
                         // Fallback to showing all models if no specific vision ones are identified by simple filter
                         // Or handle as an error/empty list. For now, let's populate with what we have or all.
                         // If visionModelIds is empty, this will clear the spinner if it had old data.
@@ -190,7 +193,7 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
                         spinnerPhotoModels.setSelection(0); // Select first if nothing was previously selected
                         sharedPreferences.edit().putString(PREF_KEY_SELECTED_PHOTO_MODEL, modelList.get(0)).apply();
                     }
-                    Toast.makeText(PhotoPromptsActivity.this, "Photo models updated.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PhotoPromptsActivity.this, getString(R.string.photo_prompts_toast_models_updated), Toast.LENGTH_SHORT).show();
                 });
 
             } catch (Exception e) {
@@ -199,7 +202,7 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
                     if (progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
-                    Toast.makeText(PhotoPromptsActivity.this, "Error fetching models: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(PhotoPromptsActivity.this, String.format(getString(R.string.photo_prompts_toast_error_fetching_models_format), e.getMessage()), Toast.LENGTH_LONG).show();
                 });
             }
         });

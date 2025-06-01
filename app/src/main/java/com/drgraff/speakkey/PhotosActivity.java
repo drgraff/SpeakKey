@@ -95,7 +95,7 @@ public class PhotosActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle("Photos");
+            actionBar.setTitle(getString(R.string.photos_title_toolbar));
         }
 
         imageViewPhoto = findViewById(R.id.image_view_photo);
@@ -116,17 +116,17 @@ public class PhotosActivity extends AppCompatActivity {
 
         String apiKey = sharedPreferences.getString("openai_api_key", "");
         if (apiKey.isEmpty()) {
-            Toast.makeText(this, "OpenAI API Key is not set. Cannot send to ChatGPT.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.photos_toast_api_key_not_set_chatgpt), Toast.LENGTH_LONG).show();
             btnSendToChatGptPhoto.setEnabled(false);
         }
         // Model name will be retrieved from shared prefs when sending
         chatGptApi = new ChatGptApi(apiKey, ""); // Model set per request in getVisionCompletion
 
-        progressDialog = new ProgressDialog(this); // Added
-        progressDialog.setMessage("Sending to ChatGPT...");
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.photos_progress_sending_to_chatgpt_message));
         progressDialog.setCancelable(false);
 
-        chkAutoSendChatGptPhoto.setChecked(sharedPreferences.getBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, false)); // Added
+        chkAutoSendChatGptPhoto.setChecked(sharedPreferences.getBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, false));
         chkAutoSendChatGptPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> {
             sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, isChecked).apply();
         });
@@ -191,7 +191,7 @@ public class PhotosActivity extends AppCompatActivity {
                 .collect(Collectors.toList());
 
         if (activePrompts.isEmpty()) {
-            textActivePhotoPromptsDisplay.setText("No active photo prompts. Click to configure."); // TODO: Use string resource
+            textActivePhotoPromptsDisplay.setText(getString(R.string.photos_text_no_active_prompts));
         } else {
             String displayText = activePrompts.stream()
                     .map(PhotoPrompt::getLabel)
@@ -225,13 +225,13 @@ public class PhotosActivity extends AppCompatActivity {
 
     private void sendPhotoAndPromptsToChatGpt() {
         if (currentPhotoPath == null || currentPhotoPath.isEmpty()) {
-            Toast.makeText(this, "No photo selected.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.photos_toast_no_photo_selected_text), Toast.LENGTH_SHORT).show();
             return;
         }
 
         String base64Image = encodeImageToBase64(currentPhotoPath);
         if (base64Image == null) {
-            Toast.makeText(this, "Failed to encode image.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.photos_toast_failed_encode_image_text), Toast.LENGTH_SHORT).show();
             return;
         }
         String dataUri = "data:image/jpeg;base64," + base64Image;
@@ -246,19 +246,18 @@ public class PhotosActivity extends AppCompatActivity {
                                     .map(PhotoPrompt::getText)
                                     .collect(Collectors.joining("\n\n"));
         } else {
-            // Default prompt if no active ones, or make it clear to the user.
-            concatenatedPromptText = "Describe this image.";
+            concatenatedPromptText = getString(R.string.photos_default_image_description_prompt);
         }
 
         String selectedPhotoModel = sharedPreferences.getString(PhotoPromptsActivity.PREF_KEY_SELECTED_PHOTO_MODEL, null);
         if (selectedPhotoModel == null || selectedPhotoModel.isEmpty()) {
-            Toast.makeText(this, "Photo processing model not selected. Please select one in Photo Prompts settings.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.photos_toast_model_not_selected_text), Toast.LENGTH_LONG).show();
             return;
         }
 
         String apiKey = sharedPreferences.getString("openai_api_key", "");
         if (apiKey.isEmpty()) {
-            Toast.makeText(this, "API Key not set. Please set it in app settings.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.photos_toast_api_key_not_set_send_text), Toast.LENGTH_LONG).show();
             return;
         }
         // chatGptApi is initialized in onCreate with the API key.
@@ -278,8 +277,8 @@ public class PhotosActivity extends AppCompatActivity {
                 mainHandler.post(() -> {
                     if (progressDialog.isShowing()) progressDialog.dismiss();
                     editTextChatGptResponsePhoto.setText(responseText);
-                    Toast.makeText(PhotosActivity.this, "Response received from ChatGPT.", Toast.LENGTH_SHORT).show();
-                    if (chkAutoSendInputStickPhoto.isChecked()) { // Added auto-send logic
+                    Toast.makeText(PhotosActivity.this, getString(R.string.photos_toast_response_received_text), Toast.LENGTH_SHORT).show();
+                    if (chkAutoSendInputStickPhoto.isChecked()) {
                         sendTextToInputStick();
                     }
                 });
@@ -287,8 +286,9 @@ public class PhotosActivity extends AppCompatActivity {
                 Log.e(TAG, "Error sending to ChatGPT Vision API", e);
                 mainHandler.post(() -> {
                     if (progressDialog.isShowing()) progressDialog.dismiss();
-                    editTextChatGptResponsePhoto.setText("Error: " + e.getMessage());
-                    Toast.makeText(PhotosActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    String errorMessage = String.format(getString(R.string.photos_toast_error_format), e.getMessage());
+                    editTextChatGptResponsePhoto.setText(errorMessage);
+                    Toast.makeText(PhotosActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -310,7 +310,7 @@ public class PhotosActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 dispatchTakePictureIntent();
             } else {
-                Toast.makeText(this, "Camera permission is required to take photos.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.photos_toast_camera_permission_denied), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -323,7 +323,7 @@ public class PhotosActivity extends AppCompatActivity {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 Log.e(TAG, "Error occurred while creating the File", ex);
-                Toast.makeText(this, "Error creating image file", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.photos_toast_error_creating_image_file_text), Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -335,7 +335,7 @@ public class PhotosActivity extends AppCompatActivity {
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         } else {
-            Toast.makeText(this, "No camera app found.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.photos_toast_no_camera_app_found), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -390,12 +390,12 @@ public class PhotosActivity extends AppCompatActivity {
             if (myBitmap != null) {
                 imageViewPhoto.setImageBitmap(myBitmap);
                 imageViewPhoto.setVisibility(View.VISIBLE);
-                btnTakePhotoArea.setVisibility(View.GONE); // Hide initial button
+                btnTakePhotoArea.setVisibility(View.GONE);
                 btnClearPhoto.setVisibility(View.VISIBLE);
             } else {
                 Log.e(TAG, "Failed to decode bitmap from path: " + currentPhotoPath);
-                Toast.makeText(this, "Failed to load image.", Toast.LENGTH_SHORT).show();
-                clearPhoto(); // Reset if image can't be loaded
+                Toast.makeText(this, getString(R.string.photos_toast_failed_load_image_text), Toast.LENGTH_SHORT).show();
+                clearPhoto();
             }
         } else {
             Log.w(TAG, "Image file does not exist at path: " + currentPhotoPath);
@@ -448,25 +448,25 @@ public class PhotosActivity extends AppCompatActivity {
 
     private void sendTextToInputStick() { // Added method
         if (!sharedPreferences.getBoolean("inputstick_enabled", true)) {
-            Toast.makeText(this, "InputStick is disabled in settings", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.photos_toast_inputstick_disabled_text), Toast.LENGTH_SHORT).show();
             return;
         }
 
         String textToSend = editTextChatGptResponsePhoto.getText().toString();
         if (textToSend.isEmpty()) {
-            Toast.makeText(this, "No text in ChatGPT response to send to InputStick", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.photos_toast_no_text_to_send_inputstick_text), Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (InputStickBroadcast.isSupported(this, true)) {
             if (inputStickManager != null) {
                 inputStickManager.typeText(textToSend);
-                Toast.makeText(this, "Text sent to InputStick", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.photos_toast_text_sent_to_inputstick_text), Toast.LENGTH_SHORT).show();
                 AppLogManager.getInstance().addEntry("INFO", "PhotosActivity: Text sent to InputStick", "Length: " + textToSend.length());
             } else {
                 Log.e(TAG, "inputStickManager is null. Cannot send text.");
                 AppLogManager.getInstance().addEntry("ERROR", "PhotosActivity: inputStickManager is null", null);
-                Toast.makeText(this, "Error: InputStickManager not initialized.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.photos_toast_error_inputstick_manager_null_text), Toast.LENGTH_SHORT).show();
             }
         } else {
             AppLogManager.getInstance().addEntry("WARN", "PhotosActivity: InputStick Utility not supported or user cancelled download.", null);

@@ -36,7 +36,7 @@
                 android:id="@+id/btn_take_photo_area"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Take Photo"
+                android:text="@string/photos_btn_take_photo_text"
                 android:layout_marginBottom="8dp"/>
 
             <ImageView
@@ -47,13 +47,13 @@
                 android:layout_marginBottom="8dp"
                 android:background="#e0e0e0"
                 android:scaleType="centerInside"
-                android:contentDescription="Captured Photo"/>
+                android:contentDescription="@string/photos_image_captured_desc"/>
 
             <Button
                 android:id="@+id/btn_clear_photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Clear Photo"
+                android:text="@string/photos_btn_clear_photo_text"
                 android:visibility="gone"
                 android:layout_marginBottom="8dp"/>
 
@@ -61,14 +61,14 @@
                 android:id="@+id/btn_photo_prompts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Photo Prompts"
+                android:text="@string/photos_btn_prompts_text"
                 android:layout_marginBottom="8dp"/>
 
             <TextView
                 android:id="@+id/text_active_photo_prompts_display"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Active Photo Prompts Display"
+                android:text="@string/photos_active_prompts_default_text"
                 android:layout_marginBottom="8dp"
                 android:padding="8dp"
                 android:background="#f0f0f0"/>
@@ -77,14 +77,14 @@
                 android:id="@+id/chk_auto_send_chatgpt_photo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Auto-send to ChatGPT"
+                android:text="@string/photos_chk_auto_send_chatgpt_text"
                 android:layout_marginBottom="4dp"/>
 
             <Button
                 android:id="@+id/btn_send_to_chatgpt_photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Send to ChatGPT"
+                android:text="@string/photos_btn_send_chatgpt_text"
                 android:layout_marginBottom="8dp"/>
 
             <LinearLayout
@@ -99,7 +99,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="ChatGPT Response"
+                    android:hint="@string/photos_edittext_chatgpt_response_hint_text"
                     android:inputType="textMultiLine"
                     android:minLines="3"
                     android:background="@android:drawable/edit_text"/>
@@ -109,7 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"
-                    android:contentDescription="Clear ChatGPT Response"
+                    android:contentDescription="@string/photos_btn_clear_chatgpt_response_desc_text"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="8dp"/>
             </LinearLayout>
@@ -118,14 +118,14 @@
                 android:id="@+id/chk_auto_send_inputstick_photo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Auto-send to InputStick"
+                android:text="@string/photos_chk_auto_send_inputstick_text"
                 android:layout_marginBottom="4dp"/>
 
             <Button
                 android:id="@+id/btn_send_to_inputstick_photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Send to InputStick"/>
+                android:text="@string/photos_btn_send_inputstick_text"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

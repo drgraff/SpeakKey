@@ -30,7 +30,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Photo Prompt Label"> <!-- TODO: Use string resource -->
+            android:hint="@string/photo_prompt_editor_hint_label">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edittext_photo_prompt_label"
@@ -45,7 +45,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginTop="8dp"
-            android:hint="Photo Prompt Text"> <!-- TODO: Use string resource -->
+            android:hint="@string/photo_prompt_editor_hint_text">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edittext_photo_prompt_text"
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="16dp"
-            android:text="Save" /> <!-- TODO: Use string resource -->
+            android:text="@string/save_button_text" />
 
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
