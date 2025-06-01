@@ -166,8 +166,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/photos_chk_auto_send_inputstick_text"/>
             </LinearLayout>
-
-        </LinearLayout>
+        </LinearLayout> <!-- This closes the inner LinearLayout with paddingStart/End -->
+    </LinearLayout> <!-- This closes the main LinearLayout child of NestedScrollView -->
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
