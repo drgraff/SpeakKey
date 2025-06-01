@@ -52,10 +52,11 @@ import com.drgraff.speakkey.api.ChatGptRequest;
 import com.drgraff.speakkey.data.PhotoPrompt;
 import com.drgraff.speakkey.data.PhotoPromptManager;
 import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
-import com.drgraff.speakkey.inputstick.InputStickManager; // Added
-import com.drgraff.speakkey.utils.AppLogManager; // Added
+import com.drgraff.speakkey.inputstick.InputStickManager;
+import com.drgraff.speakkey.utils.AppLogManager;
+import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // Added
 
-public class PhotosActivity extends AppCompatActivity {
+public class PhotosActivity extends AppCompatActivity implements FullScreenEditTextDialogFragment.OnSaveListener { // Added interface
 
     private static final String TAG = "PhotosActivity";
     private static final int REQUEST_CAMERA_PERMISSION = 101;
@@ -176,7 +177,12 @@ public class PhotosActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btnSendToChatGptPhoto.setOnClickListener(v -> sendPhotoAndPromptsToChatGpt()); // Added
+        btnSendToChatGptPhoto.setOnClickListener(v -> sendPhotoAndPromptsToChatGpt());
+
+        editTextChatGptResponsePhoto.setOnClickListener(v -> { // Added listener
+            FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(editTextChatGptResponsePhoto.getText().toString());
+            dialogFragment.show(getSupportFragmentManager(), "edit_chatgpt_response_photo_dialog");
+        });
 
         if (savedInstanceState != null) {
             currentPhotoPath = savedInstanceState.getString(KEY_PHOTO_PATH);
@@ -474,6 +480,13 @@ public class PhotosActivity extends AppCompatActivity {
         } else {
             AppLogManager.getInstance().addEntry("WARN", "PhotosActivity: InputStick Utility not supported or user cancelled download.", null);
             // isSupported() already shows a dialog if not installed/updated.
+        }
+    }
+
+    @Override // Added method
+    public void onSave(String editedText) {
+        if (editTextChatGptResponsePhoto != null) {
+            editTextChatGptResponsePhoto.setText(editedText);
         }
     }
 }

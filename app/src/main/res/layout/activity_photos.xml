@@ -120,8 +120,9 @@
                     android:scrollbars="vertical"
                     android:fadeScrollbars="false"
                     android:nestedScrollingEnabled="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true" />
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:drawableEnd="?android:attr/actionModeWebSearchDrawable" />
 
                 <ImageButton
                     android:id="@+id/btn_clear_chatgpt_response_photo"
