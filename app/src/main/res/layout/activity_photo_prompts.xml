@@ -48,14 +48,6 @@
                 android:layout_marginBottom="8dp"/>
                 <!-- The model_selection_layout already has paddingTop/Bottom and its children have start/end margins -->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/photo_prompts_label_model_selection"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"/>
-
             <Spinner
                 android:id="@+id/spinner_photo_models"
                 android:layout_width="match_parent"
