@@ -70,8 +70,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/photos_active_prompts_default_text"
                 android:layout_marginBottom="8dp"
-                android:padding="8dp"
-                android:background="?attr/colorSurfaceVariant"/>
+                android:padding="8dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
