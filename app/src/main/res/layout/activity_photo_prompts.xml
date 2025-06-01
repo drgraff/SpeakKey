@@ -43,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Photo Model:"
+                android:text="@string/photo_prompts_label_model_selection"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"/>
@@ -62,7 +62,7 @@
                 android:id="@+id/btn_check_photo_models"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Check ChatGPT Photo Models"
+                android:text="@string/photo_prompts_btn_check_models"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"/>
@@ -83,7 +83,7 @@
                 android:id="@+id/empty_photo_prompts_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No photo prompts created yet. Click the '+' button to add one."
+                android:text="@string/photo_prompts_empty_text"
                 android:textSize="16sp"
                 android:visibility="gone"
                 android:layout_gravity="center"
@@ -98,7 +98,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Add new photo prompt"
+        android:contentDescription="@string/photo_prompts_fab_add_desc"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

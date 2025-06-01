@@ -36,17 +36,16 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Edit Photo Prompt"
+            android:contentDescription="@string/photo_prompts_item_edit_desc"
             android:padding="4dp"
             app:srcCompat="@android:drawable/ic_menu_edit" />
-            <!-- Using standard ic_menu_edit, ensure you have this or replace -->
 
         <ImageButton
             android:id="@+id/photo_prompt_delete_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Delete Photo Prompt"
+            android:contentDescription="@string/photo_prompts_item_delete_desc"
             android:padding="4dp"
             app:srcCompat="@android:drawable/ic_menu_delete" />
             <!-- Using standard ic_menu_delete, ensure you have this or replace -->
