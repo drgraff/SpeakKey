@@ -104,12 +104,20 @@
                 <EditText
                     android:id="@+id/edittext_chatgpt_response_photo"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="180dp"
                     android:layout_weight="1"
                     android:hint="@string/photos_edittext_chatgpt_response_hint_text"
                     android:inputType="textMultiLine"
                     android:minLines="3"
-                    android:background="@android:drawable/edit_text"/>
+                    android:maxLines="100"
+                    android:background="@color/edit_text_background"
+                    android:padding="8dp"
+                    android:gravity="top|start"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false"
+                    android:nestedScrollingEnabled="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
 
                 <ImageButton
                     android:id="@+id/btn_clear_chatgpt_response_photo"

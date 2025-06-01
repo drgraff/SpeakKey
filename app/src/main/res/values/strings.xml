@@ -132,11 +132,11 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
     <string name="photos_btn_prompts_text">Photo Prompts</string>
     <string name="photos_active_prompts_default_text">Active Photo Prompts Display</string>
     <string name="photos_text_no_active_prompts">No active photo prompts. Click to configure.</string>
-    <string name="photos_chk_auto_send_chatgpt_text">Auto-send to ChatGPT</string>
+    <string name="photos_chk_auto_send_chatgpt_text">Auto-send</string>
     <string name="photos_btn_send_chatgpt_text">Send to ChatGPT</string>
     <string name="photos_edittext_chatgpt_response_hint_text">ChatGPT Response</string>
     <string name="photos_btn_clear_chatgpt_response_desc_text">Clear ChatGPT Response</string>
-    <string name="photos_chk_auto_send_inputstick_text">Auto-send to InputStick</string>
+    <string name="photos_chk_auto_send_inputstick_text">Auto-send</string>
     <string name="photos_btn_send_inputstick_text">Send to InputStick</string>
     <string name="photos_toast_api_key_not_set_chatgpt">OpenAI API Key is not set. Cannot send to ChatGPT.</string>
     <string name="photos_progress_sending_to_chatgpt_message">Sending to ChatGPT...</string>
