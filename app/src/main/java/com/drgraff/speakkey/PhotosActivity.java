@@ -337,6 +337,7 @@ public class PhotosActivity extends AppCompatActivity {
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         } else {
+            Log.w(TAG, "No activity found to handle ACTION_IMAGE_CAPTURE intent. Ensure a camera app is installed and enabled in the emulator/device.");
             Toast.makeText(this, getString(R.string.photos_toast_no_camera_app_found), Toast.LENGTH_SHORT).show();
         }
     }
