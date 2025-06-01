@@ -32,20 +32,24 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <Button
+            <ImageButton
                 android:id="@+id/btn_take_photo_area"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/photos_btn_take_photo_text"
+                android:layout_height="180dp"
+                android:src="@android:drawable/ic_menu_camera"
+                android:scaleType="fitCenter"
+                android:padding="24dp"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="@string/photos_btn_take_photo_text"
                 android:layout_marginBottom="8dp"/>
 
             <ImageView
                 android:id="@+id/image_view_photo"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="180dp"
                 android:visibility="gone"
                 android:layout_marginBottom="8dp"
-                android:background="#e0e0e0"
+                android:background="?attr/colorSurface"
                 android:scaleType="centerInside"
                 android:contentDescription="@string/photos_image_captured_desc"/>
 
