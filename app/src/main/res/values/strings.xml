@@ -184,26 +184,4 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
     <string name="photo_prompt_editor_toast_updated">Photo Prompt updated</string>
     <string name="photo_prompt_editor_toast_added">Photo Prompt added</string>
 
-    <!-- Photos Feature -->
-    <string name="photos_title_toolbar">Photos</string> <!-- Added for PhotosActivity Toolbar -->
-    <string name="photos_default_image_description_prompt">Describe this image.</string>
-    <!-- Other specific toasts for PhotosActivity -->
-    <string name="photos_toast_api_key_not_set_chatgpt">OpenAI API Key is not set. Cannot send to ChatGPT.</string>
-    <string name="photos_progress_sending_to_chatgpt_message">Sending to ChatGPT...</string>
-    <string name="photos_toast_camera_permission_denied">Camera permission is required to take photos.</string>
-    <string name="photos_toast_error_creating_image_file_text">Error creating image file</string>
-    <string name="photos_toast_no_camera_app_found">No camera app found.</string>
-    <string name="photos_toast_failed_load_image_text">Failed to load image.</string>
-    <string name="photos_toast_no_photo_selected_text">No photo selected.</string>
-    <string name="photos_toast_failed_encode_image_text">Failed to encode image.</string>
-    <string name="photos_toast_model_not_selected_text">Photo processing model not selected. Please select one in Photo Prompts settings.</string>
-    <string name="photos_toast_api_key_not_set_send_text">API Key not set. Please set it in app settings.</string>
-    <string name="photos_toast_response_received_text">Response received from ChatGPT.</string>
-    <string name="photos_toast_error_format">Error: %s</string>
-    <string name="photos_toast_inputstick_disabled_text">InputStick is disabled in settings</string>
-    <string name="photos_toast_no_text_to_send_inputstick_text">No text in ChatGPT response to send to InputStick</string>
-    <string name="photos_toast_text_sent_to_inputstick_text">Text sent to InputStick</string>
-    <string name="photos_toast_error_inputstick_manager_null_text">Error: InputStickManager not initialized.</string>
-    <string name="photos_text_no_active_prompts">No active photo prompts. Click to configure.</string>
-
 </resources>
