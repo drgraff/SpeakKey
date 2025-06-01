@@ -30,7 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
             <ImageButton
                 android:id="@+id/btn_take_photo_area"
@@ -53,8 +54,15 @@
                 android:scaleType="centerInside"
                 android:contentDescription="@string/photos_image_captured_desc"/>
 
-            <Button
-                android:id="@+id/btn_clear_photo"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <Button
+                    android:id="@+id/btn_clear_photo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/photos_btn_clear_photo_text"
