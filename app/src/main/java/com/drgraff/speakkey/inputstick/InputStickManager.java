@@ -51,7 +51,7 @@ public class InputStickManager {
     public void typeText(String text) {
         // Initial checks and logging on the calling thread
         AppLogManager.getInstance().addEntry("INFO", TAG, "typeText() entered. Text snippet: " + (text != null && text.length() > 20 ? text.substring(0, 20) : text));
-        Toast.makeText(context, "IM.typeText() called", Toast.LENGTH_SHORT).show(); // This Toast remains on UI thread
+        // Toast.makeText(context, "IM.typeText() called", Toast.LENGTH_SHORT).show(); // This Toast remains on UI thread
 
         if (text == null || text.isEmpty()) {
             Log.e(TAG, "Text is null or empty");
