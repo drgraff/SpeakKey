@@ -3,6 +3,7 @@ package com.drgraff.speakkey;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo; // Added
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -393,6 +394,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isRecording = true;
             isPaused = false;
             recordingStartTime = System.currentTimeMillis();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            Log.d(TAG, "Screen orientation locked due to recording start.");
             
             startTimer();
             updateUiForRecording(true);
@@ -400,7 +403,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.d(TAG, "Recording started");
         } catch (IOException e) {
             Log.e(TAG, "Error starting recording", e);
-            Toast.makeText(this, R.string.error_recording, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_recording), Toast.LENGTH_SHORT).show();
+            isRecording = false;
+            isPaused = false;
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            Log.d(TAG, "Screen orientation unlocked due to recording start failure.");
         }
     }
     
@@ -414,9 +421,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 recordingDuration += System.currentTimeMillis() - recordingStartTime;
                 stopTimer();
                 updateUiForPausedRecording();
-                Log.d(TAG, "Recording paused");
+                Log.d(TAG, "Recording paused (orientation remains locked).");
             } else {
                 // For devices that don't support pause/resume
+                // setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED); // Removed, stopRecording will handle it
                 stopRecording();
             }
         } catch (IllegalStateException e) {
@@ -432,6 +440,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mediaRecorder.resume();
                 isPaused = false;
                 recordingStartTime = System.currentTimeMillis();
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+                Log.d(TAG, "Screen orientation locked due to recording resume.");
                 startTimer();
                 updateUiForRecording(true);
                 Log.d(TAG, "Recording resumed");
@@ -455,6 +465,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             recordingDuration += System.currentTimeMillis() - recordingStartTime;
             
             updateUiForRecording(false);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            Log.d(TAG, "Screen orientation unlocked due to recording stop.");
             
             Log.d(TAG, "Recording stopped, duration: " + recordingDuration + "ms");
             
@@ -873,6 +885,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.e(TAG, "Error releasing MediaRecorder", e);
             }
         }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        Log.d(TAG, "Screen orientation unlocked in onDestroy.");
         if (macroExecutorService != null && !macroExecutorService.isShutdown()) {
             macroExecutorService.shutdown();
         }
