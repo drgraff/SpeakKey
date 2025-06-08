@@ -1,6 +1,7 @@
 package com.drgraff.speakkey.data;
 
 import androidx.room.Entity;
+import androidx.room.Ignore; // Added
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "upload_tasks")
@@ -46,6 +47,7 @@ public class UploadTask {
     }
 
     // Constructor for Audio Transcription
+    @Ignore // Added
     public UploadTask(String filePath, String uploadType, boolean isAudio) {
         this(filePath, uploadType); // Calls the main constructor
         if (!isAudio) {
@@ -55,6 +57,7 @@ public class UploadTask {
     }
 
     // Constructor for Photo Vision
+    @Ignore // Added
     public UploadTask(String filePath, String uploadType, String promptText, String modelName) {
         this(filePath, uploadType); // Calls the main constructor
         this.promptText = promptText;
