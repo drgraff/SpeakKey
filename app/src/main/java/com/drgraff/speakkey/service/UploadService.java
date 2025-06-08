@@ -36,6 +36,7 @@ import android.graphics.Bitmap; // Added
 import android.graphics.BitmapFactory; // Added
 import android.util.Base64; // Added
 
+public class UploadService extends IntentService {
     private static final String TAG = "UploadService";
     public static final String ACTION_UPLOAD = "com.drgraff.speakkey.service.action.UPLOAD";
     private static final int ONGOING_NOTIFICATION_ID = 1001;
