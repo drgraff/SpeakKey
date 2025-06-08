@@ -189,4 +189,9 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
     <string name="photos_btn_share_chatgpt_response_desc_text">Share response</string>
     <string name="photos_share_chooser_title_text">Share via</string>
 
+    <!-- MainActivity Share Buttons -->
+    <string name="main_btn_share_whisper_desc">Share Whisper text</string>
+    <string name="main_btn_share_chatgpt_desc">Share ChatGPT text</string>
+    <string name="main_share_chooser_title_text">Share content via</string>
+
 </resources>
