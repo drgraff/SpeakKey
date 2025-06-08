@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageButton btnClearChatGptIcon; // Added
     private Button btnSendInputStick;
     private Button btnSendWhisperToInputStick; // Added
+    private ImageButton btnShareWhisperText; // Added
+    private ImageButton btnShareChatGptText; // Added
     private EditText whisperText, chatGptText;
     private View recordingIndicator;
     private TextView recordingTime;
@@ -208,12 +210,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // btnClearRecording = findViewById(R.id.btn_clear_recording); // Removed
         btnClearAllWhisperIcon = findViewById(R.id.btn_clear_all_whisper_icon); // Added
         btnClearTranscriptionIcon = findViewById(R.id.btn_clear_transcription_icon); // Initialize new ImageButton
+        btnShareWhisperText = findViewById(R.id.btn_share_whisper_text); // Initialize Share Whisper Button
         chkAutoSendWhisper = findViewById(R.id.chk_auto_send_whisper);
         
         // ChatGPT section
         chatGptText = findViewById(R.id.chatgpt_text);
         btnSendChatGpt = findViewById(R.id.btn_send_chatgpt);
         btnClearChatGptIcon = findViewById(R.id.btn_clear_chatgpt_icon); // Initialize new ImageButton
+        btnShareChatGptText = findViewById(R.id.btn_share_chatgpt_text); // Initialize Share ChatGPT Button
         chkAutoSendToChatGpt = findViewById(R.id.chk_auto_send_to_chatgpt);
         
         // InputStick section
@@ -362,6 +366,53 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
         // The old btnClearAll listener is removed by not including it here.
+
+        if (btnShareWhisperText != null) {
+            btnShareWhisperText.setOnClickListener(v -> {
+                String textToShare = whisperText.getText().toString();
+                if (!textToShare.isEmpty() && !isPlaceholderOrError(textToShare)) {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, textToShare);
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.main_share_chooser_title_text)));
+                } else {
+                    Toast.makeText(MainActivity.this, "No valid content to share", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnShareChatGptText != null) {
+            btnShareChatGptText.setOnClickListener(v -> {
+                String textToShare = chatGptText.getText().toString();
+                if (!textToShare.isEmpty()) { // ChatGPT text is less likely to be a placeholder from the app
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT, textToShare);
+                    startActivity(Intent.createChooser(shareIntent, getString(R.string.main_share_chooser_title_text)));
+                } else {
+                    Toast.makeText(MainActivity.this, "No content to share", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private boolean isPlaceholderOrError(String text) {
+        if (text == null || text.isEmpty()) {
+            return true;
+        }
+        // Check against the specific placeholder string
+        if (TRANSCRIPTION_QUEUED_PLACEHOLDER.equals(text)) {
+            return true;
+        }
+        // Check for bracketed status messages like "[UPLOADING... Tap to refresh]"
+        if (text.startsWith("[") && text.endsWith("... Tap to refresh]")) {
+            return true;
+        }
+        // Check for common failure keywords
+        if (text.toLowerCase().contains("failed") || text.toLowerCase().contains("error")) {
+            return true;
+        }
+        return false;
     }
     
     private void requestPermissions() {
