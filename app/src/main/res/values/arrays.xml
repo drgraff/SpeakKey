@@ -35,4 +35,13 @@
         <item>ja</item>
         <item>zh</item>
     </string-array>
+
+    <string-array name="transcription_mode_entries">
+        <item>Whisper</item>
+        <item>ChatGPT Direct</item>
+    </string-array>
+    <string-array name="transcription_mode_values">
+        <item>whisper</item>
+        <item>chatgpt_direct</item>
+    </string-array>
 </resources>

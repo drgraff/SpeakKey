@@ -23,24 +23,76 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/prompts_recycler_view"
+    <LinearLayout
+        android:id="@+id/content_area_prompts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:padding="8dp"
-        android:clipToPadding="false"
-        tools:listitem="@layout/list_item_prompt"/>
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <TextView
-        android:id="@+id/empty_prompts_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/empty_prompts_text"
-        android:textSize="16sp"
-        android:visibility="gone"
-        android:layout_gravity="center"
-        tools:visibility="visible"/>
+        <!-- Model Selection Section -->
+        <LinearLayout
+            android:id="@+id/model_selection_layout_prompts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="?attr/colorSurface"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select ChatGPT model for prompt processing:"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_marginBottom="8dp"/>
+
+            <Spinner
+                android:id="@+id/spinner_chatgpt_models_prompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:minHeight="48dp"/>
+
+            <Button
+                android:id="@+id/btn_check_chatgpt_models_prompts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Check Models"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/prompts_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                tools:listitem="@layout/list_item_prompt"/>
+
+            <TextView
+                android:id="@+id/empty_prompts_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_prompts_text"
+                android:textSize="16sp"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                tools:visibility="visible"/>
+        </FrameLayout>
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_prompt"

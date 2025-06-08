@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View recordingIndicator;
     private TextView recordingTime;
     private TextView activePromptsDisplay; // ADD THIS
+    private View whisperSectionContainer; // Added
     private CheckBox chkAutoSendWhisper, chkAutoSendInputStick, chkAutoSendToChatGpt; // Added chkAutoSendToChatGpt
     private CheckBox chk_auto_send_whisper_to_inputstick; // Added
     private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Audio recording
     private MediaRecorder mediaRecorder;
     private String audioFilePath;
+    private String lastRecordedAudioPathForChatGPTDirect = null; // Added
     private boolean isRecording = false;
     private boolean isPaused = false;
     private long recordingStartTime = 0;
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         // Initialize settings
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper"); // Added
         
         // Apply the theme before setting content view
         ThemeManager.applyTheme(sharedPreferences);
@@ -164,6 +167,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Display active macros
         displayActiveMacros(); // Call after macroRepository is initialized
+        updateUiForTranscriptionMode(transcriptionMode); // Added
+    }
+
+    private void updateUiForTranscriptionMode(String mode) {
+        if (whisperSectionContainer == null) {
+            // This might happen if called before initializeUiElements or if ID is wrong.
+            Log.e(TAG, "whisperSectionContainer is null in updateUiForTranscriptionMode. UI update skipped.");
+            return;
+        }
+        if ("chatgpt_direct".equals(mode)) {
+            whisperSectionContainer.setVisibility(View.GONE);
+            // Adjust hint for chatGptText if needed, e.g.,
+            // chatGptText.setHint("ChatGPT Direct Transcription/Response");
+
+            // Update activePromptsDisplay for "Direct Transcription" if no prompts are active
+            // This part of the logic will also be handled/refined in updateActivePromptsDisplay()
+            // For now, ensure that updateActivePromptsDisplay() is aware of the mode or is called after this.
+            if (promptManager != null) { // promptManager should be initialized
+                List<Prompt> activePrompts = promptManager.getPrompts().stream()
+                                                 .filter(Prompt::isActive)
+                                                 .collect(Collectors.toList());
+                if (activePrompts.isEmpty() && activePromptsDisplay != null) {
+                    activePromptsDisplay.setText("Direct Transcription");
+                    activePromptsDisplay.setVisibility(View.VISIBLE); // Ensure it's visible
+                } else if (activePromptsDisplay != null) {
+                    // If there are active prompts, updateActivePromptsDisplay will handle showing them.
+                    // Call it to refresh, as it contains the full logic.
+                    updateActivePromptsDisplay();
+                }
+            }
+
+        } else { // "whisper" mode (default)
+            whisperSectionContainer.setVisibility(View.VISIBLE);
+            // chatGptText.setHint("ChatGPT Response"); // Reset hint if changed
+
+            // Ensure activePromptsDisplay is updated by its dedicated method
+            updateActivePromptsDisplay();
+        }
     }
 
     @Override
@@ -242,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false)); // Moved down
         // chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Moved down
         btnRefreshStatus = findViewById(R.id.btn_refresh_status); // Initialize refresh button
+        whisperSectionContainer = findViewById(R.id.whisper_section_container); // Added
 
         setupClickListeners(); // Moved to after all findViewById calls
         
@@ -530,9 +572,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.d(TAG, "Screen orientation unlocked due to recording stop.");
             
             Log.d(TAG, "Recording stopped, duration: " + recordingDuration + "ms");
-            
-            if (chkAutoSendWhisper.isChecked()) {
-                transcribeAudio();
+
+            String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
+            if (transcriptionMode.equals("chatgpt_direct")) {
+                lastRecordedAudioPathForChatGPTDirect = audioFilePath;
+                if (chkAutoSendToChatGpt.isChecked()) { // Using chkAutoSendToChatGpt as the equivalent
+                    transcribeAudioWithChatGpt();
+                }
+            } else { // "whisper" mode
+                if (chkAutoSendWhisper.isChecked()) {
+                    transcribeAudio();
+                }
             }
         } catch (IllegalStateException e) {
             Log.e(TAG, "Error stopping recording", e);
@@ -702,6 +752,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             audioFile.delete();
         }
         recordingDuration = 0;
+        lastRecordedAudioPathForChatGPTDirect = null; // Added
         Toast.makeText(this, "Recording cleared", Toast.LENGTH_SHORT).show();
     }
     
@@ -710,10 +761,124 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         clearRecording();
     }
     
+    private void transcribeAudioWithChatGpt() {
+        File audioFile = new File(audioFilePath); // or lastRecordedAudioPathForChatGPTDirect if audioFilePath is cleared early
+        if (lastRecordedAudioPathForChatGPTDirect != null) { // Prefer specific path if available
+            audioFile = new File(lastRecordedAudioPathForChatGPTDirect);
+        }
+
+        if (!audioFile.exists() || audioFile.length() == 0) {
+            Toast.makeText(this, "No recording available for ChatGPT transcription", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String apiKey = sharedPreferences.getString("openai_api_key", "");
+        if (apiKey.isEmpty()) {
+            Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Prepare prompts
+        List<Prompt> activePrompts = promptManager.getPrompts().stream()
+                                           .filter(Prompt::isActive)
+                                           .collect(Collectors.toList());
+        String promptText = activePrompts.stream()
+                                   .map(Prompt::getText)
+                                   .collect(Collectors.joining("\n\n"));
+        if (activePrompts.isEmpty()) {
+            promptText = "Transcribe the following audio."; // Default prompt if none are active
+        }
+
+        String model = sharedPreferences.getString("chatgpt_model", "gpt-4-turbo"); // Or a specific model for audio
+
+        // Show placeholder in UI
+        mainHandler.post(() -> {
+            chatGptText.setText("[Sending audio to ChatGPT for transcription...]");
+        });
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": Sending audio to ChatGPT for transcription.", "File: " + audioFile.getAbsolutePath());
+
+
+        // Background task for API call
+        // This will be fully implemented when ChatGptApi.java is updated.
+        // For now, it's a placeholder.
+        new Thread(() -> {
+            // Ensure using the correct path, which is lastRecordedAudioPathForChatGPTDirect
+            File currentAudioFile = new File(lastRecordedAudioPathForChatGPTDirect);
+            if (!currentAudioFile.exists() || currentAudioFile.length() == 0) {
+                mainHandler.post(() -> {
+                    Toast.makeText(MainActivity.this, "Audio file is missing or empty.", Toast.LENGTH_SHORT).show();
+                    chatGptText.setText("Audio file missing."); // Update UI to reflect this
+                });
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": Audio file missing or empty for transcription.", "Path: " + lastRecordedAudioPathForChatGPTDirect);
+                return; // Exit if no valid audio file
+            }
+
+            // Re-fetch active prompts within the thread, as they might change.
+            List<Prompt> currentActivePrompts = promptManager.getPrompts().stream()
+                                                   .filter(Prompt::isActive)
+                                                   .collect(Collectors.toList());
+            String currentPromptText = currentActivePrompts.stream()
+                                           .map(Prompt::getText)
+                                           .collect(Collectors.joining("\n\n"));
+            if (currentActivePrompts.isEmpty()) {
+                // For Whisper API, an empty prompt is fine and often preferred.
+                currentPromptText = "";
+            }
+
+            // Use "whisper-1" for transcriptions via /v1/audio/transcriptions
+            String transcriptionModel = "whisper-1";
+
+            try {
+                Log.d(TAG, "Calling getTranscriptionFromAudio with model: " + transcriptionModel + ", prompt length: " + currentPromptText.length());
+                final String transcriptionResult = chatGptApi.getTranscriptionFromAudio(currentAudioFile, currentPromptText, transcriptionModel);
+                AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": ChatGPT transcription received.", "Length: " + transcriptionResult.length());
+
+                mainHandler.post(() -> {
+                    chatGptText.setText(transcriptionResult);
+                    Toast.makeText(MainActivity.this, "ChatGPT transcription received", Toast.LENGTH_SHORT).show();
+                    if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
+                        sendToInputStick();
+                    }
+                });
+            } catch (IOException e) { // Catch IOException specifically
+                Log.e(TAG, "IOException in transcribeAudioWithChatGpt", e);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": IOException in transcribeAudioWithChatGpt.", e.getMessage());
+                mainHandler.post(() -> {
+                    chatGptText.setText("Error: " + e.getMessage());
+                    Toast.makeText(MainActivity.this, "API Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            } catch (Exception e) { // Catch any other unexpected exceptions
+                Log.e(TAG, "Unexpected error in transcribeAudioWithChatGpt", e);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": Unexpected error in transcribeAudioWithChatGpt.", e.toString());
+                mainHandler.post(() -> {
+                    chatGptText.setText("Unexpected error during transcription.");
+                    Toast.makeText(MainActivity.this, "Unexpected error during transcription.", Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
     private void sendToChatGpt() {
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
+
+        if (transcriptionMode.equals("chatgpt_direct")) {
+            if (lastRecordedAudioPathForChatGPTDirect != null && new File(lastRecordedAudioPathForChatGPTDirect).exists()) {
+                transcribeAudioWithChatGpt();
+                return; // Exit here to prevent text-based sending
+            } else {
+                // If btnSendChatGpt is clicked in direct mode but no audio recorded yet for this session
+                Toast.makeText(this, "Please record audio first for direct transcription.", Toast.LENGTH_LONG).show();
+                // Optionally, if whisperText has some old content, you might allow sending that.
+                // But for a clean "direct" mode, requiring fresh audio makes sense.
+                // If you want to allow sending existing whisperText content, remove the return and the else.
+                return;
+            }
+        }
+
+        // Existing logic for "whisper" mode (or if direct mode had no audio and didn't return)
         String transcript = whisperText.getText().toString().trim();
-        if (transcript.isEmpty()) {
-            Toast.makeText(this, "No transcription to send", Toast.LENGTH_SHORT).show();
+        if (transcript.isEmpty() || isPlaceholderOrError(transcript)) { // Also check for placeholder
+            Toast.makeText(this, "No valid transcription to send to ChatGPT", Toast.LENGTH_SHORT).show();
             return;
         }
         
@@ -849,35 +1014,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Refresh active macros
         displayActiveMacros();
-        updateActivePromptsDisplay(); // ADD THIS
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper"); // Added
+        updateUiForTranscriptionMode(transcriptionMode); // Added
+        updateActivePromptsDisplay(); // Ensure this is called AFTER updateUiForTranscriptionMode
         refreshTranscriptionStatus(false); // false because it's an automatic refresh onResume
     }
 
     private void updateActivePromptsDisplay() {
-        if (promptManager == null) { // Should be initialized in onCreate
+        if (promptManager == null) {
             promptManager = new PromptManager(this);
         }
-        List<Prompt> allPrompts = promptManager.getPrompts();
-        StringBuilder activePromptsText = new StringBuilder();
-        boolean hasActivePrompts = false;
-
-        for (Prompt prompt : allPrompts) {
-            if (prompt.isActive()) {
-                if (hasActivePrompts) {
-                    activePromptsText.append("\n"); // Newline separator
-                }
-                activePromptsText.append(prompt.getLabel());
-                hasActivePrompts = true;
-            }
+        if (activePromptsDisplay == null) { // Check if initialized
+            Log.w(TAG, "activePromptsDisplay is null in updateActivePromptsDisplay.");
+            return;
         }
 
-        if (activePromptsDisplay != null) { // Check if initialized
-            if (hasActivePrompts) {
-                activePromptsDisplay.setText(activePromptsText.toString());
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
+        List<Prompt> allPrompts = promptManager.getPrompts();
+        List<Prompt> activeSystemPrompts = allPrompts.stream()
+                                             .filter(Prompt::isActive)
+                                             .collect(Collectors.toList());
+
+        if ("chatgpt_direct".equals(transcriptionMode)) {
+            if (activeSystemPrompts.isEmpty()) {
+                activePromptsDisplay.setText("Direct Transcription");
                 activePromptsDisplay.setVisibility(View.VISIBLE);
             } else {
+                // Show actual active prompts
+                String promptsText = activeSystemPrompts.stream()
+                                        .map(Prompt::getLabel)
+                                        .collect(Collectors.joining("\n"));
+                activePromptsDisplay.setText(promptsText);
+                activePromptsDisplay.setVisibility(View.VISIBLE);
+            }
+        } else { // Whisper mode
+            if (activeSystemPrompts.isEmpty()) {
                 activePromptsDisplay.setText(""); // Or "No active prompts"
                 activePromptsDisplay.setVisibility(View.GONE);
+            } else {
+                String promptsText = activeSystemPrompts.stream()
+                                        .map(Prompt::getLabel)
+                                        .collect(Collectors.joining("\n"));
+                activePromptsDisplay.setText(promptsText);
+                activePromptsDisplay.setVisibility(View.VISIBLE);
             }
         }
     }

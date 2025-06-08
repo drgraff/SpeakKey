@@ -236,6 +236,27 @@ public class SettingsActivity extends AppCompatActivity {
             if (chatGptModelPreference.getEntry() != null) {
                 chatGptModelPreference.setSummary(chatGptModelPreference.getEntry());
             }
+
+            ListPreference transcriptionModePreference = findPreference("transcription_mode");
+            if (transcriptionModePreference != null) {
+                if (transcriptionModePreference.getEntry() != null) {
+                    transcriptionModePreference.setSummary(transcriptionModePreference.getEntry());
+                } else {
+                    // If entry is null (e.g. if value was set programmatically to something not in entryValues)
+                    // you might want to set a default summary or try to find value and set summary accordingly.
+                    // For now, relying on getEntry() is fine as per existing pattern for chatgpt_model.
+                    CharSequence value = transcriptionModePreference.getValue();
+                    int index = transcriptionModePreference.findIndexOfValue(value != null ? value.toString() : "");
+                    if (index >= 0) {
+                        transcriptionModePreference.setSummary(transcriptionModePreference.getEntries()[index]);
+                    } else {
+                         // If the value is not found, you could set a generic summary or the default.
+                         // For simplicity, let's assume the value will be one of the defined ones.
+                         // If using a default value from XML, getEntry() should ideally not be null.
+                        transcriptionModePreference.setSummary("Select transcription service");
+                    }
+                }
+            }
         }
         
         @Override
@@ -260,6 +281,14 @@ public class SettingsActivity extends AppCompatActivity {
                 Preference modelPref = findPreference(key);
                 if (modelPref instanceof ListPreference) {
                     ListPreference listPref = (ListPreference) modelPref;
+                    if (listPref.getEntry() != null) {
+                        listPref.setSummary(listPref.getEntry());
+                    }
+                }
+            } else if (key.equals("transcription_mode")) {
+                Preference pref = findPreference(key);
+                if (pref instanceof ListPreference) {
+                    ListPreference listPref = (ListPreference) pref;
                     if (listPref.getEntry() != null) {
                         listPref.setSummary(listPref.getEntry());
                     }
