@@ -388,10 +388,12 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         );
 
         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        final String finalConcatenatedPromptText = concatenatedPromptText; // Create final copy
         Executors.newSingleThreadExecutor().execute(() -> {
             database.uploadTaskDao().insert(uploadTask);
             Log.d(TAG, "New Photo Vision UploadTask inserted with ID: " + uploadTask.id + " for file: " + currentPhotoPath);
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": Photo processing task queued in DB.", "File: " + currentPhotoPath + ", Prompt: " + concatenatedPromptText.substring(0, Math.min(concatenatedPromptText.length(), 50)) + "...");
+            // Use finalConcatenatedPromptText in the lambda
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": Photo processing task queued in DB.", "File: " + currentPhotoPath + ", Prompt: " + finalConcatenatedPromptText.substring(0, Math.min(finalConcatenatedPromptText.length(), 50)) + "...");
 
             UploadService.startUploadService(PhotosActivity.this);
         });
