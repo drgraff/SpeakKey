@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Button btnSendWhisper; // Removed btnClearTranscription, Removed btnClearRecording
     private ImageButton btnClearTranscriptionIcon; // Added
     private ImageButton btnClearAllWhisperIcon; // Added to replace btnClearAll
-    private Button btnRefreshStatus; // Added for manual refresh
+    // private Button btnRefreshStatus; // Removed
     private Button btnSendChatGpt; // Removed btnClearChatGpt
     private ImageButton btnClearChatGptIcon; // Added
     private Button btnSendInputStick;
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false)); // Moved down
         // chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false)); // Moved down
         // chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Moved down
-        btnRefreshStatus = findViewById(R.id.btn_refresh_status); // Initialize refresh button
+        // btnRefreshStatus = findViewById(R.id.btn_refresh_status); // Removed
         whisperSectionContainer = findViewById(R.id.whisper_section_container); // Added
 
         setupClickListeners(); // Moved to after all findViewById calls
@@ -362,9 +362,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             btnClearTranscriptionIcon.setOnClickListener(v -> clearTranscription());
         }
 
-        if (btnRefreshStatus != null) {
-            btnRefreshStatus.setOnClickListener(v -> refreshTranscriptionStatus(true)); // true for user initiated
-        }
+        // if (btnRefreshStatus != null) { // Removed
+        //     btnRefreshStatus.setOnClickListener(v -> refreshTranscriptionStatus(true)); // true for user initiated
+        // }
         
         btnSendChatGpt.setOnClickListener(v -> sendToChatGpt());
         // btnClearChatGpt.setOnClickListener(v -> clearChatGptResponse()); // Removed old listener
