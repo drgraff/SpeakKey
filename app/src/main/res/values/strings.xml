@@ -52,6 +52,7 @@
     
     <!-- Errors -->
     <string name="error_no_api_key">Please set your OpenAI API key in Settings</string>
+    <string name="api_key_not_set_short">API Key Not Set</string> <!-- Added -->
     <string name="error_recording">Error while recording audio</string>
     <string name="error_transcribing">Error transcribing audio</string>
     <string name="error_chatgpt">Error getting response from ChatGPT</string>
