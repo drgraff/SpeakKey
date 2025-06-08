@@ -3,6 +3,9 @@ package com.drgraff.speakkey.api;
 import android.util.Log;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -53,6 +56,9 @@ public class ChatGptApi {
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -79,8 +85,15 @@ public class ChatGptApi {
                 String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
                 throw new Exception("Error getting completion: " + response.code() + " " + response.message() + " - " + errorBody);
             }
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG, "getCompletion failed due to socket timeout: " + e.getMessage(), e);
+            throw new SocketTimeoutException("getCompletion socket timeout: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "getCompletion failed due to unknown host: " + e.getMessage(), e);
+            throw new UnknownHostException("getCompletion unknown host: " + e.getMessage());
         } catch (IOException e) {
-            throw new Exception("Error getting completion due to network issue: " + e.getMessage(), e);
+            Log.e(TAG, "getCompletion failed due to network issue: " + e.getMessage(), e);
+            throw new IOException("Error getting completion due to network issue: " + e.getMessage(), e);
         }
     }
 
@@ -109,6 +122,9 @@ public class ChatGptApi {
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -135,8 +151,15 @@ public class ChatGptApi {
                 String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
                 throw new Exception("Error getting vision completion: " + response.code() + " " + response.message() + " - " + errorBody);
             }
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG, "getVisionCompletion failed due to socket timeout: " + e.getMessage(), e);
+            throw new SocketTimeoutException("getVisionCompletion socket timeout: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "getVisionCompletion failed due to unknown host: " + e.getMessage(), e);
+            throw new UnknownHostException("getVisionCompletion unknown host: " + e.getMessage());
         } catch (IOException e) {
-            throw new Exception("Error getting vision completion due to network issue: " + e.getMessage(), e);
+            Log.e(TAG, "getVisionCompletion failed due to network issue: " + e.getMessage(), e);
+            throw new IOException("Error getting vision completion due to network issue: " + e.getMessage(), e);
         }
     }
 
@@ -151,6 +174,9 @@ public class ChatGptApi {
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -173,9 +199,15 @@ public class ChatGptApi {
                 Log.e(TAG, "Error listing models: " + response.code() + " " + response.message() + " - " + errorBody);
                 throw new Exception("Error listing models: " + response.code() + " " + response.message() + " - " + errorBody);
             }
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG, "listModels failed due to socket timeout: " + e.getMessage(), e);
+            throw new SocketTimeoutException("listModels socket timeout: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "listModels failed due to unknown host: " + e.getMessage(), e);
+            throw new UnknownHostException("listModels unknown host: " + e.getMessage());
         } catch (IOException e) {
-            Log.e(TAG, "Error listing models due to network issue: " + e.getMessage(), e);
-            throw new Exception("Error listing models due to network issue: " + e.getMessage(), e);
+            Log.e(TAG, "listModels failed due to network issue: " + e.getMessage(), e);
+            throw new IOException("Error listing models due to network issue: " + e.getMessage(), e);
         }
     }
 }

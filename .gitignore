@@ -12,6 +12,10 @@
 *.aab
 *.dex
 *.class
+
+# Room Schema
+/app/schemas/
+
 /app/build/# Build artifacts
 .gradle/
 app/build/

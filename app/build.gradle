@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -53,7 +54,13 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-    
+
+    // Room persistence library
+    def room_version = "2.5.0" // Check for the latest version
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version" // Kotlin Extensions and Coroutines support for Room
+
     // Audio recording
     implementation 'androidx.media:media:1.6.0'
 
@@ -66,6 +73,7 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.9.2' 
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9' // Added PowerMock
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9' // Added PowerMock API for Mockito
+    testImplementation "androidx.room:room-testing:$room_version" // Room Test helpers
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
