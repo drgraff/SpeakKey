@@ -37,8 +37,11 @@ import com.google.android.material.button.MaterialButton; // Added for Macro but
 
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.WhisperApi;
+import com.drgraff.speakkey.data.AppDatabase; // Added for UploadTask
 import com.drgraff.speakkey.data.Prompt;
 import com.drgraff.speakkey.data.PromptManager;
+import com.drgraff.speakkey.data.UploadTask; // Added for UploadTask
+import com.drgraff.speakkey.service.UploadService; // Added for UploadService
 import com.speakkey.data.Macro; // Added for Macro buttons
 import com.speakkey.data.MacroRepository; // Added for Macro buttons
 import com.speakkey.service.MacroExecutor; // Added for Macro Execution
@@ -67,6 +70,7 @@ import android.text.TextUtils; // Added for ellipsize
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FullScreenEditTextDialogFragment.OnSaveListener {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    public static final String TRANSCRIPTION_QUEUED_PLACEHOLDER = "[Transcription queued... Tap to refresh]"; // Added
 
     // UI elements
     private DrawerLayout drawerLayout;
@@ -74,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Button btnSendWhisper; // Removed btnClearTranscription, Removed btnClearRecording
     private ImageButton btnClearTranscriptionIcon; // Added
     private ImageButton btnClearAllWhisperIcon; // Added to replace btnClearAll
+    private Button btnRefreshStatus; // Added for manual refresh
     private Button btnSendChatGpt; // Removed btnClearChatGpt
     private ImageButton btnClearChatGptIcon; // Added
     private Button btnSendInputStick;
@@ -232,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // chkAutoSendInputStick.setChecked(sharedPreferences.getBoolean("auto_send_inputstick", false)); // Moved down
         // chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false)); // Moved down
         // chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Moved down
+        btnRefreshStatus = findViewById(R.id.btn_refresh_status); // Initialize refresh button
 
         setupClickListeners(); // Moved to after all findViewById calls
         
@@ -308,6 +314,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (btnClearTranscriptionIcon != null) {
             btnClearTranscriptionIcon.setOnClickListener(v -> clearTranscription());
+        }
+
+        if (btnRefreshStatus != null) {
+            btnRefreshStatus.setOnClickListener(v -> refreshTranscriptionStatus(true)); // true for user initiated
         }
         
         btnSendChatGpt.setOnClickListener(v -> sendToChatGpt());
@@ -547,53 +557,92 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
         
-        Toast.makeText(this, "Transcribing audio...", Toast.LENGTH_SHORT).show();
-        AppLogManager.getInstance().addEntry("INFO", "Whisper: Starting transcription...", null);
-        
-        // Perform transcription in background
-        new Thread(() -> {
-            try {
-                String transcription = whisperApi.transcribe(audioFile);
-                AppLogManager.getInstance().addEntry("SUCCESS", "Whisper: Transcription successful", "Length: " + transcription.length());
-                mainHandler.post(() -> {
-                    whisperText.setText(transcription);
-                    Toast.makeText(MainActivity.this, "Transcription complete", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Queueing transcription...", Toast.LENGTH_SHORT).show(); // Changed message
+        AppLogManager.getInstance().addEntry("INFO", "Whisper: Queuing transcription task...", null);
 
-                    // Existing auto-send to ChatGPT logic (should remain)
-                    if (chkAutoSendToChatGpt.isChecked()) {
-                        AppLogManager.getInstance().addEntry("INFO", "Auto-sending transcript to ChatGPT...", null);
-                        sendToChatGpt(); 
+        // Create UploadTask
+        UploadTask uploadTask = new UploadTask(audioFilePath, UploadTask.TYPE_AUDIO_TRANSCRIPTION);
+        // All other fields (status, retryCount, creationTimestamp) are set in the constructor
+
+        // Get DAO and insert in background
+        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        // Using a simple executor for this one-off DB operation.
+        // Consider a shared executor if this pattern becomes common.
+        Executors.newSingleThreadExecutor().execute(() -> {
+            database.uploadTaskDao().insert(uploadTask);
+            Log.d(TAG, "New UploadTask inserted with ID: " + uploadTask.id); // ID will be auto-generated
+            AppLogManager.getInstance().addEntry("INFO", "Whisper: Transcription task queued in DB.", "File: " + audioFilePath);
+
+            // Start the service to process the queue
+            // It's okay to call this multiple times; IntentService handles sequential execution.
+            UploadService.startUploadService(MainActivity.this);
+        });
+
+        // Update UI (e.g., clear previous transcription or show "queued" status)
+        mainHandler.post(() -> {
+            whisperText.setText(TRANSCRIPTION_QUEUED_PLACEHOLDER); // Update placeholder text
+            // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
+            // That logic will move to when the task is actually completed by the service.
+        });
+    }
+
+    private void refreshTranscriptionStatus(boolean userInitiated) {
+        if (audioFilePath == null || audioFilePath.isEmpty()) {
+            if (userInitiated) Toast.makeText(this, "No active recording session to check.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        Executors.newSingleThreadExecutor().execute(() -> {
+            // We are interested in the task for the current audioFilePath, ordered by creation time descending to get the latest.
+            // This assumes audioFilePath is unique per recording session before it's transcribed or discarded.
+            // If multiple tasks could exist for the same file path, more specific logic might be needed.
+            List<UploadTask> tasks = database.uploadTaskDao().getTasksByFilePath(audioFilePath); // Assumes getTasksByFilePath method exists
+
+            mainHandler.post(() -> {
+                if (tasks != null && !tasks.isEmpty()) {
+                    UploadTask latestTaskForFile = null;
+                    // Find the most recent task for this file path
+                    for(UploadTask task : tasks) {
+                        if (task.filePath.equals(audioFilePath)) {
+                            if (latestTaskForFile == null || task.creationTimestamp > latestTaskForFile.creationTimestamp) {
+                                latestTaskForFile = task;
+                            }
+                        }
                     }
 
-                    // New: Auto-send Whisper text directly to InputStick
-                    if (chk_auto_send_whisper_to_inputstick.isChecked()) { // Use the new CheckBox ID
-                        AppLogManager.getInstance().addEntry("INFO", "Auto-sending Whisper transcript directly to InputStick...", null);
-                        sendWhisperToInputStick(); // This is the method created in the previous task
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Error transcribing audio", e);
-                AppLogManager.getInstance().addEntry("ERROR", "Whisper: Transcription failed", e.toString());
-                mainHandler.post(() -> {
-                    // Show a more specific toast
-                    String detailedErrorMessage = getString(R.string.error_transcribing);
-                    if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-                        // Append only the first part of the message if it's too long or has newlines.
-                        // Let's take up to the first newline or a certain character limit.
-                        String userFriendlyMessage = e.getMessage();
-                        int newlineIndex = userFriendlyMessage.indexOf('\n');
-                        if (newlineIndex != -1) {
-                            userFriendlyMessage = userFriendlyMessage.substring(0, newlineIndex);
+                    if (latestTaskForFile != null) {
+                        Log.d(TAG, "Refresh found task ID " + latestTaskForFile.id + " with status: " + latestTaskForFile.status + " for path: " + audioFilePath);
+                        if (UploadTask.STATUS_SUCCESS.equals(latestTaskForFile.status)) {
+                            whisperText.setText(latestTaskForFile.transcriptionResult);
+                            Toast.makeText(MainActivity.this, "Transcription loaded.", Toast.LENGTH_SHORT).show();
+                            // Potentially trigger auto-send actions if they were pending on this result
+                            if (chkAutoSendToChatGpt.isChecked()) {
+                                AppLogManager.getInstance().addEntry("INFO", "Auto-sending refreshed transcript to ChatGPT...", null);
+                                sendToChatGpt();
+                            }
+                            if (chk_auto_send_whisper_to_inputstick.isChecked()) {
+                                AppLogManager.getInstance().addEntry("INFO", "Auto-sending refreshed Whisper transcript to InputStick...", null);
+                                sendWhisperToInputStick();
+                            }
+                        } else if (UploadTask.STATUS_FAILED.equals(latestTaskForFile.status)) {
+                            String errorMsg = "Transcription failed: " + latestTaskForFile.errorMessage;
+                            whisperText.setText(errorMsg);
+                            Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        } else if (UploadTask.STATUS_PENDING.equals(latestTaskForFile.status) || UploadTask.STATUS_UPLOADING.equals(latestTaskForFile.status)) {
+                            whisperText.setText("[" + latestTaskForFile.status + "... Tap to refresh]");
+                            if (userInitiated) Toast.makeText(MainActivity.this, "Transcription is " + latestTaskForFile.status.toLowerCase() + ".", Toast.LENGTH_SHORT).show();
+                        } else {
+                             if (userInitiated) Toast.makeText(MainActivity.this, "Task status: " + latestTaskForFile.status, Toast.LENGTH_SHORT).show();
                         }
-                        if (userFriendlyMessage.length() > 150) { // Arbitrary limit for toast length
-                            userFriendlyMessage = userFriendlyMessage.substring(0, 147) + "...";
-                        }
-                        detailedErrorMessage += ": " + userFriendlyMessage;
+                    } else {
+                        if (userInitiated) Toast.makeText(MainActivity.this, "No transcription task found for the last recording.", Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(MainActivity.this, detailedErrorMessage, Toast.LENGTH_LONG).show(); // Use LENGTH_LONG
-                });
-            }
-        }).start();
+                } else {
+                    if (userInitiated) Toast.makeText(MainActivity.this, "No transcription tasks found in queue for this file.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
     }
     
     private void clearRecording() {
@@ -750,6 +799,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Refresh active macros
         displayActiveMacros();
         updateActivePromptsDisplay(); // ADD THIS
+        refreshTranscriptionStatus(false); // false because it's an automatic refresh onResume
     }
 
     private void updateActivePromptsDisplay() {

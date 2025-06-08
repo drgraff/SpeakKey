@@ -49,9 +49,12 @@ import java.util.stream.Collectors;
 
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.ChatGptRequest;
+import com.drgraff.speakkey.data.AppDatabase; // Added for UploadTask
 import com.drgraff.speakkey.data.PhotoPrompt;
 import com.drgraff.speakkey.data.PhotoPromptManager;
+import com.drgraff.speakkey.data.UploadTask; // Added for UploadTask
 import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
+import com.drgraff.speakkey.service.UploadService; // Added for UploadService
 import com.drgraff.speakkey.inputstick.InputStickManager;
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // Added
@@ -64,6 +67,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     private static final String KEY_PHOTO_PATH = "currentPhotoPath";
     private static final String PREF_AUTO_SEND_CHATGPT_PHOTO = "auto_send_chatgpt_photo_enabled";
     private static final String PREF_AUTO_SEND_INPUTSTICK_PHOTO = "auto_send_inputstick_photo_enabled";
+    public static final String PHOTO_PROCESSING_QUEUED_PLACEHOLDER = "[Photo processing queued... Tap to refresh]"; // Added
 
     private ImageView imageViewPhoto;
     private ImageButton btnTakePhotoArea; // Changed from Button to ImageButton
@@ -213,6 +217,64 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     protected void onResume() {
         super.onResume();
         updateActivePhotoPromptsDisplay();
+        refreshPhotoProcessingStatus(false); // Add this call
+    }
+
+    private void refreshPhotoProcessingStatus(boolean userInitiated) {
+        if (currentPhotoPath == null || currentPhotoPath.isEmpty()) {
+            if (userInitiated) Toast.makeText(this, "No active photo to check status for.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        // Assuming currentPhotoPath is the key to find the relevant task.
+        // We might need a more robust way if multiple tasks can be associated with the same photo path over time.
+        // For now, getting the latest task for this path.
+        Executors.newSingleThreadExecutor().execute(() -> {
+            List<UploadTask> tasks = database.uploadTaskDao().getTasksByFilePath(currentPhotoPath);
+
+            mainHandler.post(() -> {
+                if (tasks != null && !tasks.isEmpty()) {
+                    UploadTask latestTaskForFile = null;
+                    // Find the most recent task for this file path
+                    for(UploadTask task : tasks) {
+                        if (task.filePath.equals(currentPhotoPath) && UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType)) {
+                            if (latestTaskForFile == null || task.creationTimestamp > latestTaskForFile.creationTimestamp) {
+                                latestTaskForFile = task;
+                            }
+                        }
+                    }
+
+                    if (latestTaskForFile != null) {
+                        Log.d(TAG, "Refresh found photo task ID " + latestTaskForFile.id + " with status: " + latestTaskForFile.status + " for path: " + currentPhotoPath);
+                        if (UploadTask.STATUS_SUCCESS.equals(latestTaskForFile.status)) {
+                            editTextChatGptResponsePhoto.setText(latestTaskForFile.visionApiResponse);
+                            Toast.makeText(PhotosActivity.this, "Photo processing complete.", Toast.LENGTH_SHORT).show();
+                            if (chkAutoSendInputStickPhoto.isChecked()) { // Check if auto-send to InputStick is enabled
+                                sendTextToInputStick();
+                            }
+                        } else if (UploadTask.STATUS_FAILED.equals(latestTaskForFile.status)) {
+                            String errorMsg = "Photo processing failed: " + latestTaskForFile.errorMessage;
+                            editTextChatGptResponsePhoto.setText(errorMsg);
+                            Toast.makeText(PhotosActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        } else if (UploadTask.STATUS_PENDING.equals(latestTaskForFile.status) || UploadTask.STATUS_UPLOADING.equals(latestTaskForFile.status)) {
+                            editTextChatGptResponsePhoto.setText("[" + latestTaskForFile.status + "... Tap to refresh]");
+                            if (userInitiated) Toast.makeText(PhotosActivity.this, "Photo processing is " + latestTaskForFile.status.toLowerCase() + ".", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (userInitiated) Toast.makeText(PhotosActivity.this, "Task status: " + latestTaskForFile.status, Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                         if (userInitiated && !editTextChatGptResponsePhoto.getText().toString().startsWith("[")) { // Only show if not already showing a status
+                            Toast.makeText(PhotosActivity.this, "No processing task found for the current photo.", Toast.LENGTH_SHORT).show();
+                         }
+                    }
+                } else {
+                     if (userInitiated && !editTextChatGptResponsePhoto.getText().toString().startsWith("[")) {
+                        Toast.makeText(PhotosActivity.this, "No processing tasks found in queue for this photo.", Toast.LENGTH_SHORT).show();
+                     }
+                }
+            });
+        });
     }
 
     private String encodeImageToBase64(String imagePath) {
@@ -271,35 +333,29 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         // chatGptApi is initialized in onCreate with the API key.
         // If key changes, activity would typically be recreated or API re-initialized on resume if critical.
 
-        List<ChatGptRequest.ContentPart> contentParts = new ArrayList<>();
-        contentParts.add(new ChatGptRequest.TextContentPart(concatenatedPromptText));
-        contentParts.add(new ChatGptRequest.ImageContentPart(dataUri));
+        // The base64 encoding and data URI creation are now done in UploadService.
+        // We just need to pass the file path and other parameters.
 
-        progressDialog.show();
-        editTextChatGptResponsePhoto.setText(""); // Clear previous response
+        // progressDialog.show(); // No longer show progress here, service handles it.
+        editTextChatGptResponsePhoto.setText(PHOTO_PROCESSING_QUEUED_PLACEHOLDER);
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": Queuing photo processing task.", "File: " + currentPhotoPath);
 
-        executorService.execute(() -> {
-            try {
-                // Max tokens can be adjusted, e.g., 1024 or 2048 for more detailed descriptions
-                String responseText = chatGptApi.getVisionCompletion(contentParts, selectedPhotoModel, 1024);
-                mainHandler.post(() -> {
-                    if (progressDialog.isShowing()) progressDialog.dismiss();
-                    editTextChatGptResponsePhoto.setText(responseText);
-                    Toast.makeText(PhotosActivity.this, getString(R.string.photos_toast_response_received_text), Toast.LENGTH_SHORT).show();
-                    if (chkAutoSendInputStickPhoto.isChecked()) {
-                        sendTextToInputStick();
-                    }
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Error sending to ChatGPT Vision API", e);
-                mainHandler.post(() -> {
-                    if (progressDialog.isShowing()) progressDialog.dismiss();
-                    String errorMessage = String.format(getString(R.string.photos_toast_error_format), e.getMessage());
-                    editTextChatGptResponsePhoto.setText(errorMessage);
-                    Toast.makeText(PhotosActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-                });
-            }
+        UploadTask uploadTask = new UploadTask(
+                currentPhotoPath,
+                UploadTask.TYPE_PHOTO_VISION,
+                concatenatedPromptText, // Storing the full prompt text
+                selectedPhotoModel      // Storing the model name
+        );
+
+        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        Executors.newSingleThreadExecutor().execute(() -> {
+            database.uploadTaskDao().insert(uploadTask);
+            Log.d(TAG, "New Photo Vision UploadTask inserted with ID: " + uploadTask.id + " for file: " + currentPhotoPath);
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": Photo processing task queued in DB.", "File: " + currentPhotoPath + ", Prompt: " + concatenatedPromptText.substring(0, Math.min(concatenatedPromptText.length(), 50)) + "...");
+
+            UploadService.startUploadService(PhotosActivity.this);
         });
+        // Do NOT automatically call sendTextToInputStick here. This will be handled when the task completes.
     }
 
 

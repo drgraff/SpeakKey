@@ -10,6 +10,10 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
+import java.util.concurrent.TimeUnit;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.io.IOException;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -71,6 +75,9 @@ public class WhisperApi {
         // Build OkHttp client
         OkHttpClient client = new OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             .build();
         
         // Create Retrofit instance
@@ -116,9 +123,16 @@ public class WhisperApi {
                 }
                 throw new Exception(errorMessage);
             }
-        } catch (java.io.IOException e) {
-            // Handle potential IOException
-            throw new Exception("Transcription failed due to network error: " + e.getMessage(), e);
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG, "Transcription failed due to socket timeout: " + e.getMessage(), e);
+            throw new SocketTimeoutException("Transcription socket timeout: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            Log.e(TAG, "Transcription failed due to unknown host: " + e.getMessage(), e);
+            throw new UnknownHostException("Transcription unknown host: " + e.getMessage());
+        } catch (IOException e) { // Catching a broader IOException for other network issues
+            Log.e(TAG, "Transcription failed due to network error: " + e.getMessage(), e);
+            // It's better to throw a more specific custom exception or re-throw e if it's already specific enough
+            throw new IOException("Transcription failed due to network error: " + e.getMessage(), e);
         }
     }
 }
