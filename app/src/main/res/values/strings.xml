@@ -185,4 +185,8 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
     <string name="photo_prompt_editor_toast_updated">Photo Prompt updated</string>
     <string name="photo_prompt_editor_toast_added">Photo Prompt added</string>
 
+    <!-- Photos Share Button -->
+    <string name="photos_btn_share_chatgpt_response_desc_text">Share response</string>
+    <string name="photos_share_chooser_title_text">Share via</string>
+
 </resources>

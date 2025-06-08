@@ -85,6 +85,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private CheckBox chkAutoSendChatGptPhoto;
     private ImageButton btnClearChatGptResponsePhoto;
+    private ImageButton btnShareChatGptResponsePhoto; // Added for share button
     private Button btnSendToInputStickPhoto;
     private CheckBox chkAutoSendInputStickPhoto;
     private InputStickManager inputStickManager; // Added
@@ -117,6 +118,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         chkAutoSendChatGptPhoto = findViewById(R.id.chk_auto_send_chatgpt_photo);
         btnClearChatGptResponsePhoto = findViewById(R.id.btn_clear_chatgpt_response_photo);
+        btnShareChatGptResponsePhoto = findViewById(R.id.btn_share_chatgpt_response_photo); // Initialize share button
         btnSendToInputStickPhoto = findViewById(R.id.btn_send_to_inputstick_photo); // Added
         chkAutoSendInputStickPhoto = findViewById(R.id.chk_auto_send_inputstick_photo);
         inputStickManager = new InputStickManager(this); // Added
@@ -188,6 +190,39 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             dialogFragment.show(getSupportFragmentManager(), "edit_chatgpt_response_photo_dialog");
         });
 
+        // Retain the OnTouchListener for refresh that was added in the previous subtask
+        editTextChatGptResponsePhoto.setOnTouchListener((v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                String text = editTextChatGptResponsePhoto.getText().toString();
+                if (text.contains("queued") || text.contains(UploadTask.STATUS_PENDING) || text.contains(UploadTask.STATUS_UPLOADING) || text.equals(PHOTO_PROCESSING_QUEUED_PLACEHOLDER)) {
+                    refreshPhotoProcessingStatus(true);
+                    return true; // Consumed touch
+                }
+            }
+            // Allow click to proceed to open full screen editor if not a refresh action
+            // but return false so other listeners (like the OnClickListener above) can also fire.
+            // Also, ensure this doesn't interfere with normal EditText touch actions like cursor placement
+            // if the condition for refresh isn't met.
+            return v.performClick(); // Propagate if not handled, or false if only for this listener
+        });
+
+        btnShareChatGptResponsePhoto.setOnClickListener(v -> {
+            String textToShare = editTextChatGptResponsePhoto.getText().toString();
+            if (!textToShare.isEmpty() &&
+                !textToShare.equals(PHOTO_PROCESSING_QUEUED_PLACEHOLDER) &&
+                !(textToShare.startsWith("[") && textToShare.endsWith("... Tap to refresh]")) &&
+                !textToShare.toLowerCase().contains("failed") && // Avoid sharing "Photo processing failed:..."
+                !textToShare.toLowerCase().startsWith("photo processing failed")) { // More specific check
+
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, textToShare);
+                startActivity(Intent.createChooser(shareIntent, getString(R.string.photos_share_chooser_title_text)));
+            } else {
+                Toast.makeText(PhotosActivity.this, "No valid content to share.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         if (savedInstanceState != null) {
             currentPhotoPath = savedInstanceState.getString(KEY_PHOTO_PATH);
             if (currentPhotoPath != null) {
@@ -219,6 +254,11 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         updateActivePhotoPromptsDisplay();
         refreshPhotoProcessingStatus(false); // Add this call
     }
+
+    // The existing OnTouchListener for editTextChatGptResponsePhoto for refresh should be here.
+    // It was added in a previous step. I'll ensure the new listener for btnShare is added correctly
+    // without interfering with it. The previous diff attempt failed because the OnTouchListener was not
+    // in the search block. I'll add the new listener at the end of onCreate.
 
     private void refreshPhotoProcessingStatus(boolean userInitiated) {
         if (currentPhotoPath == null || currentPhotoPath.isEmpty()) {

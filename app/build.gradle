@@ -74,6 +74,12 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9' // Added PowerMock
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9' // Added PowerMock API for Mockito
     testImplementation "androidx.room:room-testing:$room_version" // Room Test helpers
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // AndroidX Test - Instrumented testing
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0' // Core utilities
+    androidTestImplementation 'androidx.test:runner:1.5.2' // AndroidJUnitRunner
+    androidTestImplementation 'androidx.test:rules:1.5.0' // JUnit Rules (e.g., ActivityTestRule, ServiceTestRule)
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5' // JUnit 4 support for AndroidX Test
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // Espresso for UI testing (optional here, but good to have)
+    androidTestImplementation "androidx.room:room-testing:$room_version" // Room Test helpers for instrumented tests
 }

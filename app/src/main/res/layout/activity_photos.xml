@@ -134,14 +134,30 @@
                     android:clickable="true"
                     android:drawableEnd="?android:attr/actionModeWebSearchDrawable" />
 
-                <ImageButton
-                    android:id="@+id/btn_clear_chatgpt_response_photo"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel"
-                    android:contentDescription="@string/photos_btn_clear_chatgpt_response_desc_text"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:padding="8dp"/>
+                    android:orientation="vertical"
+                    android:layout_marginStart="4dp">
+
+                    <ImageButton
+                        android:id="@+id/btn_clear_chatgpt_response_photo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        android:contentDescription="@string/photos_btn_clear_chatgpt_response_desc_text"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btn_share_chatgpt_response_photo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@android:drawable/ic_menu_share"
+                        android:contentDescription="@string/photos_btn_share_chatgpt_response_desc_text"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"/>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
