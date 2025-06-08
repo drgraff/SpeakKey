@@ -29,6 +29,14 @@
             android:defaultValue="https://api.openai.com/v1/audio/transcriptions" />
 
         <ListPreference
+            android:key="transcription_mode"
+            android:title="Transcription Mode"
+            android:summary="Select the transcription service to use."
+            android:defaultValue="whisper"
+            android:entries="@array/transcription_mode_entries"
+            android:entryValues="@array/transcription_mode_values" />
+
+        <ListPreference
             android:key="language"
             android:title="@string/settings_language_title"
             android:summary="@string/settings_language_summary"

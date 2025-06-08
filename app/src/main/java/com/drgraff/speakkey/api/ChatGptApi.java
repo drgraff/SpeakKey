@@ -10,10 +10,17 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import java.io.File; // Added
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List; // Added for List<ModelInfo>
 import com.drgraff.speakkey.api.OpenAIModelData.*; // Added for model data classes
+import okhttp3.MediaType; // Added
+import okhttp3.MultipartBody; // Added
+import okhttp3.RequestBody; // Added
+import org.json.JSONObject; // Added
+import org.json.JSONException; // Added
+
 
 /**
  * API client for OpenAI's ChatGPT API
@@ -21,7 +28,8 @@ import com.drgraff.speakkey.api.OpenAIModelData.*; // Added for model data class
 public class ChatGptApi {
     private static final String TAG = "ChatGptApi";
     private final String apiKey;
-    private final String model;
+    private String model; // Made non-final to allow changing
+    private final OkHttpClient client; // Added OkHttpClient as a member
 
     /**
      * Constructor
@@ -32,6 +40,25 @@ public class ChatGptApi {
     public ChatGptApi(String apiKey, String model) {
         this.apiKey = apiKey;
         this.model = model;
+
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        this.client = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+    }
+
+    /**
+     * Sets the model to be used for API calls.
+     * @param model The model name.
+     */
+    public void setModel(String model) {
+        this.model = model;
+        Log.d(TAG, "ChatGPT model updated to: " + model);
     }
 
     /**
@@ -46,24 +73,11 @@ public class ChatGptApi {
             throw new IllegalArgumentException("API key is required");
         }
 
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(String message) {
-                Log.d(TAG, message);
-            }
-        });
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
+        // HttpLoggingInterceptor and OkHttpClient are now member variables, initialized in constructor
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.openai.com/")
-                .client(client)
+                .client(this.client) // Use member client
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -117,19 +131,11 @@ public class ChatGptApi {
             throw new IllegalArgumentException("Vision model name is required");
         }
 
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
+        // HttpLoggingInterceptor and OkHttpClient are now member variables, initialized in constructor
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.openai.com/")
-                .client(client)
+                .client(this.client) // Use member client
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -169,19 +175,11 @@ public class ChatGptApi {
             throw new IllegalArgumentException("API key is required for listing models");
         }
 
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
+        // HttpLoggingInterceptor and OkHttpClient are now member variables, initialized in constructor
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.openai.com/") // Ensure this base URL is appropriate
-                .client(client)
+                .client(this.client) // Use member client
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -208,6 +206,63 @@ public class ChatGptApi {
         } catch (IOException e) {
             Log.e(TAG, "listModels failed due to network issue: " + e.getMessage(), e);
             throw new IOException("Error listing models due to network issue: " + e.getMessage(), e);
+        }
+    }
+
+    public String getTranscriptionFromAudio(File audioFile, String userPrompt, String modelName) throws IOException {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IOException("OpenAI API key is not set.");
+        }
+        if (audioFile == null || !audioFile.exists()) {
+            throw new IOException("Audio file is missing or invalid.");
+        }
+
+        Log.d(TAG, "Sending audio transcription request. Model: " + modelName + ", Prompt: " + userPrompt);
+
+        RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse("audio/mpeg")); // Adjust MediaType if necessary
+
+        MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", audioFile.getName(), fileBody)
+                .addFormDataPart("model", modelName);
+
+        if (userPrompt != null && !userPrompt.isEmpty()) {
+            requestBodyBuilder.addFormDataPart("prompt", userPrompt);
+        }
+        // Add other parameters as needed, e.g., language, temperature
+        // requestBodyBuilder.addFormDataPart("language", "en");
+        // requestBodyBuilder.addFormDataPart("temperature", "0.2");
+
+        RequestBody requestBody = requestBodyBuilder.build();
+
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url("https://api.openai.com/v1/audio/transcriptions") // Standard Whisper API endpoint
+                .header("Authorization", "Bearer " + apiKey)
+                .post(requestBody)
+                .build();
+
+        try (okhttp3.Response response = this.client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                String errorBody = response.body() != null ? response.body().string() : "Unknown error";
+                Log.e(TAG, "Audio transcription API request failed: " + response.code() + " " + errorBody);
+                throw new IOException("Unexpected code " + response + "\n" + errorBody);
+            }
+
+            String responseBodyString = response.body().string();
+            Log.d(TAG, "Audio transcription response: " + responseBodyString);
+
+            try {
+                JSONObject jsonResponse = new JSONObject(responseBodyString);
+                if (jsonResponse.has("text")) {
+                    return jsonResponse.getString("text");
+                } else {
+                    Log.e(TAG, "Audio transcription response does not contain 'text' field: " + responseBodyString);
+                    throw new IOException("Invalid response format from transcription API: 'text' field missing.");
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "Failed to parse JSON from audio transcription response", e);
+                throw new IOException("Failed to parse JSON response: " + e.getMessage(), e);
+            }
         }
     }
 }
