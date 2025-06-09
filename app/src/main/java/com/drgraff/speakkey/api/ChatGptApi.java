@@ -222,11 +222,11 @@ public class ChatGptApi {
 
         Log.d(TAG, "Sending audio transcription request. Model: " + modelName + ", Prompt: " + userPrompt);
 
-        String whisperFileMimeType = "audio/wav"; // Default to WAV for this diagnostic
+        String whisperFileMimeType = "audio/mpeg"; // Defaulting to mpeg for this attempt
         String lowerName = audioFile.getName().toLowerCase();
-        if (lowerName.endsWith(".mp3")) whisperFileMimeType = "audio/mpeg";
+        if (lowerName.endsWith(".mp3")) whisperFileMimeType = "audio/mpeg"; // Correct for MP3
         else if (lowerName.endsWith(".m4a")) whisperFileMimeType = "audio/m4a";
-        // else if (lowerName.endsWith(".wav")) whisperFileMimeType = "audio/wav"; // Already default
+        else if (lowerName.endsWith(".wav")) whisperFileMimeType = "audio/wav";
         RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse(whisperFileMimeType));
 
         MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
@@ -298,20 +298,14 @@ public class ChatGptApi {
 
         String base64Audio = encodeAudioToBase64(audioFile);
 
-        String audioFileFormat = "wav"; // Default to WAV for this diagnostic
+        String audioFileFormat = "mp3"; // Defaulting to mp3 for this attempt
         String fileNameLower = audioFile.getName().toLowerCase();
-        if (fileNameLower.endsWith(".mp3")) {
-            audioFileFormat = "mp3";
-        } else if (fileNameLower.endsWith(".m4a")) {
-            audioFileFormat = "m4a";
-        } else if (fileNameLower.endsWith(".wav")) { // Ensure this case sets "wav"
-            audioFileFormat = "wav";
-        } else if (fileNameLower.endsWith(".ogg")) {
-            audioFileFormat = "ogg";
-        } else if (fileNameLower.endsWith(".flac")) {
-            audioFileFormat = "flac";
-        }
-        // If none of the above, it remains "wav" due to initialization.
+        if (fileNameLower.endsWith(".mp3")) { audioFileFormat = "mp3"; } // Ensure this case exists
+        else if (fileNameLower.endsWith(".m4a")) { audioFileFormat = "m4a"; }
+        else if (fileNameLower.endsWith(".wav")) { audioFileFormat = "wav"; }
+        else if (fileNameLower.endsWith(".ogg")) { audioFileFormat = "ogg"; }
+        else if (fileNameLower.endsWith(".flac")) { audioFileFormat = "flac"; }
+        // If none of the above, it remains "mp3" due to initialization.
         Log.d(TAG, "Determined audioFileFormat: " + audioFileFormat + " for file: " + fileNameLower);
         // Add more formats as supported by the model
 
