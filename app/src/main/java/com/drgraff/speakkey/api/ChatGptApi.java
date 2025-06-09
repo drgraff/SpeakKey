@@ -64,6 +64,10 @@ public class ChatGptApi {
         Log.d(TAG, "ChatGPT model updated to: " + model);
     }
 
+    public String getModel() {
+        return this.model;
+    }
+
     /**
      * Gets a completion from the ChatGPT API
      *
