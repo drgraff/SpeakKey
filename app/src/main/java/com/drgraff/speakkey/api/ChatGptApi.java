@@ -269,100 +269,55 @@ public class ChatGptApi {
         }
     }
 
-    // Removed getCompletionFromAudioAndPrompt and encodeAudioToBase64
-    // private String encodeAudioToBase64(File audioFile) throws IOException {
-    //     byte[] audioBytes = Files.readAllBytes(audioFile.toPath());
-    //     return Base64.encodeToString(audioBytes, Base64.NO_WRAP);
     // }
+
+    private String encodeAudioToBase64(File audioFile) throws IOException {
+        // Ensure java.nio.file.Files and android.util.Base64 are imported
+        byte[] audioBytes = java.nio.file.Files.readAllBytes(audioFile.toPath());
+        return android.util.Base64.encodeToString(audioBytes, android.util.Base64.NO_WRAP);
+    }
 
     public String getCompletionFromAudioAndPrompt(File audioFile, String userPrompt, String modelName) throws IOException {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IOException("OpenAI API key is not set.");
-    //     }
-    //     if (audioFile == null || !audioFile.exists()) {
-    //         throw new IOException("Audio file is missing or invalid.");
-    //     }
-    //     if (userPrompt == null || userPrompt.isEmpty()) {
-    //         userPrompt = "Transcribe the audio and follow any instructions if present. If no specific instructions, just transcribe."; // Default if empty
-    //     }
-    //     Log.d("ChatGptApi", "Sending multimodal request to " + modelName + ". Prompt: " + userPrompt);
-    //     String base64Audio = encodeAudioToBase64(audioFile);
-    //     String audioMimeType = "audio/mpeg"; // Assuming MP3, adjust if other formats are possible
-    //     String audioDataUrl = "data:" + audioMimeType + ";base64," + base64Audio;
-    //     JSONObject payload = new JSONObject();
-    //     try {
-    //         payload.put("model", modelName); // e.g., "gpt-4o"
-    //         JSONArray messages = new JSONArray();
-    //         JSONObject userMessage = new JSONObject();
-    //         userMessage.put("role", "user");
-    //         JSONArray contentArray = new JSONArray();
-    //         JSONObject textPart = new JSONObject();
-    //         textPart.put("type", "text");
-    //         textPart.put("text", userPrompt);
-    //         contentArray.put(textPart);
-    //         JSONObject audioContentPart = new JSONObject();
-    //         audioContentPart.put("type", "audio_url");
-    //         JSONObject audioUrlObject = new JSONObject();
-    //         audioUrlObject.put("url", audioDataUrl);
-    //         audioContentPart.put("audio_url", audioUrlObject);
-    //         contentArray.put(audioContentPart);
-    //         userMessage.put("content", contentArray);
-    //         messages.put(userMessage);
-    //         payload.put("messages", messages);
-    //     } catch (org.json.JSONException e) {
-    //         throw new IOException("Error creating JSON payload for multimodal request: " + e.getMessage(), e);
-    //     }
-    //     RequestBody body = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
-    //     okhttp3.Request request = new okhttp3.Request.Builder() // Explicitly using okhttp3.Request
-    //             .url("https://api.openai.com/v1/chat/completions")
-    //             .header("Authorization", "Bearer " + apiKey)
-    //             .post(body)
-    //             .build();
-    //     try (okhttp3.Response response = client.newCall(request).execute()) { // Explicitly using okhttp3.Response
-    //         String responseBodyString = response.body() != null ? response.body().string() : null;
-    //         if (!response.isSuccessful()) {
-    //             Log.e("ChatGptApi", "Multimodal API request failed: " + response.code() + " Body: " + responseBodyString);
-    //             throw new IOException("Unexpected code " + response + (responseBodyString != null ? "\n" + responseBodyString : ""));
-    //         }
-    //         if (responseBodyString == null) {
-    //             throw new IOException("Empty response body from multimodal API");
-    //         }
-    //         Log.d("ChatGptApi", "Multimodal response: " + responseBodyString);
-    //         try {
-    //             JSONObject jsonResponse = new JSONObject(responseBodyString);
-    //             JSONArray choices = jsonResponse.getJSONArray("choices");
-    //             if (choices.length() > 0) {
-    //                 JSONObject firstChoice = choices.getJSONObject(0);
-    //                 if (firstChoice.has("message") && firstChoice.getJSONObject("message").has("content")) {
-    //                     return firstChoice.getJSONObject("message").getString("content");
-    //                 } else {
-    //                     Log.w("ChatGptApi", "Unexpected message structure in choice: " + firstChoice.toString());
-    //                     if (firstChoice.has("delta") && firstChoice.getJSONObject("delta").has("content")) {
-    //                          return firstChoice.getJSONObject("delta").getString("content");
-    //                     }
-    //                     throw new IOException("No 'message.content' in API response choice.");
-    //                 }
-    //             } else {
-    //                 throw new IOException("No choices returned in multimodal API response.");
-    //             }
-    //         } catch (org.json.JSONException e) {
-    //             throw new IOException("Error parsing JSON from multimodal response: " + e.getMessage(), e);
-    //         }
         }
         if (audioFile == null || !audioFile.exists()) {
             throw new IOException("Audio file is missing or invalid.");
         }
-        // It's good for the user prompt to have some text, even if just instructional.
         if (userPrompt == null || userPrompt.isEmpty()) {
-            userPrompt = "Process the following audio. If it's speech, transcribe it. Consider any implicit instructions if the audio is more than just speech.";
+            userPrompt = "What is in this recording?"; // Default prompt from JS example
         }
 
-        Log.d(TAG, "Sending multimodal multipart request to " + modelName +
+        Log.d(TAG, "Sending JSON chat completion request with audio to " + modelName +
                    ". Prompt: " + userPrompt + ", Audio: " + audioFile.getName());
 
-        // 1. Construct the JSON for the 'messages' part
-        JSONArray messagesArray = new JSONArray();
+        String base64Audio = encodeAudioToBase64(audioFile);
+
+        String audioFileFormat = "wav"; // Default, determine from file if possible
+        String fileNameLower = audioFile.getName().toLowerCase();
+        if (fileNameLower.endsWith(".mp3")) audioFileFormat = "mp3";
+        else if (fileNameLower.endsWith(".m4a")) audioFileFormat = "m4a";
+        else if (fileNameLower.endsWith(".ogg")) audioFileFormat = "ogg";
+        else if (fileNameLower.endsWith(".flac")) audioFileFormat = "flac";
+        // Add more formats as supported by the model
+
+
+        JSONObject payload = new JSONObject();
         try {
+            payload.put("model", modelName); // e.g., "gpt-4o-audio-preview"
+
+            JSONArray modalitiesArray = new JSONArray();
+            modalitiesArray.put("text");
+            modalitiesArray.put("audio");
+            payload.put("modalities", modalitiesArray);
+
+            JSONObject audioSettings = new JSONObject();
+            // The JS example has 'audio: { voice: "alloy", format: "wav" }'
+            // 'voice' is for TTS. For input, 'format' seems relevant as a hint.
+            audioSettings.put("format", audioFileFormat);
+            payload.put("audio", audioSettings);
+
+            JSONArray messagesArray = new JSONArray();
             JSONObject userMessage = new JSONObject();
             userMessage.put("role", "user");
 
@@ -372,55 +327,43 @@ public class ChatGptApi {
             textPart.put("text", userPrompt);
             contentArray.put(textPart);
 
-            JSONObject audioPart = new JSONObject();
-            audioPart.put("type", "audio");
-            JSONObject audioFileReference = new JSONObject();
-            audioFileReference.put("file", audioFile.getName());
-            audioPart.put("audio", audioFileReference);
-            contentArray.put(audioPart);
+            JSONObject audioInputPart = new JSONObject();
+            audioInputPart.put("type", "input_audio"); // Crucial: type "input_audio"
+            JSONObject inputAudioData = new JSONObject();
+            inputAudioData.put("data", base64Audio);   // Base64 encoded string
+            inputAudioData.put("format", audioFileFormat); // Format of the encoded data
+            audioInputPart.put("input_audio", inputAudioData);
+            contentArray.put(audioInputPart);
 
             userMessage.put("content", contentArray);
             messagesArray.put(userMessage);
+            payload.put("messages", messagesArray);
+
+            payload.put("store", true); // As per JS example
 
         } catch (org.json.JSONException e) {
-            throw new IOException("Error creating JSON for messages array: " + e.getMessage(), e);
+            throw new IOException("Error creating JSON payload for audio chat completion: " + e.getMessage(), e);
         }
-        String messagesJsonString = messagesArray.toString();
-        Log.d(TAG, "Messages JSON for multipart: " + messagesJsonString);
 
-        String audioMimeType = "audio/m4a";
-        if (audioFile.getName().toLowerCase().endsWith(".mp3")) {
-            audioMimeType = "audio/mpeg";
-        } else if (audioFile.getName().toLowerCase().endsWith(".wav")) {
-            audioMimeType = "audio/wav";
-        } // Add other types as necessary
-
-        RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse(audioMimeType));
-
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("model", modelName)
-                .addFormDataPart("messages", messagesJsonString)
-                .addFormDataPart("file", audioFile.getName(), fileBody)
-                .build();
-
+        RequestBody body = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
         okhttp3.Request request = new okhttp3.Request.Builder()
                 .url("https://api.openai.com/v1/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
-                .post(requestBody)
+                .header("Content-Type", "application/json") // Explicitly set Content-Type for JSON body
+                .post(body)
                 .build();
 
         try (okhttp3.Response response = this.client.newCall(request).execute()) {
             String responseBodyString = response.body() != null ? response.body().string() : null;
             if (!response.isSuccessful()) {
-                Log.e(TAG, "API request failed (gpt-4o audio): " + response.code() + " Body: " + responseBodyString);
+                Log.e(TAG, "API request failed (JSON audio chat): " + response.code() + " Body: " + responseBodyString);
                 throw new IOException("Unexpected code " + response + (responseBodyString != null ? "\n" + responseBodyString : ""));
             }
 
             if (responseBodyString == null) {
-                throw new IOException("Empty response body from API (gpt-4o audio)");
+                throw new IOException("Empty response body from API (JSON audio chat)");
             }
-            Log.d(TAG, "API Response (gpt-4o audio): " + responseBodyString);
+            Log.d(TAG, "API Response (JSON audio chat): " + responseBodyString);
 
             try {
                 JSONObject jsonResponse = new JSONObject(responseBodyString);
@@ -430,14 +373,14 @@ public class ChatGptApi {
                     if (firstChoice.has("message") && firstChoice.getJSONObject("message").has("content")) {
                         return firstChoice.getJSONObject("message").getString("content");
                     } else {
-                        Log.w(TAG, "Unexpected message structure in choice (gpt-4o audio): " + firstChoice.toString());
-                        throw new IOException("No 'message.content' in API response choice (gpt-4o audio).");
+                        Log.w(TAG, "Unexpected message structure in choice (JSON audio chat): " + firstChoice.toString());
+                        throw new IOException("No 'message.content' in API response choice (JSON audio chat).");
                     }
                 } else {
-                    throw new IOException("No choices returned in API response (gpt-4o audio).");
+                    throw new IOException("No choices returned in API response (JSON audio chat).");
                 }
             } catch (org.json.JSONException e) {
-                throw new IOException("Error parsing JSON from API response (gpt-4o audio): " + e.getMessage(), e);
+                throw new IOException("Error parsing JSON from API response (JSON audio chat): " + e.getMessage(), e);
             }
         }
     }
