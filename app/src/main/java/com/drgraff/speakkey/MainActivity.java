@@ -163,8 +163,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-        // audioFilePath = new File(audioDir, "recording.m4a").getAbsolutePath();
-        // Log.i(TAG, "MainActivity.onCreate: audioFilePath set to M4A: " + audioFilePath);
         audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
         Log.i(TAG, "FINAL_MP3_PATH_ATTEMPT: audioFilePath set to MP3: " + audioFilePath);
 
@@ -878,7 +876,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 chatGptText.setText("[WHISPER_MODE: Sending text to " + currentChatGptModel + "...]");
                 Toast.makeText(MainActivity.this, "WHISPER_MODE: Sending to " + currentChatGptModel + "...", Toast.LENGTH_SHORT).show();
             });
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": MP3_WHISPER_MODE_SEND_TO_CHATGPT", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": WHISPER_MODE_SEND_TO_CHATGPT", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
 
             new Thread(() -> {
                 try {
