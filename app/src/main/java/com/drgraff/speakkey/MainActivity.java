@@ -163,7 +163,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-        audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
+        audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath(); // Changed to .mp3
+        Log.i(TAG, "Attempting MP3 recording (AudioEncoder.MP3 API 29+). Path: " + audioFilePath);
 
         // Display active macros
         displayActiveMacros(); // Call after macroRepository is initialized
@@ -489,8 +490,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.MP3); // Requires API 29+
+            mediaRecorder.setAudioSamplingRate(16000);
+            mediaRecorder.setAudioChannels(1);
+            mediaRecorder.setAudioEncodingBitRate(96000);
             mediaRecorder.setOutputFile(audioFilePath);
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             mediaRecorder.prepare();
             mediaRecorder.start();
             
