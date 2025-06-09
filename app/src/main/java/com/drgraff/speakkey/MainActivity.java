@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
+        // Record to a temporary M4A file which will be converted to MP3 on stop
         tempAudioFilePath = new File(audioDir, "recording_temp.m4a").getAbsolutePath();
         audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
         Log.i(TAG, "MainActivity.onCreate: tempAudioFilePath=" + tempAudioFilePath + ", audioFilePath (MP3)=" + audioFilePath);
