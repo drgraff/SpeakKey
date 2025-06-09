@@ -163,10 +163,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-        // audioFilePath = new File(audioDir, "recording.m4a").getAbsolutePath();
-        // Log.i(TAG, "FINAL_CHECK_PATH: audioFilePath explicitly set to M4A: " + audioFilePath);
-        audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
-        Log.i(TAG, "MainActivity.onCreate: audioFilePath set to MP3: " + audioFilePath);
+        // audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
+        // Log.i(TAG, "MainActivity.onCreate: audioFilePath set to MP3: " + audioFilePath);
+        audioFilePath = new File(audioDir, "recording.m4a").getAbsolutePath();
+        Log.i(TAG, "MainActivity.onCreate: audioFilePath set to M4A: " + audioFilePath);
 
 
         // Display active macros
@@ -493,11 +493,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.MP3);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // Use AAC for M4A
             mediaRecorder.setAudioSamplingRate(16000);
             mediaRecorder.setAudioChannels(1);
-            mediaRecorder.setAudioEncodingBitRate(96000);
-            Log.i(TAG, "MainActivity.startRecording: Configured for MP3 (AudioEncoder.MP3).");
+            // mediaRecorder.setAudioEncodingBitRate(96000); // Optional for AAC
+            Log.i(TAG, "MainActivity.startRecording: Configured for M4A (AAC).");
             mediaRecorder.setOutputFile(audioFilePath);
             mediaRecorder.prepare();
             mediaRecorder.start();
@@ -693,7 +693,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
             // That logic will move to when the task is actually completed by the service.
         });
-        Log.i(TAG, "MainActivity.transcribeAudio: Queued MP3 for Whisper transcription via UploadService.");
+        Log.i(TAG, "MainActivity.transcribeAudio: Queued M4A for Whisper transcription.");
     }
 
     private void refreshTranscriptionStatus(boolean userInitiated) {
@@ -803,38 +803,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             userPrompt = "Process the audio. If speech, transcribe. If music/noise, describe."; // Default prompt
         }
         final String finalUserPrompt = userPrompt;
-        final String model = sharedPreferences.getString("chatgpt_model", "gpt-4o-audio-preview"); // Ensure this model supports audio input
+        final String modelName = sharedPreferences.getString("chatgpt_model", "gpt-4o-audio-preview"); // Ensure this model supports audio input
 
         mainHandler.post(() -> {
-            chatGptText.setText("[DIRECT_MODE: Sending MP3 audio & prompt to " + model + "...]");
-            Toast.makeText(MainActivity.this, "DIRECT_MODE: Processing with " + model + "...", Toast.LENGTH_SHORT).show();
+            chatGptText.setText("[DIRECT_MODE: Sending M4A audio & prompt to " + modelName + "...]");
+            Toast.makeText(MainActivity.this, "DIRECT_MODE: Processing with " + modelName + "...", Toast.LENGTH_SHORT).show();
         });
-        AppLogManager.getInstance().addEntry("INFO", TAG + ": DIRECT_MODE: Calling getCompletionFromAudioAndPrompt with MP3.", "Model: " + model + ", Audio: " + currentAudioFile.getName());
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": M4A_SINGLE_CALL to getCompletionFromAudioAndPrompt.", "Model: " + modelName + ", Audio: " + currentAudioFile.getName());
 
         new Thread(() -> {
             try {
-                final String result = chatGptApi.getCompletionFromAudioAndPrompt(currentAudioFile, finalUserPrompt, model);
-                AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": DIRECT_MODE: Response from " + model + " received.", "Output Length: " + (result != null ? result.length() : "null"));
+                final String result = chatGptApi.getCompletionFromAudioAndPrompt(currentAudioFile, finalUserPrompt, modelName);
+                AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": M4A_SINGLE_CALL: Response from " + modelName + " received.", "Output Length: " + (result != null ? result.length() : "null"));
                 mainHandler.post(() -> {
                     chatGptText.setText(result);
-                    Toast.makeText(MainActivity.this, "DIRECT_MODE: " + model + " processing complete.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "DIRECT_MODE: " + modelName + " processing complete.", Toast.LENGTH_SHORT).show();
                     if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
                         sendToInputStick();
                     }
                 });
             } catch (IOException e) {
-                Log.e(TAG, "DIRECT_MODE: IOException during " + model + " processing: " + e.getMessage(), e);
-                AppLogManager.getInstance().addEntry("ERROR", TAG + ": DIRECT_MODE: IOException in " + model + " processing.", "Error: " + e.getMessage());
+                Log.e(TAG, "M4A_SINGLE_CALL: IOException during " + modelName + " processing: " + e.getMessage(), e);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": M4A_SINGLE_CALL: IOException in " + modelName + " processing.", "Error: " + e.getMessage());
                 mainHandler.post(() -> {
-                    chatGptText.setText("[DIRECT_MODE: API Error (" + model + "): " + e.getMessage() + "]");
+                    chatGptText.setText("[DIRECT_MODE: API Error (" + modelName + "): " + e.getMessage() + "]");
                     Toast.makeText(MainActivity.this, "DIRECT_MODE: API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             } catch (Exception e) {
-                Log.e(TAG, "DIRECT_MODE: Unexpected error during " + model + " processing: " + e.getMessage(), e);
-                AppLogManager.getInstance().addEntry("ERROR", TAG + ": DIRECT_MODE: Unexpected error in " + model + " processing.", "Error: " + e.toString());
+                Log.e(TAG, "M4A_SINGLE_CALL: Unexpected error during " + modelName + " processing: " + e.getMessage(), e);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": M4A_SINGLE_CALL: Unexpected error in " + modelName + " processing.", "Error: " + e.toString());
                 mainHandler.post(() -> {
-                    chatGptText.setText("[DIRECT_MODE: Unexpected error with " + model + "]");
-                    Toast.makeText(MainActivity.this, "DIRECT_MODE: Unexpected error (" + model + ")", Toast.LENGTH_LONG).show();
+                    chatGptText.setText("[DIRECT_MODE: Unexpected error with " + modelName + "]");
+                    Toast.makeText(MainActivity.this, "DIRECT_MODE: Unexpected error (" + modelName + ")", Toast.LENGTH_LONG).show();
                 });
             }
         }).start();
@@ -846,11 +846,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (transcriptionMode.equals("chatgpt_direct")) {
             if (lastRecordedAudioPathForChatGPTDirect != null && new File(lastRecordedAudioPathForChatGPTDirect).exists()) {
-                Log.d(TAG, "sendToChatGpt (Direct Mode): Calling transcribeAudioWithChatGpt for " + lastRecordedAudioPathForChatGPTDirect);
-                transcribeAudioWithChatGpt(); // This will use the MP3 and call getCompletionFromAudioAndPrompt
+                Log.d(TAG, "sendToChatGpt (Direct Mode): Calling transcribeAudioWithChatGpt for M4A file " + lastRecordedAudioPathForChatGPTDirect);
+                transcribeAudioWithChatGpt(); // This will use the M4A and call getCompletionFromAudioAndPrompt
             } else {
                 Toast.makeText(this, "Please record audio first for direct processing.", Toast.LENGTH_LONG).show();
-                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Direct Mode) called but no valid audio path.", "lastRecordedAudioPathForChatGPTDirect: " + lastRecordedAudioPathForChatGPTDirect);
+                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Direct Mode) called but no valid M4A audio path.", "lastRecordedAudioPathForChatGPTDirect: " + lastRecordedAudioPathForChatGPTDirect);
             }
         } else { // "whisper" mode (two-step: `whisperText` should ideally have transcription from UploadService)
             String transcript = whisperText.getText().toString().trim();
@@ -878,7 +878,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 chatGptText.setText("[WHISPER_MODE: Sending text to " + currentChatGptModel + "...]");
                 Toast.makeText(MainActivity.this, "WHISPER_MODE: Sending to " + currentChatGptModel + "...", Toast.LENGTH_SHORT).show();
             });
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": WHISPER_MODE: Calling getCompletion with text.", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": M4A_WHISPER_MODE_SEND_TO_CHATGPT", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
 
             new Thread(() -> {
                 try {
