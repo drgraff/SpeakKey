@@ -222,7 +222,10 @@ public class ChatGptApi {
 
         Log.d(TAG, "Sending audio transcription request. Model: " + modelName + ", Prompt: " + userPrompt);
 
-        RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse("audio/mpeg")); // Adjust MediaType if necessary
+        String whisperFileMimeType = "audio/m4a"; // Assuming m4a from now on
+        if (audioFile.getName().toLowerCase().endsWith(".mp3")) whisperFileMimeType = "audio/mpeg";
+        // Add other types if MainActivity might produce them for Whisper mode in the future
+        RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse(whisperFileMimeType));
 
         MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
@@ -293,9 +296,24 @@ public class ChatGptApi {
 
         String base64Audio = encodeAudioToBase64(audioFile);
 
-        String audioFileFormat = "wav"; // Default, determine from file if possible
+        String audioFileFormat = "m4a"; // New default or ensure it's detected
         String fileNameLower = audioFile.getName().toLowerCase();
-        if (fileNameLower.endsWith(".mp3")) audioFileFormat = "mp3";
+        if (fileNameLower.endsWith(".mp3")) {
+            audioFileFormat = "mp3";
+        } else if (fileNameLower.endsWith(".m4a")) {
+            audioFileFormat = "m4a";
+        } else if (fileNameLower.endsWith(".wav")) {
+            audioFileFormat = "wav";
+        } else if (fileNameLower.endsWith(".ogg")) {
+            audioFileFormat = "ogg";
+        } else if (fileNameLower.endsWith(".flac")) {
+            audioFileFormat = "flac";
+        }
+        Log.d(TAG, "Determined audioFileFormat: " + audioFileFormat + " for file: " + fileNameLower);
+        // Add more formats as supported by the model
+
+
+        JSONObject payload = new JSONObject();
         else if (fileNameLower.endsWith(".m4a")) audioFileFormat = "m4a";
         else if (fileNameLower.endsWith(".ogg")) audioFileFormat = "ogg";
         else if (fileNameLower.endsWith(".flac")) audioFileFormat = "flac";
