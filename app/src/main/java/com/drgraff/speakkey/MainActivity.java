@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Audio recording
     private MediaRecorder mediaRecorder;
     private String audioFilePath;
+    private String tempAudioFilePath;
     private String lastRecordedAudioPathForChatGPTDirect = null; // Added
     private boolean isRecording = false;
     private boolean isPaused = false;
@@ -158,15 +159,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Request permissions
         requestPermissions();
         
-        // Set up temporary audio file path
+        // Set up audio file paths
         File audioDir = new File(getFilesDir(), "audio");
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-        // audioFilePath = new File(audioDir, "recording.m4a").getAbsolutePath();
-        // Log.i(TAG, "MainActivity.onCreate: audioFilePath set to M4A: " + audioFilePath);
+        tempAudioFilePath = new File(audioDir, "recording_temp.m4a").getAbsolutePath();
         audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
-        Log.i(TAG, "FINAL_MP3_PATH_ATTEMPT: audioFilePath set to MP3: " + audioFilePath);
+        Log.i(TAG, "MainActivity.onCreate: tempAudioFilePath=" + tempAudioFilePath + ", audioFilePath (MP3)=" + audioFilePath);
 
 
         // Display active macros
@@ -492,13 +492,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4); // Container
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.MP3);   // MP3 Encoder (Requires API 29+)
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // Use AAC for temp M4A
             mediaRecorder.setAudioSamplingRate(16000);
             mediaRecorder.setAudioChannels(1);
-            mediaRecorder.setAudioEncodingBitRate(96000); // 96 kbps
-            Log.i(TAG, "FINAL_MP3_RECORDER_ATTEMPT: OutputFormat=MPEG_4, AudioEncoder=MP3");
-            mediaRecorder.setOutputFile(audioFilePath);
+            // mediaRecorder.setAudioEncodingBitRate(96000); // Optional for AAC
+            Log.i(TAG, "MainActivity.startRecording: recording temp M4A");
+            mediaRecorder.setOutputFile(tempAudioFilePath);
             mediaRecorder.prepare();
             mediaRecorder.start();
             
@@ -570,7 +570,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mediaRecorder.stop();
             mediaRecorder.release();
             mediaRecorder = null;
-            
+
+            // Convert temp M4A to MP3
+            String mp3Path = audioFilePath;
+            com.arthenica.ffmpegkit.Session session = com.arthenica.ffmpegkit.FFmpegKit.execute(
+                    "-y -i " + tempAudioFilePath + " -codec:a libmp3lame -qscale:a 2 " + mp3Path);
+            if (com.arthenica.ffmpegkit.ReturnCode.isSuccess(session.getReturnCode())) {
+                new File(tempAudioFilePath).delete();
+                Log.i(TAG, "stopRecording: Converted to MP3 at " + mp3Path);
+            } else {
+                Log.e(TAG, "stopRecording: MP3 conversion failed, using M4A");
+                mp3Path = tempAudioFilePath;
+            }
+            audioFilePath = mp3Path;
+
             isRecording = false;
             isPaused = false;
             recordingDuration += System.currentTimeMillis() - recordingStartTime;
@@ -878,7 +891,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 chatGptText.setText("[WHISPER_MODE: Sending text to " + currentChatGptModel + "...]");
                 Toast.makeText(MainActivity.this, "WHISPER_MODE: Sending to " + currentChatGptModel + "...", Toast.LENGTH_SHORT).show();
             });
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": MP3_WHISPER_MODE_SEND_TO_CHATGPT", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": WHISPER_MODE_SEND_TO_CHATGPT", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
 
             new Thread(() -> {
                 try {

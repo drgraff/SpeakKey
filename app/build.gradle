@@ -55,6 +55,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 
+    // FFmpeg for audio conversion
+    implementation 'com.arthenica:ffmpeg-kit-full:6.0.LTS'
+
     // Room persistence library
     def room_version = "2.5.0" // Check for the latest version
     implementation "androidx.room:room-runtime:$room_version"
