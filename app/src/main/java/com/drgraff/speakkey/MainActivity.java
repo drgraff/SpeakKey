@@ -762,81 +762,79 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     
     private void transcribeAudioWithChatGpt() {
-        if (lastRecordedAudioPathForChatGPTDirect == null || lastRecordedAudioPathForChatGPTDirect.isEmpty()) {
-            mainHandler.post(() -> Toast.makeText(MainActivity.this, "No audio recording available for direct processing.", Toast.LENGTH_SHORT).show());
-            return;
-        }
-
-        File currentAudioFile = new File(lastRecordedAudioPathForChatGPTDirect);
-        if (!currentAudioFile.exists() || currentAudioFile.length() == 0) {
-            mainHandler.post(() -> {
-                Toast.makeText(MainActivity.this, "Audio file is missing or empty.", Toast.LENGTH_SHORT).show();
-                chatGptText.setText("Audio file missing.");
-            });
-            AppLogManager.getInstance().addEntry("ERROR", TAG + ": Audio file missing or empty for direct processing.", "Path: " + lastRecordedAudioPathForChatGPTDirect);
-            return;
-        }
-
-        String apiKey = sharedPreferences.getString("openai_api_key", "");
-        if (apiKey.isEmpty()) {
-            mainHandler.post(() -> Toast.makeText(MainActivity.this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show());
-            return;
-        }
-
-        // Get user-defined prompts
-        List<Prompt> currentUserActivePrompts = promptManager.getPrompts().stream()
-                                                   .filter(Prompt::isActive)
-                                                   .collect(Collectors.toList());
-        String userDefinedPromptText = currentUserActivePrompts.stream()
-                                           .map(Prompt::getText)
-                                           .collect(Collectors.joining("\n\n"));
-
-        if (userDefinedPromptText.isEmpty()) {
-            userDefinedPromptText = "Transcribe the audio. If it contains speech, provide the transcription. If it's music or noise, describe it."; // Default prompt
-        }
-
-        // Model for combined audio + text processing (e.g., gpt-4o)
-        final String modelName = sharedPreferences.getString("chatgpt_model", "gpt-4o"); // Default to gpt-4o if not set
-
-        mainHandler.post(() -> {
-            chatGptText.setText("[Sending audio and prompt to " + modelName + "...]");
-            Toast.makeText(MainActivity.this, "Processing audio with " + modelName + "...", Toast.LENGTH_SHORT).show();
-        });
-        AppLogManager.getInstance().addEntry("INFO", TAG + ": Sending audio and prompt to " + modelName, "File: " + currentAudioFile.getAbsolutePath() + ", Prompt: " + userDefinedPromptText);
-
-        final String finalUserDefinedPromptText = userDefinedPromptText; // Effectively final for lambda
-
-        new Thread(() -> {
-            try {
-                Log.d(TAG, "Calling getCompletionFromAudioAndPrompt with model: " + modelName);
-                final String processedText = chatGptApi.getCompletionFromAudioAndPrompt(currentAudioFile, finalUserDefinedPromptText, modelName);
-                AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": " + modelName + " processing complete.", "Output Length: " + processedText.length());
-
-                mainHandler.post(() -> {
-                    chatGptText.setText(processedText);
-                    Toast.makeText(MainActivity.this, modelName + " processing complete", Toast.LENGTH_SHORT).show();
-                    if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
-                        sendToInputStick(); // Sends content of chatGptText
-                    }
-                });
-
-            } catch (IOException e) {
-                Log.e(TAG, "IOException in " + modelName + " processing", e);
-                AppLogManager.getInstance().addEntry("ERROR", TAG + ": IOException in " + modelName + " processing.", e.getMessage());
-                mainHandler.post(() -> {
-                    chatGptText.setText("Error processing with " + modelName + ": " + e.getMessage());
-                    Toast.makeText(MainActivity.this, "API Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Unexpected error in " + modelName + " processing", e);
-                AppLogManager.getInstance().addEntry("ERROR", TAG + ": Unexpected error in " + modelName + " processing.", e.toString());
-                mainHandler.post(() -> {
-                    chatGptText.setText("Unexpected error during " + modelName + " processing.");
-                    Toast.makeText(MainActivity.this, "Unexpected error with " + modelName + ".", Toast.LENGTH_SHORT).show();
-                });
-            }
-        }).start();
+    if (lastRecordedAudioPathForChatGPTDirect == null || lastRecordedAudioPathForChatGPTDirect.isEmpty()) {
+        mainHandler.post(() -> Toast.makeText(MainActivity.this, "No audio recording available for direct processing.", Toast.LENGTH_SHORT).show());
+        return;
     }
+
+    final File currentAudioFile = new File(lastRecordedAudioPathForChatGPTDirect); // Make effectively final for thread
+    if (!currentAudioFile.exists() || currentAudioFile.length() == 0) {
+        mainHandler.post(() -> {
+            Toast.makeText(MainActivity.this, "Audio file is missing or empty.", Toast.LENGTH_SHORT).show();
+            chatGptText.setText("Audio file missing.");
+        });
+        AppLogManager.getInstance().addEntry("ERROR", TAG + ": Audio file missing or empty for direct processing.", "Path: " + lastRecordedAudioPathForChatGPTDirect);
+        return;
+    }
+
+    String apiKey = sharedPreferences.getString("openai_api_key", "");
+    if (apiKey.isEmpty()) {
+        mainHandler.post(() -> Toast.makeText(MainActivity.this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show());
+        return;
+    }
+
+    List<Prompt> currentUserActivePrompts = promptManager.getPrompts().stream()
+                                               .filter(Prompt::isActive)
+                                               .collect(Collectors.toList());
+    String userDefinedPromptText = currentUserActivePrompts.stream()
+                                       .map(Prompt::getText)
+                                       .collect(Collectors.joining("\n\n"));
+
+    if (userDefinedPromptText.isEmpty()) {
+        userDefinedPromptText = "Process the audio. If it's speech, provide a transcription. If it's music or other sounds, describe it. Follow any instructions if present in the speech.";
+    }
+
+    // Use the model selected in settings, ensure "gpt-4o-audio-preview" or "gpt-4o" can be selected there.
+    final String modelName = sharedPreferences.getString("chatgpt_model", "gpt-4o-audio-preview");
+    final String finalUserDefinedPromptText = userDefinedPromptText; // Effectively final for thread
+
+    mainHandler.post(() -> {
+        chatGptText.setText("[Sending audio and prompt to " + modelName + "...]");
+        Toast.makeText(MainActivity.this, "Processing audio with " + modelName + "...", Toast.LENGTH_SHORT).show();
+    });
+    AppLogManager.getInstance().addEntry("INFO", TAG + ": Calling getCompletionFromAudioAndPrompt.",
+        "Model: " + modelName + ", File: " + currentAudioFile.getAbsolutePath() + ", Prompt Length: " + finalUserDefinedPromptText.length());
+
+    new Thread(() -> {
+        try {
+            final String processedText = chatGptApi.getCompletionFromAudioAndPrompt(currentAudioFile, finalUserDefinedPromptText, modelName);
+            AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": Response from " + modelName + " received.", "Output Length: " + processedText.length());
+
+            mainHandler.post(() -> {
+                chatGptText.setText(processedText);
+                Toast.makeText(MainActivity.this, modelName + " processing complete.", Toast.LENGTH_SHORT).show();
+                if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
+                    sendToInputStick();
+                }
+            });
+
+        } catch (IOException e) {
+            Log.e(TAG, "IOException during " + modelName + " processing: " + e.getMessage(), e);
+            AppLogManager.getInstance().addEntry("ERROR", TAG + ": IOException in " + modelName + " processing.", e.getMessage());
+            mainHandler.post(() -> {
+                chatGptText.setText("Error (" + modelName + "): " + e.getMessage());
+                Toast.makeText(MainActivity.this, "API Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Unexpected error during " + modelName + " processing: " + e.getMessage(), e);
+            AppLogManager.getInstance().addEntry("ERROR", TAG + ": Unexpected error in " + modelName + " processing.", e.toString());
+            mainHandler.post(() -> {
+                chatGptText.setText("Unexpected error with " + modelName + ".");
+                Toast.makeText(MainActivity.this, "Unexpected error (" + modelName + ").", Toast.LENGTH_SHORT).show();
+            });
+        }
+    }).start();
+}
 
     private void sendToChatGpt() {
         String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
