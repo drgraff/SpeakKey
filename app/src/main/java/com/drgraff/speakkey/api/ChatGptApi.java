@@ -314,7 +314,8 @@ public class ChatGptApi {
             JSONObject audioSettings = new JSONObject();
             // The JS example has 'audio: { voice: "alloy", format: "wav" }'
             // 'voice' is for TTS. For input, 'format' seems relevant as a hint.
-            audioSettings.put("format", audioFileFormat);
+            audioSettings.put("format", audioFileFormat); // Hinting the input format
+            audioSettings.put("voice", "alloy");         // Add the required voice parameter
             payload.put("audio", audioSettings);
 
             JSONArray messagesArray = new JSONArray();
