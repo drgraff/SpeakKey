@@ -222,9 +222,11 @@ public class ChatGptApi {
 
         Log.d(TAG, "Sending audio transcription request. Model: " + modelName + ", Prompt: " + userPrompt);
 
-        String whisperFileMimeType = "audio/m4a"; // Assuming m4a from now on
-        if (audioFile.getName().toLowerCase().endsWith(".mp3")) whisperFileMimeType = "audio/mpeg";
-        // Add other types if MainActivity might produce them for Whisper mode in the future
+        String whisperFileMimeType = "audio/wav"; // Default to WAV for this diagnostic
+        String lowerName = audioFile.getName().toLowerCase();
+        if (lowerName.endsWith(".mp3")) whisperFileMimeType = "audio/mpeg";
+        else if (lowerName.endsWith(".m4a")) whisperFileMimeType = "audio/m4a";
+        // else if (lowerName.endsWith(".wav")) whisperFileMimeType = "audio/wav"; // Already default
         RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse(whisperFileMimeType));
 
         MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
@@ -296,19 +298,20 @@ public class ChatGptApi {
 
         String base64Audio = encodeAudioToBase64(audioFile);
 
-        String audioFileFormat = "m4a"; // New default or ensure it's detected
+        String audioFileFormat = "wav"; // Default to WAV for this diagnostic
         String fileNameLower = audioFile.getName().toLowerCase();
         if (fileNameLower.endsWith(".mp3")) {
             audioFileFormat = "mp3";
         } else if (fileNameLower.endsWith(".m4a")) {
             audioFileFormat = "m4a";
-        } else if (fileNameLower.endsWith(".wav")) {
+        } else if (fileNameLower.endsWith(".wav")) { // Ensure this case sets "wav"
             audioFileFormat = "wav";
         } else if (fileNameLower.endsWith(".ogg")) {
             audioFileFormat = "ogg";
         } else if (fileNameLower.endsWith(".flac")) {
             audioFileFormat = "flac";
         }
+        // If none of the above, it remains "wav" due to initialization.
         Log.d(TAG, "Determined audioFileFormat: " + audioFileFormat + " for file: " + fileNameLower);
         // Add more formats as supported by the model
 
