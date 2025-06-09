@@ -766,79 +766,108 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     
     private void transcribeAudioWithChatGpt() {
-    if (lastRecordedAudioPathForChatGPTDirect == null || lastRecordedAudioPathForChatGPTDirect.isEmpty()) {
-        mainHandler.post(() -> Toast.makeText(MainActivity.this, "No audio recording available for direct processing.", Toast.LENGTH_SHORT).show());
-        return;
-    }
-
-    final File currentAudioFile = new File(lastRecordedAudioPathForChatGPTDirect); // Make effectively final for thread
-    if (!currentAudioFile.exists() || currentAudioFile.length() == 0) {
-        mainHandler.post(() -> {
-            Toast.makeText(MainActivity.this, "Audio file is missing or empty.", Toast.LENGTH_SHORT).show();
-            chatGptText.setText("Audio file missing.");
-        });
-        AppLogManager.getInstance().addEntry("ERROR", TAG + ": Audio file missing or empty for direct processing.", "Path: " + lastRecordedAudioPathForChatGPTDirect);
-        return;
-    }
-
-    String apiKey = sharedPreferences.getString("openai_api_key", "");
-    if (apiKey.isEmpty()) {
-        mainHandler.post(() -> Toast.makeText(MainActivity.this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show());
-        return;
-    }
-
-    List<Prompt> currentUserActivePrompts = promptManager.getPrompts().stream()
-                                               .filter(Prompt::isActive)
-                                               .collect(Collectors.toList());
-    String userDefinedPromptText = currentUserActivePrompts.stream()
-                                       .map(Prompt::getText)
-                                       .collect(Collectors.joining("\n\n"));
-
-    if (userDefinedPromptText.isEmpty()) {
-        userDefinedPromptText = "Process the audio. If it's speech, provide a transcription. If it's music or other sounds, describe it. Follow any instructions if present in the speech.";
-    }
-
-    // Use the model selected in settings, ensure "gpt-4o-audio-preview" or "gpt-4o" can be selected there.
-    final String modelName = sharedPreferences.getString("chatgpt_model", "gpt-4o-audio-preview");
-    final String finalUserDefinedPromptText = userDefinedPromptText; // Effectively final for thread
-
-    mainHandler.post(() -> {
-        chatGptText.setText("[Sending audio and prompt to " + modelName + "...]");
-        Toast.makeText(MainActivity.this, "Processing audio with " + modelName + "...", Toast.LENGTH_SHORT).show();
-    });
-    AppLogManager.getInstance().addEntry("INFO", TAG + ": Calling getCompletionFromAudioAndPrompt.",
-        "Model: " + modelName + ", File: " + currentAudioFile.getAbsolutePath() + ", Prompt Length: " + finalUserDefinedPromptText.length());
-
-    new Thread(() -> {
-        try {
-            final String processedText = chatGptApi.getCompletionFromAudioAndPrompt(currentAudioFile, finalUserDefinedPromptText, modelName);
-            AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": Response from " + modelName + " received.", "Output Length: " + processedText.length());
-
-            mainHandler.post(() -> {
-                chatGptText.setText(processedText);
-                Toast.makeText(MainActivity.this, modelName + " processing complete.", Toast.LENGTH_SHORT).show();
-                if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
-                    sendToInputStick();
-                }
-            });
-
-        } catch (IOException e) {
-            Log.e(TAG, "IOException during " + modelName + " processing: " + e.getMessage(), e);
-            AppLogManager.getInstance().addEntry("ERROR", TAG + ": IOException in " + modelName + " processing.", e.getMessage());
-            mainHandler.post(() -> {
-                chatGptText.setText("Error (" + modelName + "): " + e.getMessage());
-                Toast.makeText(MainActivity.this, "API Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "Unexpected error during " + modelName + " processing: " + e.getMessage(), e);
-            AppLogManager.getInstance().addEntry("ERROR", TAG + ": Unexpected error in " + modelName + " processing.", e.toString());
-            mainHandler.post(() -> {
-                chatGptText.setText("Unexpected error with " + modelName + ".");
-                Toast.makeText(MainActivity.this, "Unexpected error (" + modelName + ").", Toast.LENGTH_SHORT).show();
-            });
+        if (lastRecordedAudioPathForChatGPTDirect == null || lastRecordedAudioPathForChatGPTDirect.isEmpty()) {
+            mainHandler.post(() -> Toast.makeText(MainActivity.this, "No audio recording available for direct processing.", Toast.LENGTH_SHORT).show());
+            return;
         }
-    }).start();
-}
+
+        final File currentAudioFile = new File(lastRecordedAudioPathForChatGPTDirect);
+        if (!currentAudioFile.exists() || currentAudioFile.length() == 0) {
+            mainHandler.post(() -> {
+                Toast.makeText(MainActivity.this, "Audio file is missing or empty.", Toast.LENGTH_SHORT).show();
+                chatGptText.setText("Audio file missing.");
+            });
+            AppLogManager.getInstance().addEntry("ERROR", TAG + ": Audio file missing or empty for direct processing.", "Path: " + lastRecordedAudioPathForChatGPTDirect);
+            return;
+        }
+
+        String apiKey = sharedPreferences.getString("openai_api_key", "");
+        if (apiKey.isEmpty()) {
+            mainHandler.post(() -> Toast.makeText(MainActivity.this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show());
+            return;
+        }
+
+        mainHandler.post(() -> {
+            chatGptText.setText("[Transcribing audio with Whisper...]");
+            Toast.makeText(MainActivity.this, "Transcribing audio...", Toast.LENGTH_SHORT).show();
+        });
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": Starting direct transcription (Whisper).", "File: " + currentAudioFile.getAbsolutePath());
+
+        new Thread(() -> {
+            String rawTranscription = null;
+            try {
+                // Step 1: Get Raw Transcription
+                String whisperApiPrompt = "";
+                String transcriptionModel = "whisper-1";
+                Log.d(TAG, "Calling getTranscriptionFromAudio with model: " + transcriptionModel);
+                rawTranscription = chatGptApi.getTranscriptionFromAudio(currentAudioFile, whisperApiPrompt, transcriptionModel);
+                AppLogManager.getInstance().addEntry("INFO", TAG + ": Raw transcription received.", "Length: " + (rawTranscription != null ? rawTranscription.length() : "null"));
+
+                final String finalRawTranscription = rawTranscription;
+
+                List<Prompt> currentUserActivePrompts = promptManager.getPrompts().stream()
+                                                           .filter(Prompt::isActive)
+                                                           .collect(Collectors.toList());
+                String userDefinedPromptsForProcessing = currentUserActivePrompts.stream()
+                                                           .map(Prompt::getText)
+                                                           .collect(Collectors.joining("\n\n"));
+
+                final boolean hasUserPrompts = !userDefinedPromptsForProcessing.isEmpty();
+
+                if (hasUserPrompts) {
+                    mainHandler.post(() -> {
+                        chatGptText.setText("[Raw: " + (finalRawTranscription != null ? finalRawTranscription.substring(0, Math.min(finalRawTranscription.length(), 50)) : "N/A") + "... Applying prompts...]");
+                        Toast.makeText(MainActivity.this, "Transcription complete, applying prompts...", Toast.LENGTH_SHORT).show();
+                    });
+
+                    String payloadForChatGpt = userDefinedPromptsForProcessing + "\n\n" + finalRawTranscription;
+                    String chatCompletionModel = chatGptApi.getModel(); // Get current model from API instance
+                    Log.d(TAG, "Calling getCompletion for prompt processing. Model: " + chatCompletionModel);
+
+                    final String finalProcessedText = chatGptApi.getCompletion(payloadForChatGpt);
+                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": ChatGPT prompt processing complete.", "Length: " + finalProcessedText.length());
+
+                    mainHandler.post(() -> {
+                        chatGptText.setText(finalProcessedText);
+                        Toast.makeText(MainActivity.this, "ChatGPT processing complete", Toast.LENGTH_SHORT).show();
+                        if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
+                            sendToInputStick();
+                        }
+                    });
+                } else {
+                    mainHandler.post(() -> {
+                        chatGptText.setText(finalRawTranscription);
+                        Toast.makeText(MainActivity.this, "Transcription received (Whisper)", Toast.LENGTH_SHORT).show();
+                        if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
+                            sendToInputStick();
+                        }
+                    });
+                }
+
+            } catch (IOException e) {
+                Log.e(TAG, "IOException during direct transcription/processing", e);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": IOException in direct mode (likely transcription).", e.getMessage());
+                final String errorMsgDisplay = "Transcription Error: " + e.getMessage();
+                mainHandler.post(() -> {
+                    chatGptText.setText(errorMsgDisplay);
+                    Toast.makeText(MainActivity.this, "API Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Exception during direct transcription/processing", e);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": Exception in direct mode (likely prompt processing).", e.toString());
+                final String errorMsgDisplay = "Processing error: " + e.getMessage();
+                final String currentRawTranscription = rawTranscription;
+                mainHandler.post(() -> {
+                    if (currentRawTranscription != null && !currentRawTranscription.isEmpty()) {
+                        chatGptText.setText(currentRawTranscription + "\n\n[Error applying prompts: " + e.getMessage() + "]");
+                    } else {
+                        chatGptText.setText(errorMsgDisplay);
+                    }
+                    Toast.makeText(MainActivity.this, "Error during processing.", Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
+    }
 
     private void sendToChatGpt() {
         String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
