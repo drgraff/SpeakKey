@@ -314,13 +314,6 @@ public class ChatGptApi {
 
 
         JSONObject payload = new JSONObject();
-        else if (fileNameLower.endsWith(".m4a")) audioFileFormat = "m4a";
-        else if (fileNameLower.endsWith(".ogg")) audioFileFormat = "ogg";
-        else if (fileNameLower.endsWith(".flac")) audioFileFormat = "flac";
-        // Add more formats as supported by the model
-
-
-        JSONObject payload = new JSONObject();
         try {
             payload.put("model", modelName); // e.g., "gpt-4o-audio-preview"
 
