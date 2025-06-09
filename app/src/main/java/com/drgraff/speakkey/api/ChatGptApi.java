@@ -229,19 +229,17 @@ public class ChatGptApi {
         String whisperFileMimeType;
         String lowerName = audioFile.getName().toLowerCase();
 
-        if (lowerName.equals("recording.m4a")) { // Prioritize this case
-            whisperFileMimeType = "audio/m4a";
-        } else if (lowerName.endsWith(".m4a")) { // General .m4a check
-            whisperFileMimeType = "audio/m4a";
-        } else if (lowerName.endsWith(".mp3")) {
+        if (lowerName.endsWith(".mp3")) {
             whisperFileMimeType = "audio/mpeg";
+        } else if (lowerName.endsWith(".m4a")) {
+            whisperFileMimeType = "audio/m4a";
         } else if (lowerName.endsWith(".wav")) {
             whisperFileMimeType = "audio/wav";
         } else {
-            whisperFileMimeType = "audio/m4a"; // Default if extension is unknown
-            Log.w(TAG, "Unknown audio file extension for Whisper: " + lowerName + ". Defaulting to audio/m4a MIME type.");
+            whisperFileMimeType = "audio/mpeg"; // Default for this attempt
+            Log.w(TAG, "Unknown audio extension for Whisper, defaulting to audio/mpeg: " + lowerName);
         }
-        Log.i(TAG, "WHISPER_MIME_CHECK: Using MIME type: " + whisperFileMimeType + " for file: " + lowerName);
+        Log.i(TAG, "FINAL_MP3_WHISPER_MIME_CHECK: Using MIME type: " + whisperFileMimeType + " for file: " + lowerName);
         RequestBody fileBody = RequestBody.create(audioFile, MediaType.parse(whisperFileMimeType));
 
         MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
@@ -316,12 +314,10 @@ public class ChatGptApi {
         String audioFileFormat;
         String fileNameLower = audioFile.getName().toLowerCase();
 
-        if (fileNameLower.equals("recording.m4a")) { // Prioritize this case
-            audioFileFormat = "m4a";
-        } else if (fileNameLower.endsWith(".m4a")) { // General .m4a check
-            audioFileFormat = "m4a";
-        } else if (fileNameLower.endsWith(".mp3")) {
+        if (fileNameLower.endsWith(".mp3")) {
             audioFileFormat = "mp3";
+        } else if (fileNameLower.endsWith(".m4a")) {
+            audioFileFormat = "m4a";
         } else if (fileNameLower.endsWith(".wav")) {
             audioFileFormat = "wav";
         } else if (fileNameLower.endsWith(".ogg")) {
@@ -329,10 +325,10 @@ public class ChatGptApi {
         } else if (fileNameLower.endsWith(".flac")) {
             audioFileFormat = "flac";
         } else {
-            audioFileFormat = "m4a"; // Default if extension is unknown or different
-            Log.w(TAG, "Unknown audio file extension for getCompletionFromAudioAndPrompt: " + fileNameLower + ". Defaulting to m4a format for API.");
+            audioFileFormat = "mp3"; // Default for this attempt
+            Log.w(TAG, "Unknown audio extension, defaulting to mp3: " + fileNameLower);
         }
-        Log.i(TAG, "AUDIO_FORMAT_API_CHECK: Using audioFileFormat: " + audioFileFormat + " for file: " + fileNameLower);
+        Log.i(TAG, "FINAL_MP3_API_FORMAT_CHECK: Using audioFileFormat: " + audioFileFormat + " in getCompletionFromAudioAndPrompt");
 
 
         JSONObject payload = new JSONObject();
