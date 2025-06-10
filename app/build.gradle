@@ -63,6 +63,8 @@ dependencies {
 
     // Audio recording
     implementation 'androidx.media:media:1.6.0'
+    // FFmpeg for converting recordings to MP3
+    implementation 'com.arthenica:ffmpeg-kit-min:6.0.LTS'
 
     // InputStick API (local module)
     // implementation project(':inputstickapi')
