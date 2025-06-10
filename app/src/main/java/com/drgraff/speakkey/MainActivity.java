@@ -55,6 +55,9 @@ import com.drgraff.speakkey.ui.AboutActivity; // ADD THIS
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
+import com.arthenica.ffmpegkit.FFmpegKit;
+import com.arthenica.ffmpegkit.FFmpegSession;
+import com.arthenica.ffmpegkit.ReturnCode;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Audio recording
     private MediaRecorder mediaRecorder;
     private String audioFilePath;
+    private String mp3FilePath; // Path of MP3 converted from recording
     private String lastRecordedAudioPathForChatGPTDirect = null; // Added
     private boolean isRecording = false;
     private boolean isPaused = false;
@@ -163,8 +167,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-        audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
-        Log.i(TAG, "FINAL_MP3_PATH_ATTEMPT: audioFilePath set to MP3: " + audioFilePath);
+        audioFilePath = new File(audioDir, "recording.m4a").getAbsolutePath();
+        mp3FilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
+        Log.i(TAG, "Recording paths -> M4A: " + audioFilePath + ", MP3: " + mp3FilePath);
 
 
         // Display active macros
@@ -491,11 +496,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mediaRecorder = new MediaRecorder();
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4); // Container
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.MP3);   // MP3 Encoder (Requires API 29+)
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);  // Record to AAC
             mediaRecorder.setAudioSamplingRate(16000);
             mediaRecorder.setAudioChannels(1);
             mediaRecorder.setAudioEncodingBitRate(96000); // 96 kbps
-            Log.i(TAG, "FINAL_MP3_RECORDER_ATTEMPT: OutputFormat=MPEG_4, AudioEncoder=MP3");
+            Log.i(TAG, "Recording with AAC encoder to M4A file");
             mediaRecorder.setOutputFile(audioFilePath);
             mediaRecorder.prepare();
             mediaRecorder.start();
@@ -581,9 +586,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
             if (transcriptionMode.equals("chatgpt_direct")) {
-                lastRecordedAudioPathForChatGPTDirect = audioFilePath;
-                if (chkAutoSendToChatGpt.isChecked()) { // Using chkAutoSendToChatGpt as the equivalent
-                    transcribeAudioWithChatGpt();
+                String converted = convertToMp3(new File(audioFilePath));
+                if (converted != null) {
+                    lastRecordedAudioPathForChatGPTDirect = converted;
+                    if (chkAutoSendToChatGpt.isChecked()) {
+                        transcribeAudioWithChatGpt();
+                    }
+                } else {
+                    Toast.makeText(this, "Failed to convert recording to MP3", Toast.LENGTH_LONG).show();
                 }
             } else { // "whisper" mode
                 if (chkAutoSendWhisper.isChecked()) {
@@ -612,6 +622,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (timerExecutor != null && !timerExecutor.isShutdown()) {
             timerExecutor.shutdownNow();
             timerExecutor = null;
+        }
+    }
+
+    private String convertToMp3(File inputFile) {
+        String command = "-y -i " + inputFile.getAbsolutePath() + " " + mp3FilePath;
+        FFmpegSession session = FFmpegKit.execute(command);
+        if (ReturnCode.isSuccess(session.getReturnCode())) {
+            Log.i(TAG, "MP3 conversion successful: " + mp3FilePath);
+            return mp3FilePath;
+        } else {
+            Log.e(TAG, "MP3 conversion failed: " + session.getFailStackTrace());
+            return null;
         }
     }
     
@@ -691,7 +713,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
             // That logic will move to when the task is actually completed by the service.
         });
-        Log.i(TAG, "MainActivity.transcribeAudio: Queued MP3 for Whisper transcription via UploadService.");
+        Log.i(TAG, "MainActivity.transcribeAudio: Queued recording for Whisper transcription via UploadService.");
     }
 
     private void refreshTranscriptionStatus(boolean userInitiated) {
@@ -757,6 +779,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         File audioFile = new File(audioFilePath);
         if (audioFile.exists()) {
             audioFile.delete();
+        }
+        File mp3File = new File(mp3FilePath);
+        if (mp3File.exists()) {
+            mp3File.delete();
         }
         recordingDuration = 0;
         lastRecordedAudioPathForChatGPTDirect = null; // Added
