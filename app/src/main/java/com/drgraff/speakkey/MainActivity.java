@@ -59,7 +59,6 @@ import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
 
 import com.hualee.lame.LameControl;
- main
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -109,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String pcmFilePath; // Raw PCM recording path
     private String mp3FilePath; // Path of MP3 converted from recording
     private String audioFilePath; // Points to MP3 after conversion
- main
     private String lastRecordedAudioPathForChatGPTDirect = null; // Added
     private boolean isRecording = false;
     private boolean isPaused = false;
@@ -181,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mp3FilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
         audioFilePath = mp3FilePath;
         Log.i(TAG, "Recording paths -> PCM: " + pcmFilePath + ", MP3: " + mp3FilePath);
- main
 
 
         // Display active macros
@@ -534,7 +531,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
             recordingThread.start();
             Log.i(TAG, "Recording PCM to " + pcmFilePath);
- main
             
             isRecording = true;
             isPaused = false;
@@ -647,7 +643,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (converted != null) {
                     lastRecordedAudioPathForChatGPTDirect = converted;
                     audioFilePath = converted; // use MP3 for whisper too
- main
                     if (chkAutoSendToChatGpt.isChecked()) {
                         transcribeAudioWithChatGpt();
                     }
@@ -721,7 +716,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return mp3FilePath;
         } catch (IOException e) {
             Log.e(TAG, "MP3 conversion failed", e);
- main
             return null;
         }
     }
