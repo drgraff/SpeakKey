@@ -400,12 +400,25 @@ public class ChatGptApi {
                 JSONArray choices = jsonResponse.getJSONArray("choices");
                 if (choices.length() > 0) {
                     JSONObject firstChoice = choices.getJSONObject(0);
-                    if (firstChoice.has("message") && firstChoice.getJSONObject("message").has("content")) {
-                        return firstChoice.getJSONObject("message").getString("content");
-                    } else {
-                        Log.w(TAG, "Unexpected message structure in choice (JSON audio chat): " + firstChoice.toString());
-                        throw new IOException("No 'message.content' in API response choice (JSON audio chat).");
+                    JSONObject message = firstChoice.optJSONObject("message");
+                    if (message != null) {
+                        // Prioritize audio.transcript
+                        JSONObject audio = message.optJSONObject("audio");
+                        if (audio != null && audio.has("transcript") && !audio.isNull("transcript")) {
+                            String transcript = audio.getString("transcript");
+                            // Ensure transcript is not an empty string if that's considered invalid
+                            if (transcript != null && !transcript.isEmpty()) {
+                                return transcript;
+                            }
+                        }
+                        // Fallback to content if audio.transcript is not available or empty
+                        if (message.has("content") && !message.isNull("content")) {
+                            return message.getString("content");
+                        }
                     }
+                    // If neither was found and returned
+                    Log.w(TAG, "No 'message.audio.transcript' or 'message.content' in API response choice (JSON audio chat): " + firstChoice.toString());
+                    throw new IOException("No 'message.audio.transcript' or 'message.content' in API response choice (JSON audio chat).");
                 } else {
                     throw new IOException("No choices returned in API response (JSON audio chat).");
                 }
