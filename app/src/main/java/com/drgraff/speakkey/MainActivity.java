@@ -1253,7 +1253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 View emptyView = new View(this);
                  LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     0, // width
-                    LinearLayout.LayoutParams.WRAP_CONTENT, // height
+                    0, // height  <--- MODIFIED HERE
                     1.0f // weight
                 );
                 params.setMargins(marginHorizontalPx, 0, marginHorizontalPx, 0);

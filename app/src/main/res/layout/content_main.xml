@@ -23,7 +23,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/recording_controls"/>
+        app:layout_constraintBottom_toTopOf="@id/recording_controls"
+        app:layout_constrainedHeight="true"/>
 
     <!-- Recording Control Layout -->
     <LinearLayout
@@ -247,7 +248,8 @@
         app:layout_constraintTop_toBottomOf="@id/whisper_section_container"
         app:layout_constraintBottom_toTopOf="@id/chatgpt_controls"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_goneMarginTop="8dp" />
 
     <!-- The Button @+id/btn_clear_transcription was here and is now removed. -->
 
