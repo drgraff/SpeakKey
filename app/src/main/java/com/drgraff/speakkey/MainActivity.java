@@ -187,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateUiForTranscriptionMode(String mode) {
+        Log.d(TAG, "updateUiForTranscriptionMode: Mode changed to: " + mode);
         if (whisperSectionContainer == null) {
             // This might happen if called before initializeUiElements or if ID is wrong.
             Log.e(TAG, "whisperSectionContainer is null in updateUiForTranscriptionMode. UI update skipped.");
@@ -194,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         if ("chatgpt_direct".equals(mode)) {
             whisperSectionContainer.setVisibility(View.GONE);
+            Log.d(TAG, "updateUiForTranscriptionMode: whisperSectionContainer visibility set to GONE");
             // Adjust hint for chatGptText if needed, e.g.,
             // chatGptText.setHint("ChatGPT Direct Transcription/Response");
 
@@ -216,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else { // "whisper" mode (default)
             whisperSectionContainer.setVisibility(View.VISIBLE);
+            Log.d(TAG, "updateUiForTranscriptionMode: whisperSectionContainer visibility set to VISIBLE");
             // chatGptText.setHint("ChatGPT Response"); // Reset hint if changed
 
             // Ensure activePromptsDisplay is updated by its dedicated method
@@ -1109,6 +1112,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         updateActivePromptsDisplay(); // Ensure this is called AFTER updateUiForTranscriptionMode
         displayActiveMacros(); // Moved here
         refreshTranscriptionStatus(false); // false because it's an automatic refresh onResume
+        Log.d(TAG, "onResume: All UI setup calls complete in onResume.");
     }
 
     private void updateActivePromptsDisplay() {
@@ -1153,6 +1157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void displayActiveMacros() {
+        Log.d(TAG, "displayActiveMacros: Called");
         if (macroRepository == null) {
             Log.e(TAG, "MacroRepository not initialized in displayActiveMacros");
             return;
@@ -1161,13 +1166,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         activeMacrosRowsContainer.removeAllViews();
 
         List<Macro> activeMacros = macroRepository.getActiveMacros();
+        Log.d(TAG, "displayActiveMacros: Number of active macros: " + activeMacros.size());
         int macrosPerRow = macroRepository.getMacrosPerRow(2); // Default to 2 macros per row
 
         if (activeMacros.isEmpty()) {
             activeMacrosRowsContainer.setVisibility(View.GONE);
+            Log.d(TAG, "displayActiveMacros: activeMacrosRowsContainer programmatically set to GONE");
+            activeMacrosRowsContainer.post(() -> {
+                Log.d(TAG, "displayActiveMacros (post-GONE): Container actual getVisibility(): " + activeMacrosRowsContainer.getVisibility());
+                Log.d(TAG, "displayActiveMacros (post-GONE): Container actual height: " + activeMacrosRowsContainer.getHeight());
+                Log.d(TAG, "displayActiveMacros (post-GONE): Container actual width: " + activeMacrosRowsContainer.getWidth());
+            });
             return;
         } else {
             activeMacrosRowsContainer.setVisibility(View.VISIBLE);
+            Log.d(TAG, "displayActiveMacros: activeMacrosRowsContainer programmatically set to VISIBLE");
+            activeMacrosRowsContainer.post(() -> {
+                Log.d(TAG, "displayActiveMacros (post-VISIBLE): Container actual getVisibility(): " + activeMacrosRowsContainer.getVisibility());
+                Log.d(TAG, "displayActiveMacros (post-VISIBLE): Container actual height: " + activeMacrosRowsContainer.getHeight());
+                Log.d(TAG, "displayActiveMacros (post-VISIBLE): Container actual width: " + activeMacrosRowsContainer.getWidth());
+            });
         }
 
         LinearLayout currentRow = null;
