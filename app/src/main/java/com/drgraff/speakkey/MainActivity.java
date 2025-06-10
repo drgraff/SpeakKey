@@ -182,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         // Display active macros
-        displayActiveMacros(); // Call after macroRepository is initialized
         updateUiForTranscriptionMode(transcriptionMode); // Added
+        displayActiveMacros(); // Call after macroRepository is initialized
     }
 
     private void updateUiForTranscriptionMode(String mode) {
@@ -1104,10 +1104,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false)); // Added
 
         // Refresh active macros
-        displayActiveMacros();
         String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper"); // Added
         updateUiForTranscriptionMode(transcriptionMode); // Added
         updateActivePromptsDisplay(); // Ensure this is called AFTER updateUiForTranscriptionMode
+        displayActiveMacros(); // Moved here
         refreshTranscriptionStatus(false); // false because it's an automatic refresh onResume
     }
 
