@@ -912,7 +912,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         List<Prompt> activePrompts = promptManager.getPrompts().stream().filter(Prompt::isActive).collect(Collectors.toList());
         String userPrompt = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
         if (userPrompt.isEmpty()) {
-            userPrompt = "Process the audio. If speech, transcribe. If music/noise, describe."; // Default prompt
+            userPrompt = "Please transcribe the audio file.  Do not add anything else before or after the transcribed text."; // Default prompt
         }
         final String finalUserPrompt = userPrompt;
         final String modelName = sharedPreferences.getString("chatgpt_model", "gpt-4o-audio-preview"); // Ensure this model supports audio input
