@@ -57,7 +57,9 @@ import com.drgraff.speakkey.ui.AboutActivity; // ADD THIS
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
+
 import com.hualee.lame.LameControl;
+ main
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,12 +102,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
 
     // Audio recording
+
     private AudioRecord audioRecord;
     private Thread recordingThread;
     private boolean recordingThreadRunning = false;
     private String pcmFilePath; // Raw PCM recording path
     private String mp3FilePath; // Path of MP3 converted from recording
     private String audioFilePath; // Points to MP3 after conversion
+ main
     private String lastRecordedAudioPathForChatGPTDirect = null; // Added
     private boolean isRecording = false;
     private boolean isPaused = false;
@@ -172,10 +176,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
+
         pcmFilePath = new File(audioDir, "recording.pcm").getAbsolutePath();
         mp3FilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
         audioFilePath = mp3FilePath;
         Log.i(TAG, "Recording paths -> PCM: " + pcmFilePath + ", MP3: " + mp3FilePath);
+ main
 
 
         // Display active macros
@@ -528,6 +534,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
             recordingThread.start();
             Log.i(TAG, "Recording PCM to " + pcmFilePath);
+ main
             
             isRecording = true;
             isPaused = false;
@@ -635,10 +642,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
             if (transcriptionMode.equals("chatgpt_direct")) {
+
                 String converted = convertToMp3(new File(pcmFilePath));
                 if (converted != null) {
                     lastRecordedAudioPathForChatGPTDirect = converted;
                     audioFilePath = converted; // use MP3 for whisper too
+ main
                     if (chkAutoSendToChatGpt.isChecked()) {
                         transcribeAudioWithChatGpt();
                     }
@@ -682,6 +691,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private String convertToMp3(File inputFile) {
+
         int sampleRate = 16000;
         int channel = 1;
         int bitrate = 96;
@@ -711,6 +721,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return mp3FilePath;
         } catch (IOException e) {
             Log.e(TAG, "MP3 conversion failed", e);
+ main
             return null;
         }
     }
@@ -857,6 +868,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         File pcmFile = new File(pcmFilePath);
         if (pcmFile.exists()) {
             pcmFile.delete();
+        }
+        File mp3File = new File(mp3FilePath);
+        if (mp3File.exists()) {
+            mp3File.delete();
         }
         File mp3File = new File(mp3FilePath);
         if (mp3File.exists()) {

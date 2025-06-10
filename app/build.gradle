@@ -63,8 +63,10 @@ dependencies {
 
     // Audio recording
     implementation 'androidx.media:media:1.6.0'
+
     // LAME library for MP3 encoding
     implementation 'io.github.lijieqing:lame:1.0.1032'
+main
 
     // InputStick API (local module)
     // implementation project(':inputstickapi')
