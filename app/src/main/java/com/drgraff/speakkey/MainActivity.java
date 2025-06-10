@@ -867,10 +867,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (mp3File.exists()) {
             mp3File.delete();
         }
-        File mp3File = new File(mp3FilePath);
-        if (mp3File.exists()) {
-            mp3File.delete();
-        }
         recordingDuration = 0;
         lastRecordedAudioPathForChatGPTDirect = null; // Added
         Toast.makeText(this, "Recording cleared", Toast.LENGTH_SHORT).show();
