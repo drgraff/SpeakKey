@@ -17,6 +17,7 @@ import android.view.MenuInflater; // ADD THIS
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup; // Added import
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -1259,6 +1260,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 emptyView.setLayoutParams(params);
                 currentRow.addView(emptyView);
             }
+        }
+
+        // Attempt to force WRAP_CONTENT for height after buttons are added
+        ViewGroup.LayoutParams params = activeMacrosRowsContainer.getLayoutParams();
+        if (params != null) { // Check if params is null, though it shouldn't be for a view in layout
+            params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            activeMacrosRowsContainer.setLayoutParams(params);
+            activeMacrosRowsContainer.requestLayout();
+            Log.d(TAG, "displayActiveMacros: Programmatically set height to WRAP_CONTENT and requested layout.");
+        } else {
+            Log.w(TAG, "displayActiveMacros: Could not get LayoutParams for activeMacrosRowsContainer to force WRAP_CONTENT.");
         }
     }
     
