@@ -7,6 +7,7 @@ SpeakKey is an Android application that enables voice-driven transcription, AI-p
 ## ✨ Features
 
 - 🎙️ Record audio and transcribe using OpenAI Whisper API
+- 🎵 Records microphone input as true MP3 using the LAME encoder, enabling audio uploads to ChatGPT
 - Display that transcription in an editable text box in the app
 - 🤖 Send transcribed text to ChatGPT (configurable model)
 - Display that response in an editable text box in the app

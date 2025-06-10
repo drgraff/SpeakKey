@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
   - Removed allprojects block from build.gradle
   - Updated clean task to use Gradle 8+ syntax
 
+### Added
+- Switched audio capture to use the LAME library to produce true MP3 recordings
+
 ## [1.0] - Initial Release
 
 - Initial application features
