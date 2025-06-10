@@ -542,7 +542,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             updateUiForRecording(true);
             
             Log.d(TAG, "Recording started");
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "Error starting recording", e);
             Toast.makeText(this, getString(R.string.error_recording), Toast.LENGTH_SHORT).show();
             isRecording = false;
@@ -618,7 +618,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             stopTimer();
             recordingThreadRunning = false;
             if (recordingThread != null) {
-                recordingThread.join();
+                try {
+                    recordingThread.join();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Interrupted while stopping recording thread", e);
+                    Thread.currentThread().interrupt(); // Restore interrupt status
+                }
             }
             if (audioRecord != null) {
                 audioRecord.stop();
