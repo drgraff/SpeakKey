@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo; // Added
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
+import android.media.AudioRecord;
+import android.media.AudioFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -55,8 +57,11 @@ import com.drgraff.speakkey.ui.AboutActivity; // ADD THIS
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.navigation.NavigationView;
+import com.hualee.lame.LameControl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -95,8 +100,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
 
     // Audio recording
-    private MediaRecorder mediaRecorder;
-    private String audioFilePath;
+    private AudioRecord audioRecord;
+    private Thread recordingThread;
+    private boolean recordingThreadRunning = false;
+    private String pcmFilePath; // Raw PCM recording path
+    private String mp3FilePath; // Path of MP3 converted from recording
+    private String audioFilePath; // Points to MP3 after conversion
     private String lastRecordedAudioPathForChatGPTDirect = null; // Added
     private boolean isRecording = false;
     private boolean isPaused = false;
@@ -163,8 +172,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-        audioFilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
-        Log.i(TAG, "FINAL_MP3_PATH_ATTEMPT: audioFilePath set to MP3: " + audioFilePath);
+        pcmFilePath = new File(audioDir, "recording.pcm").getAbsolutePath();
+        mp3FilePath = new File(audioDir, "recording.mp3").getAbsolutePath();
+        audioFilePath = mp3FilePath;
+        Log.i(TAG, "Recording paths -> PCM: " + pcmFilePath + ", MP3: " + mp3FilePath);
 
 
         // Display active macros
@@ -488,17 +499,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         
         try {
-            mediaRecorder = new MediaRecorder();
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4); // Container
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.MP3);   // MP3 Encoder (Requires API 29+)
-            mediaRecorder.setAudioSamplingRate(16000);
-            mediaRecorder.setAudioChannels(1);
-            mediaRecorder.setAudioEncodingBitRate(96000); // 96 kbps
-            Log.i(TAG, "FINAL_MP3_RECORDER_ATTEMPT: OutputFormat=MPEG_4, AudioEncoder=MP3");
-            mediaRecorder.setOutputFile(audioFilePath);
-            mediaRecorder.prepare();
-            mediaRecorder.start();
+            int sampleRate = 16000;
+            int channelConfig = AudioFormat.CHANNEL_IN_MONO;
+            int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+            int bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate,
+                    channelConfig, audioFormat, bufferSize);
+            if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+                Toast.makeText(this, "AudioRecord init failed", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            audioRecord.startRecording();
+            recordingThreadRunning = true;
+            recordingThread = new Thread(() -> {
+                try (FileOutputStream os = new FileOutputStream(pcmFilePath)) {
+                    byte[] buffer = new byte[bufferSize];
+                    while (recordingThreadRunning) {
+                        int read = audioRecord.read(buffer, 0, buffer.length);
+                        if (read > 0) {
+                            os.write(buffer, 0, read);
+                        }
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Error writing PCM data", e);
+                }
+            });
+            recordingThread.start();
+            Log.i(TAG, "Recording PCM to " + pcmFilePath);
             
             isRecording = true;
             isPaused = false;
@@ -524,19 +553,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!isRecording || isPaused) return;
         
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                mediaRecorder.pause();
-                isPaused = true;
-                recordingDuration += System.currentTimeMillis() - recordingStartTime;
-                stopTimer();
-                updateUiForPausedRecording();
-                Log.d(TAG, "Recording paused (orientation remains locked).");
-            } else {
-                // For devices that don't support pause/resume
-                // setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED); // Removed, stopRecording will handle it
-                stopRecording();
+            recordingThreadRunning = false;
+            if (recordingThread != null) {
+                recordingThread.join();
             }
-        } catch (IllegalStateException e) {
+            if (audioRecord != null) {
+                audioRecord.stop();
+            }
+            isPaused = true;
+            recordingDuration += System.currentTimeMillis() - recordingStartTime;
+            stopTimer();
+            updateUiForPausedRecording();
+            Log.d(TAG, "Recording paused (orientation remains locked).");
+        } catch (InterruptedException e) {
             Log.e(TAG, "Error pausing recording", e);
         }
     }
@@ -545,16 +574,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (!isRecording || !isPaused) return;
         
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                mediaRecorder.resume();
-                isPaused = false;
-                recordingStartTime = System.currentTimeMillis();
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-                Log.d(TAG, "Screen orientation locked due to recording resume.");
-                startTimer();
-                updateUiForRecording(true);
-                Log.d(TAG, "Recording resumed");
-            }
+            int sampleRate = 16000;
+            int channelConfig = AudioFormat.CHANNEL_IN_MONO;
+            int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+            int bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
+
+            audioRecord.startRecording();
+            recordingThreadRunning = true;
+            recordingThread = new Thread(() -> {
+                try (FileOutputStream os = new FileOutputStream(pcmFilePath, true)) {
+                    byte[] buffer = new byte[bufferSize];
+                    while (recordingThreadRunning) {
+                        int read = audioRecord.read(buffer, 0, buffer.length);
+                        if (read > 0) {
+                            os.write(buffer, 0, read);
+                        }
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Error writing PCM data", e);
+                }
+            });
+            recordingThread.start();
+
+            isPaused = false;
+            recordingStartTime = System.currentTimeMillis();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+            Log.d(TAG, "Screen orientation locked due to recording resume.");
+            startTimer();
+            updateUiForRecording(true);
+            Log.d(TAG, "Recording resumed");
         } catch (IllegalStateException e) {
             Log.e(TAG, "Error resuming recording", e);
         }
@@ -565,9 +613,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         
         try {
             stopTimer();
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
+            recordingThreadRunning = false;
+            if (recordingThread != null) {
+                recordingThread.join();
+            }
+            if (audioRecord != null) {
+                audioRecord.stop();
+                audioRecord.release();
+                audioRecord = null;
+            }
             
             isRecording = false;
             isPaused = false;
@@ -581,13 +635,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
             if (transcriptionMode.equals("chatgpt_direct")) {
-                lastRecordedAudioPathForChatGPTDirect = audioFilePath;
-                if (chkAutoSendToChatGpt.isChecked()) { // Using chkAutoSendToChatGpt as the equivalent
-                    transcribeAudioWithChatGpt();
+                String converted = convertToMp3(new File(pcmFilePath));
+                if (converted != null) {
+                    lastRecordedAudioPathForChatGPTDirect = converted;
+                    audioFilePath = converted; // use MP3 for whisper too
+                    if (chkAutoSendToChatGpt.isChecked()) {
+                        transcribeAudioWithChatGpt();
+                    }
+                } else {
+                    Toast.makeText(this, "Failed to convert recording to MP3", Toast.LENGTH_LONG).show();
                 }
             } else { // "whisper" mode
-                if (chkAutoSendWhisper.isChecked()) {
-                    transcribeAudio();
+                String converted = convertToMp3(new File(pcmFilePath));
+                if (converted != null) {
+                    audioFilePath = converted;
+                    if (chkAutoSendWhisper.isChecked()) {
+                        transcribeAudio();
+                    }
+                } else {
+                    Toast.makeText(this, "Failed to convert recording to MP3", Toast.LENGTH_LONG).show();
                 }
             }
         } catch (IllegalStateException e) {
@@ -612,6 +678,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (timerExecutor != null && !timerExecutor.isShutdown()) {
             timerExecutor.shutdownNow();
             timerExecutor = null;
+        }
+    }
+
+    private String convertToMp3(File inputFile) {
+        int sampleRate = 16000;
+        int channel = 1;
+        int bitrate = 96;
+        byte[] buffer = new byte[1024];
+        byte[] mp3buffer = new byte[1024];
+
+        try (FileInputStream fis = new FileInputStream(inputFile);
+             FileOutputStream fos = new FileOutputStream(mp3FilePath)) {
+            LameControl.init(sampleRate, channel, sampleRate, bitrate, 7);
+            int read;
+            short[] shortBuffer = new short[buffer.length / 2];
+            while ((read = fis.read(buffer)) > 0) {
+                for (int i = 0; i < read / 2; i++) {
+                    shortBuffer[i] = (short) ((buffer[2 * i] & 0xff) | (buffer[2 * i + 1] << 8));
+                }
+                int encoded = LameControl.encode(shortBuffer, shortBuffer, read / 2, mp3buffer);
+                if (encoded > 0) {
+                    fos.write(mp3buffer, 0, encoded);
+                }
+            }
+            int flushResult = LameControl.flush(mp3buffer);
+            if (flushResult > 0) {
+                fos.write(mp3buffer, 0, flushResult);
+            }
+            LameControl.close();
+            Log.i(TAG, "MP3 conversion successful: " + mp3FilePath);
+            return mp3FilePath;
+        } catch (IOException e) {
+            Log.e(TAG, "MP3 conversion failed", e);
+            return null;
         }
     }
     
@@ -691,7 +791,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
             // That logic will move to when the task is actually completed by the service.
         });
-        Log.i(TAG, "MainActivity.transcribeAudio: Queued MP3 for Whisper transcription via UploadService.");
+        Log.i(TAG, "MainActivity.transcribeAudio: Queued recording for Whisper transcription via UploadService.");
     }
 
     private void refreshTranscriptionStatus(boolean userInitiated) {
@@ -754,9 +854,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     
     private void clearRecording() {
-        File audioFile = new File(audioFilePath);
-        if (audioFile.exists()) {
-            audioFile.delete();
+        File pcmFile = new File(pcmFilePath);
+        if (pcmFile.exists()) {
+            pcmFile.delete();
+        }
+        File mp3File = new File(mp3FilePath);
+        if (mp3File.exists()) {
+            mp3File.delete();
         }
         recordingDuration = 0;
         lastRecordedAudioPathForChatGPTDirect = null; // Added
@@ -1136,10 +1240,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         stopTimer();
         if (isRecording) {
             try {
-                mediaRecorder.stop();
-                mediaRecorder.release();
+                recordingThreadRunning = false;
+                if (recordingThread != null) {
+                    recordingThread.join();
+                }
+                if (audioRecord != null) {
+                    audioRecord.stop();
+                    audioRecord.release();
+                }
             } catch (Exception e) {
-                Log.e(TAG, "Error releasing MediaRecorder", e);
+                Log.e(TAG, "Error releasing AudioRecord", e);
             }
         }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
