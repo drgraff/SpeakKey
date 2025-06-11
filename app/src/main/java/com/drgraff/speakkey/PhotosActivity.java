@@ -375,7 +375,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             concatenatedPromptText = getString(R.string.photos_default_image_description_prompt);
         }
 
-        String selectedPhotoModel = sharedPreferences.getString(PhotoPromptsActivity.PREF_KEY_SELECTED_PHOTO_MODEL, null);
+        String selectedPhotoModel = sharedPreferences.getString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, "gpt-4-vision-preview");
         if (selectedPhotoModel == null || selectedPhotoModel.isEmpty()) {
             Toast.makeText(this, getString(R.string.photos_toast_model_not_selected_text), Toast.LENGTH_LONG).show();
             return;
