@@ -15,9 +15,9 @@
             android:summary="Tap to fetch the latest list of models from OpenAI" />
 
         <ListPreference
-            android:key="chatgpt_model"
-            android:title="@string/settings_model_title"
-            android:summary="@string/settings_model_summary"
+            android:key="pref_onestep_processing_model"
+            android:title="One Step Processing Model"
+            android:summary="Select ChatGPT model for One Step Transcription"
             android:defaultValue="gpt-3.5-turbo"
             android:entries="@array/chatgpt_model_entries"
             android:entryValues="@array/chatgpt_model_values" />
@@ -30,7 +30,7 @@
 
         <ListPreference
             android:key="transcription_mode"
-            android:title="Transcription Mode"
+            android:title="Primary Transcription Mode"
             android:summary="Select the transcription service to use."
             android:defaultValue="two_step_transcription"
             android:entries="@array/transcription_mode_entries"
@@ -43,6 +43,38 @@
             android:defaultValue="en"
             android:entries="@array/language_entries"
             android:entryValues="@array/language_values" />
+
+        <ListPreference
+            android:key="pref_twostep_step1_engine"
+            android:title="Two Step: Step 1 Engine"
+            android:summary="Choose engine for initial transcription in Two Step mode"
+            android:entries="@array/twostep_step1_engine_entries"
+            android:entryValues="@array/twostep_step1_engine_values"
+            android:defaultValue="whisper" />
+
+        <ListPreference
+            android:key="pref_twostep_step1_chatgpt_model"
+            android:title="Two Step: Step 1 ChatGPT Model"
+            android:summary="Select ChatGPT model for Step 1 transcription (if ChatGPT engine chosen)"
+            android:entries="@array/chatgpt_model_entries"
+            android:entryValues="@array/chatgpt_model_values"
+            android:defaultValue="gpt-3.5-turbo" />
+
+        <ListPreference
+            android:key="pref_twostep_step2_processing_model"
+            android:title="Two Step: Step 2 Processing Model"
+            android:summary="Select ChatGPT model for processing after Step 1 transcription"
+            android:entries="@array/chatgpt_model_entries"
+            android:entryValues="@array/chatgpt_model_values"
+            android:defaultValue="gpt-4o" />
+
+        <ListPreference
+            android:key="pref_photovision_processing_model"
+            android:title="Photo Vision Processing Model"
+            android:summary="Select ChatGPT model for photo analysis"
+            android:entries="@array/chatgpt_model_entries"
+            android:entryValues="@array/chatgpt_model_values"
+            android:defaultValue="gpt-4-vision-preview" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="InputStick Settings">

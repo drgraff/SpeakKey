@@ -31,8 +31,16 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService; // Added
 import java.util.concurrent.Executors; // Added
 
-
 public class SettingsActivity extends AppCompatActivity {
+
+    public static final String PREF_KEY_TRANSCRIPTION_MODE = "transcription_mode"; // Existing key, good to have a constant
+    public static final String PREF_KEY_ONESTEP_PROCESSING_MODEL = "pref_onestep_processing_model"; // New key for old "chatgpt_model"
+    public static final String PREF_KEY_TWOSTEP_STEP1_ENGINE = "pref_twostep_step1_engine";
+    public static final String PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL = "pref_twostep_step1_chatgpt_model";
+    public static final String PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL = "pref_twostep_step2_processing_model";
+    public static final String PREF_KEY_PHOTOVISION_PROCESSING_MODEL = "pref_photovision_processing_model";
+    // The old key "chatgpt_model" will be replaced by PREF_KEY_ONESTEP_PROCESSING_MODEL in root_preferences.xml next.
+    // The old key "pref_key_selected_photo_model" from PhotoPromptsActivity will be superseded by PREF_KEY_PHOTOVISION_PROCESSING_MODEL.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,13 +88,13 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
 
             sharedPreferences = getPreferenceManager().getSharedPreferences();
-            chatGptModelPreference = findPreference("chatgpt_model");
+            chatGptModelPreference = findPreference(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL); // Updated key
             prefCheckModelsButton = findPreference("pref_check_models_button");
             // Preference checkUpdatesPreference = findPreference("pref_check_for_updates"); // Removed
 
             String apiKey = sharedPreferences.getString("openai_api_key", "");
             if (!apiKey.isEmpty()) {
-                chatGptApi = new ChatGptApi(apiKey, sharedPreferences.getString("chatgpt_model", "gpt-3.5-turbo"));
+                chatGptApi = new ChatGptApi(apiKey, sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-3.5-turbo")); // Updated key
             } else {
                 if (prefCheckModelsButton != null) {
                     prefCheckModelsButton.setEnabled(false);
@@ -104,6 +112,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             // Removed the if (checkUpdatesPreference != null) block
+
+            ListPreference twoStepStep1EnginePrefOnCreate = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE);
+            if (twoStepStep1EnginePrefOnCreate != null) {
+                updateTwoStepStep1ModelVisibility(twoStepStep1EnginePrefOnCreate.getValue());
+            }
         }
 
         private void fetchModelsAndUpdatePreference() {
@@ -147,7 +160,7 @@ public class SettingsActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putStringSet(PREF_KEY_FETCHED_MODEL_IDS, new HashSet<>(Arrays.asList(modelIdsArray)));
                         
-                        String currentSelectedModel = sharedPreferences.getString("chatgpt_model", null);
+                        String currentSelectedModel = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, null); // Updated key
                         boolean currentSelectionStillValid = false;
                         if (currentSelectedModel != null) {
                             for (String id : modelIdsArray) {
@@ -160,7 +173,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                         if (!currentSelectionStillValid && modelIdsArray.length > 0) {
                             currentSelectedModel = modelIdsArray[0]; 
-                            editor.putString("chatgpt_model", currentSelectedModel);
+                            editor.putString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, currentSelectedModel); // Updated key
                         }
                         editor.apply();
 
@@ -186,7 +199,7 @@ public class SettingsActivity extends AppCompatActivity {
             Set<String> modelIdsSet = sharedPreferences.getStringSet(PREF_KEY_FETCHED_MODEL_IDS, null);
             // Use IDs for names too, as PREF_KEY_FETCHED_MODEL_NAMES is not saved by fetchModelsAndUpdatePreference
             Set<String> modelNamesSet = modelIdsSet; 
-            String currentSelectedModel = sharedPreferences.getString("chatgpt_model", "gpt-3.5-turbo");
+            String currentSelectedModel = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-3.5-turbo"); // Updated key
 
             if (modelIdsSet != null && !modelIdsSet.isEmpty()) { // modelNamesSet will be the same
                 String[] modelIds = modelIdsSet.toArray(new String[0]);
@@ -209,7 +222,7 @@ public class SettingsActivity extends AppCompatActivity {
                 } else if (modelIds.length > 0) { // Default to first in the new sorted list
                     chatGptModelPreference.setValue(modelIds[0]);
                     // Persist this change if the previously selected model is no longer valid
-                    sharedPreferences.edit().putString("chatgpt_model", modelIds[0]).apply();
+                    sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, modelIds[0]).apply(); // Updated key
                 }
             } else {
                  // Fallback to default XML values if nothing is stored
@@ -227,7 +240,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 if(!isDefaultValid && entryValues.length > 0) {
                     currentSelectedModel = entryValues[0].toString();
-                    sharedPreferences.edit().putString("chatgpt_model", currentSelectedModel).apply();
+                    sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, currentSelectedModel).apply(); // Updated key
                 }
                 chatGptModelPreference.setValue(currentSelectedModel);
             }
@@ -237,25 +250,115 @@ public class SettingsActivity extends AppCompatActivity {
                 chatGptModelPreference.setSummary(chatGptModelPreference.getEntry());
             }
 
-            ListPreference transcriptionModePreference = findPreference("transcription_mode");
-            if (transcriptionModePreference != null) {
-                if (transcriptionModePreference.getEntry() != null) {
-                    transcriptionModePreference.setSummary(transcriptionModePreference.getEntry());
-                } else {
-                    // If entry is null (e.g. if value was set programmatically to something not in entryValues)
-                    // you might want to set a default summary or try to find value and set summary accordingly.
-                    // For now, relying on getEntry() is fine as per existing pattern for chatgpt_model.
-                    CharSequence value = transcriptionModePreference.getValue();
-                    int index = transcriptionModePreference.findIndexOfValue(value != null ? value.toString() : "");
-                    if (index >= 0) {
-                        transcriptionModePreference.setSummary(transcriptionModePreference.getEntries()[index]);
+            // Helper lambda to update summary for a ListPreference
+            BiConsumer<ListPreference, String> updateSummary = (pref, defaultSummary) -> {
+                if (pref != null) {
+                    if (pref.getEntry() != null) {
+                        pref.setSummary(pref.getEntry());
                     } else {
-                         // If the value is not found, you could set a generic summary or the default.
-                         // For simplicity, let's assume the value will be one of the defined ones.
-                         // If using a default value from XML, getEntry() should ideally not be null.
-                        transcriptionModePreference.setSummary("Select transcription service");
+                        CharSequence value = pref.getValue();
+                        int index = pref.findIndexOfValue(value != null ? value.toString() : "");
+                        if (index >= 0) {
+                            pref.setSummary(pref.getEntries()[index]);
+                        } else {
+                            pref.setSummary(defaultSummary);
+                        }
                     }
                 }
+            };
+
+            ListPreference transcriptionModePreference = findPreference(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE);
+            updateSummary.accept(transcriptionModePreference, "Select transcription service");
+
+            ListPreference twoStepStep1EnginePref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE);
+            updateSummary.accept(twoStepStep1EnginePref, "Choose Step 1 engine");
+
+            ListPreference twoStepStep1ModelPref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL);
+            updateSummary.accept(twoStepStep1ModelPref, "Select Step 1 ChatGPT model");
+            // For this one, also populate with dynamic models if available, like chatGptModelPreference
+            if (twoStepStep1ModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
+                String[] modelIds = modelIdsSet.toArray(new String[0]);
+                String[] modelNames = modelIdsSet.toArray(new String[0]); // Assuming names are IDs
+                Arrays.sort(modelIds);
+                Arrays.sort(modelNames);
+                twoStepStep1ModelPref.setEntries(modelNames);
+                twoStepStep1ModelPref.setEntryValues(modelIds);
+                // Set value and summary based on current selection or default
+                String currentStep1Model = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "gpt-3.5-turbo");
+                boolean step1ModelFound = Arrays.asList(modelIds).contains(currentStep1Model);
+                if (step1ModelFound) {
+                    twoStepStep1ModelPref.setValue(currentStep1Model);
+                } else if (modelIds.length > 0) {
+                    twoStepStep1ModelPref.setValue(modelIds[0]);
+                    sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, modelIds[0]).apply();
+                }
+                if (twoStepStep1ModelPref.getEntry() != null) { // Re-check after setting value
+                     twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntry());
+                }
+            }
+
+
+            ListPreference twoStepStep2ModelPref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL);
+            updateSummary.accept(twoStepStep2ModelPref, "Select Step 2 processing model");
+            // Populate with dynamic models
+             if (twoStepStep2ModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
+                String[] modelIds = modelIdsSet.toArray(new String[0]);
+                String[] modelNames = modelIdsSet.toArray(new String[0]);
+                Arrays.sort(modelIds);
+                Arrays.sort(modelNames);
+                twoStepStep2ModelPref.setEntries(modelNames);
+                twoStepStep2ModelPref.setEntryValues(modelIds);
+                String currentStep2Model = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
+                boolean step2ModelFound = Arrays.asList(modelIds).contains(currentStep2Model);
+                 if (step2ModelFound) {
+                    twoStepStep2ModelPref.setValue(currentStep2Model);
+                } else if (modelIds.length > 0) {
+                    twoStepStep2ModelPref.setValue(modelIds[0]);
+                    sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, modelIds[0]).apply();
+                }
+                if (twoStepStep2ModelPref.getEntry() != null) {
+                     twoStepStep2ModelPref.setSummary(twoStepStep2ModelPref.getEntry());
+                }
+            }
+
+
+            ListPreference photoVisionModelPref = findPreference(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL);
+            updateSummary.accept(photoVisionModelPref, "Select photo vision model");
+            // Populate with dynamic models
+            if (photoVisionModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
+                String[] modelIds = modelIdsSet.toArray(new String[0]);
+                String[] modelNames = modelIdsSet.toArray(new String[0]);
+                Arrays.sort(modelIds);
+                Arrays.sort(modelNames);
+                photoVisionModelPref.setEntries(modelNames);
+                photoVisionModelPref.setEntryValues(modelIds);
+                String currentPhotoModel = sharedPreferences.getString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, "gpt-4-vision-preview");
+                boolean photoModelFound = Arrays.asList(modelIds).contains(currentPhotoModel);
+                if (photoModelFound) {
+                    photoVisionModelPref.setValue(currentPhotoModel);
+                } else if (modelIds.length > 0) {
+                    photoVisionModelPref.setValue(modelIds[0]);
+                     sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, modelIds[0]).apply();
+                }
+                 if (photoVisionModelPref.getEntry() != null) {
+                     photoVisionModelPref.setSummary(photoVisionModelPref.getEntry());
+                }
+            }
+        }
+
+        private void updateTwoStepStep1ModelVisibility(String engineValue) {
+            ListPreference twoStepStep1ChatGptModelPref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL);
+            if (twoStepStep1ChatGptModelPref != null) {
+                if ("chatgpt".equals(engineValue)) { // Use the actual value stored for ChatGPT engine
+                    twoStepStep1ChatGptModelPref.setVisible(true);
+                    // twoStepStep1ChatGptModelPref.setEnabled(true); // setVisible is usually enough
+                } else {
+                    twoStepStep1ChatGptModelPref.setVisible(false);
+                    // twoStepStep1ChatGptModelPref.setEnabled(false);
+                }
+                Log.d("SettingsFragment", "Two Step Step 1 ChatGPT Model visibility set to: " + twoStepStep1ChatGptModelPref.isVisible());
+            } else {
+                Log.w("SettingsFragment", "Could not find pref_twostep_step1_chatgpt_model preference to update visibility.");
             }
         }
         
@@ -277,23 +380,25 @@ public class SettingsActivity extends AppCompatActivity {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("dark_mode")) {
                 ThemeManager.applyTheme(sharedPreferences);
-            } else if (key.equals("chatgpt_model")) {
-                Preference modelPref = findPreference(key);
-                if (modelPref instanceof ListPreference) {
-                    ListPreference listPref = (ListPreference) modelPref;
-                    if (listPref.getEntry() != null) {
-                        listPref.setSummary(listPref.getEntry());
-                    }
-                }
-            } else if (key.equals("transcription_mode")) {
+            } else if (key.equals(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL) ||
+                       key.equals(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE) ||
+                       key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE) ||
+                       key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL) ||
+                       key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL) ||
+                       key.equals(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL)) {
                 Preference pref = findPreference(key);
                 if (pref instanceof ListPreference) {
                     ListPreference listPref = (ListPreference) pref;
                     if (listPref.getEntry() != null) {
                         listPref.setSummary(listPref.getEntry());
                     }
+                    // Add this call for the specific key:
+                    if (key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE)) {
+                        updateTwoStepStep1ModelVisibility(listPref.getValue());
+                    }
                 }
             }
+            // Potentially add logic here to show/hide model preferences based on transcription_mode or step1_engine
         }
 
         @Override

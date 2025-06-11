@@ -7,16 +7,19 @@ public class Prompt {
     private String text;
     private boolean isActive;
     private String label;
+    private String promptModeType;
 
     // Default constructor for GSON
     public Prompt() {
+        this.promptModeType = "two_step_transcription"; // Default for new prompts from UI if not specified
     }
 
-    public Prompt(long id, String text, boolean isActive, String label) {
+    public Prompt(long id, String text, boolean isActive, String label, String promptModeType) {
         this.id = id;
         this.text = text;
         this.isActive = isActive;
         this.label = label;
+        this.promptModeType = promptModeType;
     }
 
     public long getId() {
@@ -51,6 +54,14 @@ public class Prompt {
         this.label = label;
     }
 
+    public String getPromptModeType() {
+        return promptModeType;
+    }
+
+    public void setPromptModeType(String promptModeType) {
+        this.promptModeType = promptModeType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -59,12 +70,13 @@ public class Prompt {
         return id == prompt.id &&
                 isActive == prompt.isActive &&
                 Objects.equals(text, prompt.text) &&
-                Objects.equals(label, prompt.label);
+                Objects.equals(label, prompt.label) &&
+                Objects.equals(promptModeType, prompt.promptModeType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, text, isActive, label);
+        return Objects.hash(id, text, isActive, label, promptModeType);
     }
 
     @Override
@@ -74,6 +86,7 @@ public class Prompt {
                 ", text='" + text + '\'' +
                 ", isActive=" + isActive +
                 ", label='" + label + '\'' +
+                ", promptModeType='" + promptModeType + '\'' +
                 '}';
     }
 }

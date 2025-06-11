@@ -44,4 +44,14 @@
         <item>two_step_transcription</item>
         <item>one_step_transcription</item>
     </string-array>
+
+    <!-- Two Step - Step 1 Engine Options -->
+    <string-array name="twostep_step1_engine_entries">
+        <item>Whisper API</item>
+        <item>ChatGPT for Transcription</item>
+    </string-array>
+    <string-array name="twostep_step1_engine_values">
+        <item>whisper</item> <!-- Internal value for choosing Whisper -->
+        <item>chatgpt</item> <!-- Internal value for choosing ChatGPT for transcription step -->
+    </string-array>
 </resources>
