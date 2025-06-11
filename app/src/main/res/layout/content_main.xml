@@ -238,7 +238,8 @@
         android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
         android:gravity="center_horizontal"
-        android:padding="8dp"
+        android:paddingVertical="2dp"
+        android:paddingHorizontal="8dp"
         android:text="Active Prompts Area"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="?android:attr/textColorSecondary"
@@ -249,7 +250,7 @@
         app:layout_constraintBottom_toTopOf="@id/chatgpt_controls"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_goneMarginTop="8dp" />
+        app:layout_goneMarginTop="0dp" />
 
     <!-- The Button @+id/btn_clear_transcription was here and is now removed. -->
 
