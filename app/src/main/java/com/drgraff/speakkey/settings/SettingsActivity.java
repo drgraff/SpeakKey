@@ -250,31 +250,37 @@ public class SettingsActivity extends AppCompatActivity {
                 chatGptModelPreference.setSummary(chatGptModelPreference.getEntry());
             }
 
-            // Helper lambda to update summary for a ListPreference
-            BiConsumer<ListPreference, String> updateSummary = (pref, defaultSummary) -> {
-                if (pref != null) {
-                    if (pref.getEntry() != null) {
-                        pref.setSummary(pref.getEntry());
+            ListPreference transcriptionModePreference = findPreference(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE);
+            if (transcriptionModePreference != null) {
+                if (transcriptionModePreference.getEntry() != null) {
+                    transcriptionModePreference.setSummary(transcriptionModePreference.getEntry());
+                } else {
+                    CharSequence value = transcriptionModePreference.getValue();
+                    int index = transcriptionModePreference.findIndexOfValue(value != null ? value.toString() : "");
+                    if (index >= 0) {
+                        transcriptionModePreference.setSummary(transcriptionModePreference.getEntries()[index]);
                     } else {
-                        CharSequence value = pref.getValue();
-                        int index = pref.findIndexOfValue(value != null ? value.toString() : "");
-                        if (index >= 0) {
-                            pref.setSummary(pref.getEntries()[index]);
-                        } else {
-                            pref.setSummary(defaultSummary);
-                        }
+                        transcriptionModePreference.setSummary("Select transcription service");
                     }
                 }
-            };
-
-            ListPreference transcriptionModePreference = findPreference(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE);
-            updateSummary.accept(transcriptionModePreference, "Select transcription service");
+            }
 
             ListPreference twoStepStep1EnginePref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE);
-            updateSummary.accept(twoStepStep1EnginePref, "Choose Step 1 engine");
+            if (twoStepStep1EnginePref != null) {
+                if (twoStepStep1EnginePref.getEntry() != null) {
+                    twoStepStep1EnginePref.setSummary(twoStepStep1EnginePref.getEntry());
+                } else {
+                    CharSequence value = twoStepStep1EnginePref.getValue();
+                    int index = twoStepStep1EnginePref.findIndexOfValue(value != null ? value.toString() : "");
+                    if (index >= 0) {
+                        twoStepStep1EnginePref.setSummary(twoStepStep1EnginePref.getEntries()[index]);
+                    } else {
+                        twoStepStep1EnginePref.setSummary("Choose Step 1 engine");
+                    }
+                }
+            }
 
             ListPreference twoStepStep1ModelPref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL);
-            updateSummary.accept(twoStepStep1ModelPref, "Select Step 1 ChatGPT model");
             // For this one, also populate with dynamic models if available, like chatGptModelPreference
             if (twoStepStep1ModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
                 String[] modelIds = modelIdsSet.toArray(new String[0]);
@@ -296,10 +302,23 @@ public class SettingsActivity extends AppCompatActivity {
                      twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntry());
                 }
             }
+            // Update summary for twoStepStep1ModelPref after potential population
+            if (twoStepStep1ModelPref != null) {
+                if (twoStepStep1ModelPref.getEntry() != null) {
+                    twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntry());
+                } else {
+                    CharSequence value = twoStepStep1ModelPref.getValue();
+                    int index = twoStepStep1ModelPref.findIndexOfValue(value != null ? value.toString() : "");
+                    if (index >= 0) {
+                        twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntries()[index]);
+                    } else {
+                        twoStepStep1ModelPref.setSummary("Select Step 1 ChatGPT model");
+                    }
+                }
+            }
 
 
             ListPreference twoStepStep2ModelPref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL);
-            updateSummary.accept(twoStepStep2ModelPref, "Select Step 2 processing model");
             // Populate with dynamic models
              if (twoStepStep2ModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
                 String[] modelIds = modelIdsSet.toArray(new String[0]);
@@ -320,10 +339,23 @@ public class SettingsActivity extends AppCompatActivity {
                      twoStepStep2ModelPref.setSummary(twoStepStep2ModelPref.getEntry());
                 }
             }
+            // Update summary for twoStepStep2ModelPref after potential population
+            if (twoStepStep2ModelPref != null) {
+                if (twoStepStep2ModelPref.getEntry() != null) {
+                    twoStepStep2ModelPref.setSummary(twoStepStep2ModelPref.getEntry());
+                } else {
+                    CharSequence value = twoStepStep2ModelPref.getValue();
+                    int index = twoStepStep2ModelPref.findIndexOfValue(value != null ? value.toString() : "");
+                    if (index >= 0) {
+                        twoStepStep2ModelPref.setSummary(twoStepStep2ModelPref.getEntries()[index]);
+                    } else {
+                        twoStepStep2ModelPref.setSummary("Select Step 2 processing model");
+                    }
+                }
+            }
 
 
             ListPreference photoVisionModelPref = findPreference(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL);
-            updateSummary.accept(photoVisionModelPref, "Select photo vision model");
             // Populate with dynamic models
             if (photoVisionModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
                 String[] modelIds = modelIdsSet.toArray(new String[0]);
