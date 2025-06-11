@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -39,6 +40,14 @@ import android.util.Base64; // Added
 public class UploadService extends IntentService {
     private static final String TAG = "UploadService";
     public static final String ACTION_UPLOAD = "com.drgraff.speakkey.service.action.UPLOAD";
+
+    public static final String ACTION_TRANSCRIPTION_COMPLETE = "com.drgraff.speakkey.service.action.TRANSCRIPTION_COMPLETE";
+    public static final String EXTRA_FILE_PATH = "com.drgraff.speakkey.service.extra.FILE_PATH";
+    public static final String EXTRA_TRANSCRIPTION_RESULT = "com.drgraff.speakkey.service.extra.TRANSCRIPTION_RESULT";
+    // Using task.id (long) directly is fine, but if a String ID was ever needed:
+    // public static final String EXTRA_TASK_ID_STRING = "com.drgraff.speakkey.service.extra.TASK_ID_STRING";
+    public static final String EXTRA_TASK_ID_LONG = "com.drgraff.speakkey.service.extra.TASK_ID_LONG";
+
     private static final int ONGOING_NOTIFICATION_ID = 1001;
     private static final int SUCCESS_NOTIFICATION_ID_OFFSET = 2000; // So each success can have a unique ID
     private static final int FAILED_NOTIFICATION_ID_OFFSET = 3000; // So each failure can have a unique ID
@@ -211,6 +220,15 @@ public class UploadService extends IntentService {
                     Log.w(TAG, "Local file not found for deletion: " + task.filePath + " for task ID: " + task.id);
                 }
                 // Delete task from DB (Option A)
+                // Broadcast success before deleting
+                if (UploadTask.TYPE_AUDIO_TRANSCRIPTION.equals(task.uploadType)) {
+                    Intent broadcastIntent = new Intent(ACTION_TRANSCRIPTION_COMPLETE);
+                    broadcastIntent.putExtra(EXTRA_FILE_PATH, task.filePath);
+                    broadcastIntent.putExtra(EXTRA_TRANSCRIPTION_RESULT, task.transcriptionResult);
+                    broadcastIntent.putExtra(EXTRA_TASK_ID_LONG, task.id); // Pass the task ID
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+                    Log.d(TAG, "Sent ACTION_TRANSCRIPTION_COMPLETE broadcast for task ID: " + task.id);
+                }
                 uploadTaskDao.delete(task);
                 Log.i(TAG, "Task ID: " + task.id + " deleted from database after successful processing.");
 
@@ -220,7 +238,13 @@ public class UploadService extends IntentService {
                 if (task.errorMessage == null) {
                     task.errorMessage = "Processing failed due to an unknown error.";
                 }
-                Log.w(TAG, "Task ID: " + task.id + " failed. Retry count: " + task.retryCount + ". Error: " + task.errorMessage);
+                Log.w(TAG, "Task ID: " + task.id + " (" + task.uploadType + ") processing failed. Retry count: " + task.retryCount + ". Error: " + task.errorMessage);
+                if (task.retryCount >= 5) { // Max 5 retries
+                    Log.e(TAG, "Task ID: " + task.id + " has reached max retries. Marking as permanently failed (conceptually). Not attempting further retries in this run.");
+                    // In a fuller implementation, you might set a specific status like STATUS_PERMANENTLY_FAILED
+                    // and ensure getPendingUploads() excludes these. For now, it will just be updated.
+                    // The showFailedNotification logic can remain as is (e.g., notify after 3).
+                }
                 // For now, show failure immediately. Retry logic might change this.
                  if (task.retryCount >= 3) { // Example: Notify failure after 3 retries
                     showFailedNotification(task);
