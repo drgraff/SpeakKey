@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         // Initialize settings
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper"); // Added
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription"); // Added
         
         // Apply the theme before setting content view
         ThemeManager.applyTheme(sharedPreferences);
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.e(TAG, "whisperSectionContainer is null in updateUiForTranscriptionMode. UI update skipped.");
             return;
         }
-        if ("chatgpt_direct".equals(mode)) {
+        if ("one_step_transcription".equals(mode)) {
             whisperSectionContainer.setVisibility(View.GONE);
             Log.d(TAG, "updateUiForTranscriptionMode: whisperSectionContainer visibility set to GONE");
             // Adjust hint for chatGptText if needed, e.g.,
@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                  .filter(Prompt::isActive)
                                                  .collect(Collectors.toList());
                 if (activePrompts.isEmpty() && activePromptsDisplay != null) {
-                    activePromptsDisplay.setText("Direct Transcription");
+                    activePromptsDisplay.setText("One Step Transcription");
                     activePromptsDisplay.setVisibility(View.VISIBLE); // Ensure it's visible
                 } else if (activePromptsDisplay != null) {
                     // If there are active prompts, updateActivePromptsDisplay will handle showing them.
@@ -696,8 +696,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             
             Log.d(TAG, "Recording stopped, duration: " + recordingDuration + "ms");
 
-            String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
-            if (transcriptionMode.equals("chatgpt_direct")) {
+            String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
+            if (transcriptionMode.equals("one_step_transcription")) {
 
                 String converted = convertToMp3(new File(pcmFilePath));
                 if (converted != null) {
@@ -1008,10 +1008,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void sendToChatGpt() {
-        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
         Log.i(TAG, "sendToChatGpt called. Mode: " + transcriptionMode);
 
-        if (transcriptionMode.equals("chatgpt_direct")) {
+        if (transcriptionMode.equals("one_step_transcription")) {
             if (lastRecordedAudioPathForChatGPTDirect != null && new File(lastRecordedAudioPathForChatGPTDirect).exists()) {
                 Log.d(TAG, "sendToChatGpt (Direct Mode): Calling transcribeAudioWithChatGpt for MP3 file " + lastRecordedAudioPathForChatGPTDirect);
                 transcribeAudioWithChatGpt(); // This will use the MP3 and call getCompletionFromAudioAndPrompt
@@ -1192,9 +1192,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                              .filter(Prompt::isActive)
                                              .collect(Collectors.toList());
 
-        if ("chatgpt_direct".equals(transcriptionMode)) {
+        if ("one_step_transcription".equals(transcriptionMode)) {
             if (activeSystemPrompts.isEmpty()) {
-                activePromptsDisplay.setText("Direct Transcription");
+                activePromptsDisplay.setText("One Step Transcription");
                 activePromptsDisplay.setVisibility(View.VISIBLE);
             } else {
                 // Show actual active prompts
