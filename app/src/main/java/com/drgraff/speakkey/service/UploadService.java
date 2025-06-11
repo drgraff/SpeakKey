@@ -48,6 +48,11 @@ public class UploadService extends IntentService {
     // public static final String EXTRA_TASK_ID_STRING = "com.drgraff.speakkey.service.extra.TASK_ID_STRING";
     public static final String EXTRA_TASK_ID_LONG = "com.drgraff.speakkey.service.extra.TASK_ID_LONG";
 
+    public static final String ACTION_PHOTO_VISION_COMPLETE = "com.drgraff.speakkey.service.action.PHOTO_VISION_COMPLETE";
+    public static final String EXTRA_PHOTO_FILE_PATH = "com.drgraff.speakkey.service.extra.PHOTO_FILE_PATH";
+    public static final String EXTRA_VISION_RESULT = "com.drgraff.speakkey.service.extra.VISION_RESULT";
+    public static final String EXTRA_PHOTO_TASK_ID_LONG = "com.drgraff.speakkey.service.extra.PHOTO_TASK_ID_LONG";
+
     private static final int ONGOING_NOTIFICATION_ID = 1001;
     private static final int SUCCESS_NOTIFICATION_ID_OFFSET = 2000; // So each success can have a unique ID
     private static final int FAILED_NOTIFICATION_ID_OFFSET = 3000; // So each failure can have a unique ID
@@ -228,6 +233,13 @@ public class UploadService extends IntentService {
                     broadcastIntent.putExtra(EXTRA_TASK_ID_LONG, task.id); // Pass the task ID
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                     Log.d(TAG, "Sent ACTION_TRANSCRIPTION_COMPLETE broadcast for task ID: " + task.id);
+                } else if (UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType)) {
+                    Intent broadcastIntent = new Intent(ACTION_PHOTO_VISION_COMPLETE);
+                    broadcastIntent.putExtra(EXTRA_PHOTO_FILE_PATH, task.filePath);
+                    broadcastIntent.putExtra(EXTRA_VISION_RESULT, task.visionApiResponse); // Assuming vision result is in task.visionApiResponse
+                    broadcastIntent.putExtra(EXTRA_PHOTO_TASK_ID_LONG, task.id);
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+                    Log.d(TAG, "Sent ACTION_PHOTO_VISION_COMPLETE broadcast for task ID: " + task.id);
                 }
                 uploadTaskDao.delete(task);
                 Log.i(TAG, "Task ID: " + task.id + " deleted from database after successful processing.");

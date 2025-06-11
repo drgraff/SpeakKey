@@ -9,6 +9,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -91,6 +95,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     private InputStickManager inputStickManager; // Added
 
     private String currentPhotoPath;
+    private PhotoVisionBroadcastReceiver photoVisionReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +127,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         btnSendToInputStickPhoto = findViewById(R.id.btn_send_to_inputstick_photo); // Added
         chkAutoSendInputStickPhoto = findViewById(R.id.chk_auto_send_inputstick_photo);
         inputStickManager = new InputStickManager(this); // Added
+        photoVisionReceiver = new PhotoVisionBroadcastReceiver();
 
         String apiKey = sharedPreferences.getString("openai_api_key", "");
         if (apiKey.isEmpty()) {
@@ -251,8 +257,18 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     @Override
     protected void onResume() {
         super.onResume();
+        IntentFilter filter = new IntentFilter(UploadService.ACTION_PHOTO_VISION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(photoVisionReceiver, filter);
+        Log.d(TAG, "PhotoVisionBroadcastReceiver registered.");
         updateActivePhotoPromptsDisplay();
         refreshPhotoProcessingStatus(false); // Add this call
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(photoVisionReceiver);
+        Log.d(TAG, "PhotoVisionBroadcastReceiver unregistered.");
     }
 
     // The existing OnTouchListener for editTextChatGptResponsePhoto for refresh should be here.
@@ -585,6 +601,46 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     public void onSave(String editedText) {
         if (editTextChatGptResponsePhoto != null) {
             editTextChatGptResponsePhoto.setText(editedText);
+        }
+    }
+
+    private class PhotoVisionBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "PhotoVisionBroadcastReceiver: onReceive triggered.");
+            String action = intent.getAction();
+            if (UploadService.ACTION_PHOTO_VISION_COMPLETE.equals(action)) {
+                String receivedFilePath = intent.getStringExtra(UploadService.EXTRA_PHOTO_FILE_PATH);
+                String visionResult = intent.getStringExtra(UploadService.EXTRA_VISION_RESULT);
+                long taskId = intent.getLongExtra(UploadService.EXTRA_PHOTO_TASK_ID_LONG, -1);
+
+                Log.d(TAG, "Received ACTION_PHOTO_VISION_COMPLETE for task ID: " + taskId + ", file: " + receivedFilePath);
+                Log.d(TAG, "Current photo path in PhotosActivity: " + PhotosActivity.this.currentPhotoPath);
+
+                if (editTextChatGptResponsePhoto == null) {
+                    Log.e(TAG, "editTextChatGptResponsePhoto is null in BroadcastReceiver. Cannot update UI.");
+                    return;
+                }
+
+                // Compare with the currentPhotoPath that this PhotosActivity instance is displaying/waiting for
+                if (receivedFilePath != null && receivedFilePath.equals(PhotosActivity.this.currentPhotoPath)) {
+                    if (visionResult != null) {
+                        editTextChatGptResponsePhoto.setText(visionResult);
+                        Log.i(TAG, "Photo vision result updated via broadcast for task ID: " + taskId);
+
+                        // Auto-send to InputStick if checked
+                        if (chkAutoSendInputStickPhoto != null && chkAutoSendInputStickPhoto.isChecked()) {
+                            Log.d(TAG, "Auto-sending photo vision result to InputStick from broadcast receiver.");
+                            sendTextToInputStick();
+                        }
+                    } else {
+                        Log.w(TAG, "Received null vision result for matched file path: " + receivedFilePath);
+                        editTextChatGptResponsePhoto.setText(getString(R.string.photos_vision_failed_placeholder)); // Assumes such a string exists or will be added
+                    }
+                } else {
+                    Log.d(TAG, "Received vision result for a different/unknown file path. Current: " + PhotosActivity.this.currentPhotoPath + ", Received: " + receivedFilePath + ". No UI update for editTextChatGptResponsePhoto.");
+                }
+            }
         }
     }
 }
