@@ -9,6 +9,10 @@ import android.media.MediaRecorder;
 import android.media.AudioRecord;
 import android.media.AudioFormat;
 import android.os.Bundle;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -130,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Timer
     private ScheduledExecutorService timerExecutor;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private TranscriptionBroadcastReceiver transcriptionReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initializeApis();
         macroRepository = new MacroRepository(getApplicationContext()); // Initialize MacroRepository
         promptManager = new PromptManager(this); // Initialize PromptManager
+        transcriptionReceiver = new TranscriptionBroadcastReceiver();
         
         // Request permissions
         requestPermissions();
@@ -480,6 +486,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void requestPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
+        }
+    }
+
+    private class TranscriptionBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "TranscriptionBroadcastReceiver: onReceive triggered.");
+            String action = intent.getAction();
+            if (UploadService.ACTION_TRANSCRIPTION_COMPLETE.equals(action)) {
+                String receivedFilePath = intent.getStringExtra(UploadService.EXTRA_FILE_PATH);
+                String transcriptionResult = intent.getStringExtra(UploadService.EXTRA_TRANSCRIPTION_RESULT);
+                long taskId = intent.getLongExtra(UploadService.EXTRA_TASK_ID_LONG, -1); // Get task ID
+
+                Log.d(TAG, "Received ACTION_TRANSCRIPTION_COMPLETE for task ID: " + taskId + ", file: " + receivedFilePath);
+                Log.d(TAG, "Current audioFilePath in MainActivity: " + MainActivity.this.audioFilePath); // Log current path for comparison
+
+                // Ensure whisperText is not null (it should be initialized in initializeUiElements)
+                if (whisperText == null) {
+                    Log.e(TAG, "whisperText EditText is null in BroadcastReceiver. Cannot update UI.");
+                    return;
+                }
+
+                // Compare with the audioFilePath that triggered the transcription in *this* MainActivity instance
+                if (receivedFilePath != null && receivedFilePath.equals(MainActivity.this.audioFilePath)) {
+                    if (transcriptionResult != null) {
+                        whisperText.setText(transcriptionResult);
+                        Log.i(TAG, "Whisper transcription updated via broadcast for task ID: " + taskId);
+
+                        // Optional: Auto-send to ChatGPT or InputStick if checked
+                        if (chkAutoSendToChatGpt.isChecked()) {
+                            Log.d(TAG, "Auto-sending to ChatGPT from broadcast receiver.");
+                            sendToChatGpt(); // Make sure this method can handle being called here
+                        }
+                        if (chk_auto_send_whisper_to_inputstick.isChecked()) {
+                            Log.d(TAG, "Auto-sending Whisper text to InputStick from broadcast receiver.");
+                            sendWhisperToInputStick(); // Make sure this method can handle being called here
+                        }
+                    } else {
+                        Log.w(TAG, "Received null transcription result for matched file path: " + receivedFilePath);
+                        whisperText.setText(getString(R.string.transcription_failed_placeholder)); // Or some error placeholder
+                    }
+                } else {
+                    Log.d(TAG, "Received transcription for a different/unknown file path. Current: " + MainActivity.this.audioFilePath + ", Received: " + receivedFilePath + ". No UI update for whisperText.");
+                }
+            }
         }
     }
     
@@ -1097,6 +1148,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        IntentFilter filter = new IntentFilter(UploadService.ACTION_TRANSCRIPTION_COMPLETE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(transcriptionReceiver, filter);
+        Log.d(TAG, "TranscriptionBroadcastReceiver registered.");
         // Apply theme in case it was changed in settings
         ThemeManager.applyTheme(sharedPreferences);
         
@@ -1114,6 +1168,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         displayActiveMacros(); // Moved here
         refreshTranscriptionStatus(false); // false because it's an automatic refresh onResume
         Log.d(TAG, "onResume: All UI setup calls complete in onResume.");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(transcriptionReceiver);
+        Log.d(TAG, "TranscriptionBroadcastReceiver unregistered.");
     }
 
     private void updateActivePromptsDisplay() {
