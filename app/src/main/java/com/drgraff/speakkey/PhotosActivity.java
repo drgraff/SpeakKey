@@ -60,6 +60,7 @@ import com.drgraff.speakkey.data.UploadTask; // Added for UploadTask
 import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
 import com.drgraff.speakkey.service.UploadService; // Added for UploadService
 import com.drgraff.speakkey.inputstick.InputStickManager;
+import com.drgraff.speakkey.settings.SettingsActivity; // Added import
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // Added
 
