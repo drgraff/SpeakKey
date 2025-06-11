@@ -37,11 +37,11 @@
     </string-array>
 
     <string-array name="transcription_mode_entries">
-        <item>Whisper</item>
-        <item>ChatGPT Direct</item>
+        <item>Two Step Transcription</item>
+        <item>One Step Transcription</item>
     </string-array>
     <string-array name="transcription_mode_values">
-        <item>whisper</item>
-        <item>chatgpt_direct</item>
+        <item>two_step_transcription</item>
+        <item>one_step_transcription</item>
     </string-array>
 </resources>
