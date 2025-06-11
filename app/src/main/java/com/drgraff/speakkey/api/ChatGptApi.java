@@ -75,7 +75,7 @@ public class ChatGptApi {
      * @return Completion from ChatGPT
      * @throws Exception if API call fails
      */
-    public String getCompletion(String prompt) throws Exception {
+    public String getCompletion(String prompt, String modelToUse) throws Exception {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IllegalArgumentException("API key is required");
         }
@@ -91,7 +91,7 @@ public class ChatGptApi {
         ChatGptApiService apiService = retrofit.create(ChatGptApiService.class);
 
         ChatGptRequest.Message userMessage = new ChatGptRequest.Message("user", prompt);
-        ChatGptRequest request = new ChatGptRequest(this.model, Collections.singletonList(userMessage));
+        ChatGptRequest request = new ChatGptRequest(modelToUse, Collections.singletonList(userMessage));
 
         String authToken = "Bearer " + this.apiKey;
 

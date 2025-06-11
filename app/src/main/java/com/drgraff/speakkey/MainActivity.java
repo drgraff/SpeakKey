@@ -696,28 +696,67 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             
             Log.d(TAG, "Recording stopped, duration: " + recordingDuration + "ms");
 
-            String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
+            String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
             if (transcriptionMode.equals("one_step_transcription")) {
-
                 String converted = convertToMp3(new File(pcmFilePath));
                 if (converted != null) {
                     lastRecordedAudioPathForChatGPTDirect = converted;
-                    audioFilePath = converted; // use MP3 for whisper too
-                    if (chkAutoSendToChatGpt.isChecked()) {
+                    audioFilePath = converted;
+                    if (chkAutoSendToChatGpt.isChecked()) { // This checkbox now implies auto-send for one-step
                         transcribeAudioWithChatGpt();
                     }
                 } else {
-                    Toast.makeText(this, "Failed to convert recording to MP3", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Failed to convert recording to MP3 for one-step.", Toast.LENGTH_LONG).show();
                 }
-            } else { // "whisper" mode
-                String converted = convertToMp3(new File(pcmFilePath));
-                if (converted != null) {
-                    audioFilePath = converted;
-                    if (chkAutoSendWhisper.isChecked()) {
-                        transcribeAudio();
+            } else { // "two_step_transcription" mode
+                String step1Engine = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE, "whisper");
+                Log.d(TAG, "Two Step Mode - Step 1 Engine: " + step1Engine);
+
+                if ("chatgpt".equals(step1Engine)) {
+                    String step1ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "gpt-3.5-turbo");
+                    Log.d(TAG, "Two Step Mode - Step 1 using ChatGPT Model: " + step1ModelName);
+                    String converted = convertToMp3(new File(pcmFilePath));
+                    if (converted != null) {
+                        audioFilePath = converted;
+                        lastRecordedAudioPathForChatGPTDirect = converted;
+
+                        new Thread(() -> {
+                            try {
+                                String systemPromptForTranscription = "Transcribe this audio.";
+                                Log.d(TAG, "Two Step (Step 1 - ChatGPT): Transcribing with model: " + step1ModelName);
+                                final String transcript = chatGptApi.getCompletionFromAudioAndPrompt(new File(converted), systemPromptForTranscription, step1ModelName);
+
+                                mainHandler.post(() -> {
+                                    if (transcript != null) {
+                                        Log.i(TAG, "Two Step (Step 1 - ChatGPT): Transcription successful.");
+                                        whisperText.setText(transcript);
+                                        if (chkAutoSendToChatGpt.isChecked()) {
+                                            Log.d(TAG, "Two Step (Step 1 - ChatGPT): Auto-sending transcript for Step 2 processing.");
+                                            sendToChatGpt();
+                                        }
+                                    } else {
+                                        Log.w(TAG, "Two Step (Step 1 - ChatGPT): Transcription returned null.");
+                                        whisperText.setText(getString(R.string.transcription_failed_placeholder));
+                                    }
+                                });
+                            } catch (Exception e) {
+                                Log.e(TAG, "Two Step (Step 1 - ChatGPT): Transcription error", e);
+                                mainHandler.post(() -> whisperText.setText(getString(R.string.transcription_failed_placeholder) + " - " + e.getMessage()));
+                            }
+                        }).start();
+                    } else {
+                        Toast.makeText(this, "Failed to convert recording to MP3 for two-step (ChatGPT).", Toast.LENGTH_LONG).show();
                     }
-                } else {
-                    Toast.makeText(this, "Failed to convert recording to MP3", Toast.LENGTH_LONG).show();
+                } else { // Default to Whisper for Step 1
+                    String converted = convertToMp3(new File(pcmFilePath));
+                    if (converted != null) {
+                        audioFilePath = converted;
+                        if (chkAutoSendWhisper.isChecked()) {
+                            transcribeAudio(); // Queues via UploadService
+                        }
+                    } else {
+                        Toast.makeText(this, "Failed to convert recording to MP3 for two-step (Whisper).", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         } catch (IllegalStateException e) {
@@ -970,7 +1009,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             userPrompt = "Please transcribe the audio file.  Do not add anything else before or after the transcribed text."; // Default prompt
         }
         final String finalUserPrompt = userPrompt;
-        final String modelName = sharedPreferences.getString("chatgpt_model", "gpt-4o-audio-preview"); // Ensure this model supports audio input
+        final String modelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-4o"); // Default to gpt-4o or another suitable model
 
         mainHandler.post(() -> {
             chatGptText.setText("[DIRECT_MODE: Sending MP3 audio & prompt to " + modelName + "...]");
@@ -1039,38 +1078,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             List<Prompt> activePrompts = promptManager.getPrompts().stream().filter(Prompt::isActive).collect(Collectors.toList());
             String promptsText = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
             String finalTextPayload = promptsText.isEmpty() ? transcript : promptsText + "\n\n" + transcript;
-            final String currentChatGptModel = chatGptApi.getModel(); // Get current model from API instance
+            // Use the specific model for Step 2 processing
+            String step2ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
+            Log.d(TAG, "Using Two Step - Step 2 Processing Model: " + step2ModelName);
 
             mainHandler.post(() -> {
-                chatGptText.setText("[WHISPER_MODE: Sending text to " + currentChatGptModel + "...]");
-                Toast.makeText(MainActivity.this, "WHISPER_MODE: Sending to " + currentChatGptModel + "...", Toast.LENGTH_SHORT).show();
+                chatGptText.setText("[TWO_STEP_MODE: Sending text to " + step2ModelName + "...]");
+                Toast.makeText(MainActivity.this, "TWO_STEP_MODE: Sending to " + step2ModelName + "...", Toast.LENGTH_SHORT).show();
             });
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": WHISPER_MODE_SEND_TO_CHATGPT", "Model: " + currentChatGptModel + ", Payload Length: " + finalTextPayload.length());
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": TWO_STEP_SEND_TO_CHATGPT", "Model: " + step2ModelName + ", Payload Length: " + finalTextPayload.length());
 
             new Thread(() -> {
                 try {
-                    final String result = chatGptApi.getCompletion(finalTextPayload);
-                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": WHISPER_MODE: Response from " + currentChatGptModel + " received.", "Output Length: " + (result != null ? result.length() : "null"));
+                    final String result = chatGptApi.getCompletion(finalTextPayload, step2ModelName); // Pass the model
+                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": TWO_STEP_MODE: Response from " + step2ModelName + " received.", "Output Length: " + (result != null ? result.length() : "null"));
                     mainHandler.post(() -> {
                         chatGptText.setText(result);
-                        Toast.makeText(MainActivity.this, "WHISPER_MODE: " + currentChatGptModel + " processing complete.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "TWO_STEP_MODE: " + step2ModelName + " processing complete.", Toast.LENGTH_SHORT).show();
                         if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
                             sendToInputStick();
                         }
                     });
                 } catch (IOException e) {
-                    Log.e(TAG, "WHISPER_MODE: IOException during " + currentChatGptModel + " processing: " + e.getMessage(), e);
-                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": WHISPER_MODE: IOException in " + currentChatGptModel + " processing.", "Error: " + e.getMessage());
+                    Log.e(TAG, "TWO_STEP_MODE: IOException during " + step2ModelName + " processing: " + e.getMessage(), e);
+                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": TWO_STEP_MODE: IOException in " + step2ModelName + " processing.", "Error: " + e.getMessage());
                     mainHandler.post(() -> {
-                        chatGptText.setText("[WHISPER_MODE: API Error (" + currentChatGptModel + "): " + e.getMessage() + "]");
-                        Toast.makeText(MainActivity.this, "WHISPER_MODE: API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        chatGptText.setText("[TWO_STEP_MODE: API Error (" + step2ModelName + "): " + e.getMessage() + "]");
+                        Toast.makeText(MainActivity.this, "TWO_STEP_MODE: API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
                 } catch (Exception e) {
-                    Log.e(TAG, "WHISPER_MODE: Unexpected error during " + currentChatGptModel + " processing: " + e.getMessage(), e);
-                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": WHISPER_MODE: Unexpected error in " + currentChatGptModel + " processing.", "Error: " + e.toString());
+                    Log.e(TAG, "TWO_STEP_MODE: Unexpected error during " + step2ModelName + " processing: " + e.getMessage(), e);
+                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": TWO_STEP_MODE: Unexpected error in " + step2ModelName + " processing.", "Error: " + e.toString());
                     mainHandler.post(() -> {
-                        chatGptText.setText("[WHISPER_MODE: Unexpected error with " + currentChatGptModel + "]");
-                        Toast.makeText(MainActivity.this, "WHISPER_MODE: Unexpected error (" + currentChatGptModel + ")", Toast.LENGTH_LONG).show();
+                        chatGptText.setText("[TWO_STEP_MODE: Unexpected error with " + step2ModelName + "]");
+                        Toast.makeText(MainActivity.this, "TWO_STEP_MODE: Unexpected error (" + step2ModelName + ")", Toast.LENGTH_LONG).show();
                     });
                 }
             }).start();
