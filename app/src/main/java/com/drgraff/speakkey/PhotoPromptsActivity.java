@@ -27,9 +27,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.OpenAIModelData;
-import com.drgraff.speakkey.data.PhotoPrompt;
-import com.drgraff.speakkey.data.PhotoPromptManager;
+import com.drgraff.speakkey.data.Prompt; // Changed
+import com.drgraff.speakkey.data.PromptManager; // Changed
 import com.drgraff.speakkey.data.PhotoPromptsAdapter;
+import com.drgraff.speakkey.settings.SettingsActivity; // Added
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -41,15 +42,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class PhotoPromptsActivity extends AppCompatActivity implements PhotoPromptsAdapter.OnPhotoPromptInteractionListener {
+public class PhotoPromptsActivity extends AppCompatActivity implements PhotoPromptsAdapter.OnPhotoPromptInteractionListener { // Interface name might need update based on Adapter's actual change
 
-    public static final String PREF_KEY_SELECTED_PHOTO_MODEL = "selected_photo_model";
-    public static final String PREF_KEY_FETCHED_PHOTO_MODEL_IDS = "fetched_photo_model_ids";
+    // Removed local PREF_KEY constants
     private static final String TAG = "PhotoPromptsActivity";
 
     private RecyclerView photoPromptsRecyclerView;
-    private PhotoPromptsAdapter photoPromptsAdapter;
-    private PhotoPromptManager photoPromptManager;
+    private PhotoPromptsAdapter photoPromptsAdapter; // Adapter type might need to change if it's generic now
+    private PromptManager promptManager; // Changed
     private TextView emptyPhotoPromptsTextView;
     private FloatingActionButton fabAddPhotoPrompt;
     private Button btnCheckPhotoModels;
@@ -90,12 +90,13 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
         chatGptApi = new ChatGptApi(apiKey, "default_model_not_used_for_listing");
 
 
-        photoPromptManager = new PhotoPromptManager(this);
+        promptManager = new PromptManager(this); // Changed
 
         photoPromptsRecyclerView = findViewById(R.id.photo_prompts_recycler_view);
         photoPromptsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        photoPromptsAdapter = new PhotoPromptsAdapter(this, new ArrayList<>(), photoPromptManager, this);
+        // Assuming PhotoPromptsAdapter constructor now takes PromptManager
+        photoPromptsAdapter = new PhotoPromptsAdapter(this, new ArrayList<>(), promptManager, this);
         photoPromptsRecyclerView.setAdapter(photoPromptsAdapter);
 
         emptyPhotoPromptsTextView = findViewById(R.id.empty_photo_prompts_text_view);
@@ -125,7 +126,7 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedModel = (String) parent.getItemAtPosition(position);
-                sharedPreferences.edit().putString(PREF_KEY_SELECTED_PHOTO_MODEL, selectedModel).apply();
+                sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, selectedModel).apply(); // Changed
                 Log.d(TAG, "Selected photo model saved: " + selectedModel);
             }
 
@@ -179,22 +180,23 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
 
                     // Save fetched models to SharedPreferences
                     Set<String> modelSet = new HashSet<>(modelList);
-                    sharedPreferences.edit().putStringSet(PREF_KEY_FETCHED_PHOTO_MODEL_IDS, modelSet).apply();
+                    // Using the generic fetched model IDs key from SettingsActivity as per instruction
+                    sharedPreferences.edit().putStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, modelSet).apply(); // Changed
                     Log.d(TAG, "Fetched and saved photo models: " + modelSet.size());
 
                     // Restore selection
-                    String previouslySelected = sharedPreferences.getString(PREF_KEY_SELECTED_PHOTO_MODEL, null);
+                    String previouslySelected = sharedPreferences.getString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, null); // Changed
                     if (previouslySelected != null) {
                         int spinnerPosition = modelAdapter.getPosition(previouslySelected);
                         if (spinnerPosition >= 0) {
                             spinnerPhotoModels.setSelection(spinnerPosition);
                         } else if (!modelList.isEmpty()){
                             spinnerPhotoModels.setSelection(0); // Select first if previous not found
-                             sharedPreferences.edit().putString(PREF_KEY_SELECTED_PHOTO_MODEL, modelList.get(0)).apply();
+                             sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, modelList.get(0)).apply(); // Changed
                         }
                     } else if (!modelList.isEmpty()) {
                         spinnerPhotoModels.setSelection(0); // Select first if nothing was previously selected
-                        sharedPreferences.edit().putString(PREF_KEY_SELECTED_PHOTO_MODEL, modelList.get(0)).apply();
+                        sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, modelList.get(0)).apply(); // Changed
                     }
                     Toast.makeText(PhotoPromptsActivity.this, getString(R.string.photo_prompts_toast_models_updated), Toast.LENGTH_SHORT).show();
                 });
@@ -212,7 +214,8 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
     }
 
     private void loadAndPopulatePhotoModelsSpinner() {
-        Set<String> fetchedModelIds = sharedPreferences.getStringSet(PREF_KEY_FETCHED_PHOTO_MODEL_IDS, null);
+        // Using the generic fetched model IDs key from SettingsActivity
+        Set<String> fetchedModelIds = sharedPreferences.getStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, null); // Changed
         modelList.clear();
         if (fetchedModelIds != null && !fetchedModelIds.isEmpty()) {
             modelList.addAll(new ArrayList<>(fetchedModelIds));
@@ -225,24 +228,24 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
         }
         modelAdapter.notifyDataSetChanged();
 
-        String selectedModelId = sharedPreferences.getString(PREF_KEY_SELECTED_PHOTO_MODEL, "gpt-4-vision-preview");
+        String selectedModelId = sharedPreferences.getString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, "gpt-4-vision-preview"); // Changed
         if (selectedModelId != null && !modelList.isEmpty()) { // selectedModelId will not be null due to default
             int spinnerPosition = modelAdapter.getPosition(selectedModelId);
             if (spinnerPosition >= 0) {
                 spinnerPhotoModels.setSelection(spinnerPosition);
             } else if (!modelList.isEmpty()) { // If saved selection not in current list, select first
                  spinnerPhotoModels.setSelection(0);
-                 sharedPreferences.edit().putString(PREF_KEY_SELECTED_PHOTO_MODEL, modelList.get(0)).apply();
+                 sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, modelList.get(0)).apply(); // Changed
             }
         } else if (!modelList.isEmpty()) { // If no selection saved, select first
             spinnerPhotoModels.setSelection(0);
-            sharedPreferences.edit().putString(PREF_KEY_SELECTED_PHOTO_MODEL, modelList.get(0)).apply();
+            sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, modelList.get(0)).apply(); // Changed
         }
     }
 
     private void loadPhotoPrompts() {
-        List<PhotoPrompt> prompts = photoPromptManager.getPhotoPrompts();
-        photoPromptsAdapter.setPhotoPrompts(prompts);
+        List<Prompt> prompts = promptManager.getPromptsForMode("photo_vision"); // Changed
+        photoPromptsAdapter.setPrompts(prompts); // Changed, assumes adapter method rename
 
         if (prompts.isEmpty()) {
             photoPromptsRecyclerView.setVisibility(View.GONE);
@@ -271,9 +274,9 @@ public class PhotoPromptsActivity extends AppCompatActivity implements PhotoProm
     }
 
     @Override
-    public void onEditPhotoPrompt(PhotoPrompt photoPrompt) {
+    public void onEditPhotoPrompt(Prompt prompt) { // Changed parameter type
         Intent intent = new Intent(this, com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.class);
-        intent.putExtra(com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.EXTRA_PHOTO_PROMPT_ID, photoPrompt.getId());
+        intent.putExtra(com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.EXTRA_PHOTO_PROMPT_ID, prompt.getId()); // Changed to prompt.getId()
         startActivityForResult(intent, REQUEST_EDIT_PHOTO_PROMPT);
     }
 

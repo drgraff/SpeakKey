@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import com.drgraff.speakkey.settings.SettingsActivity;
+import java.util.ArrayList; // Added
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
