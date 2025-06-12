@@ -15,8 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.drgraff.speakkey.R;
-import com.drgraff.speakkey.data.PhotoPrompt;
-import com.drgraff.speakkey.data.PhotoPromptManager;
+import com.drgraff.speakkey.data.Prompt; // Changed
+import com.drgraff.speakkey.data.PromptManager; // Changed
+import java.util.List; // Added
 
 public class PhotoPromptEditorActivity extends AppCompatActivity {
 
@@ -28,10 +29,10 @@ public class PhotoPromptEditorActivity extends AppCompatActivity {
     private Button btnSavePhotoPrompt;
     private Toolbar toolbar;
 
-    private PhotoPromptManager photoPromptManager;
+    private PromptManager promptManager; // Changed
     private long currentPromptId = -1; // Default to -1 or 0 if 0 is not a valid ID
     private boolean isEditMode = false;
-    private PhotoPrompt currentPhotoPrompt; // To store the loaded prompt in edit mode
+    private Prompt currentPrompt; // Changed // To store the loaded prompt in edit mode
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,17 +47,25 @@ public class PhotoPromptEditorActivity extends AppCompatActivity {
         editTextPhotoPromptText = findViewById(R.id.edittext_photo_prompt_text);
         btnSavePhotoPrompt = findViewById(R.id.btn_save_photo_prompt);
 
-        photoPromptManager = new PhotoPromptManager(this);
+        promptManager = new PromptManager(this); // Changed
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(EXTRA_PHOTO_PROMPT_ID)) {
             currentPromptId = intent.getLongExtra(EXTRA_PHOTO_PROMPT_ID, -1);
             if (currentPromptId != -1) {
                 isEditMode = true;
-                currentPhotoPrompt = photoPromptManager.getPhotoPromptById(currentPromptId);
-                if (currentPhotoPrompt != null) {
-                    editTextPhotoPromptLabel.setText(currentPhotoPrompt.getLabel());
-                    editTextPhotoPromptText.setText(currentPhotoPrompt.getText());
+                // currentPhotoPrompt = photoPromptManager.getPhotoPromptById(currentPromptId);
+                List<Prompt> photoPrompts = promptManager.getPromptsForMode("photo_vision");
+                for (Prompt p : photoPrompts) {
+                    if (p.getId() == currentPromptId) {
+                        currentPrompt = p; // Changed
+                        break;
+                    }
+                }
+                if (currentPrompt != null) { // Changed
+                    editTextPhotoPromptLabel.setText(currentPrompt.getLabel()); // Changed
+                    editTextPhotoPromptText.setText(currentPrompt.getText()); // Changed
+                    // activeSwitch.setChecked(currentPrompt.isActive()); // activeSwitch not in this file
                 } else {
                     Toast.makeText(this, getString(R.string.photo_prompt_editor_toast_not_found), Toast.LENGTH_SHORT).show();
                     finish();
@@ -90,13 +99,14 @@ public class PhotoPromptEditorActivity extends AppCompatActivity {
             return;
         }
 
-        if (isEditMode && currentPhotoPrompt != null) {
-            currentPhotoPrompt.setLabel(label);
-            currentPhotoPrompt.setText(text);
-            photoPromptManager.updatePhotoPrompt(currentPhotoPrompt);
+        if (isEditMode && currentPrompt != null) { // Changed
+            currentPrompt.setLabel(label); // Changed
+            currentPrompt.setText(text); // Changed
+            currentPrompt.setPromptModeType("photo_vision"); // Ensure mode type
+            promptManager.updatePrompt(currentPrompt); // Changed
             Toast.makeText(this, getString(R.string.photo_prompt_editor_toast_updated), Toast.LENGTH_SHORT).show();
         } else {
-            photoPromptManager.addPhotoPrompt(label, text);
+            promptManager.addPrompt(label, text, "photo_vision"); // Changed
             Toast.makeText(this, getString(R.string.photo_prompt_editor_toast_added), Toast.LENGTH_SHORT).show();
         }
 

@@ -58,7 +58,7 @@ public class PromptEditorActivity extends AppCompatActivity {
                 actionBar.setTitle(R.string.edit_prompt_title);
             }
             // Load the prompt
-            List<Prompt> prompts = promptManager.getPrompts();
+            List<Prompt> prompts = promptManager.getAllPrompts(); // Changed to getAllPrompts
             for (Prompt p : prompts) {
                 if (p.getId() == currentPromptId) {
                     currentPrompt = p;
@@ -106,11 +106,20 @@ public class PromptEditorActivity extends AppCompatActivity {
             currentPrompt.setLabel(label);
             currentPrompt.setText(text);
             // isActive state is preserved from the original currentPrompt object
+            if (currentPrompt.getPromptModeType() == null || currentPrompt.getPromptModeType().isEmpty()) {
+                currentPrompt.setPromptModeType("two_step_processing"); // Default for safety if missing
+                android.util.Log.w("PromptEditorActivity", "Prompt " + currentPrompt.getId() + " had null/empty modeType, defaulted to two_step_processing");
+            }
             promptManager.updatePrompt(currentPrompt);
             Toast.makeText(this, R.string.prompt_saved_message, Toast.LENGTH_SHORT).show(); // Use "Prompt saved" for update too
         } else {
             // Adding new prompt
-            promptManager.addPrompt(text, label); // isActive is false by default in addPrompt
+            String modeTypeForNewPrompt = getIntent().getStringExtra("PROMPT_MODE_TYPE");
+            if (modeTypeForNewPrompt == null || modeTypeForNewPrompt.isEmpty()) {
+                modeTypeForNewPrompt = "two_step_processing"; // Fallback default
+                android.util.Log.w("PromptEditorActivity", "PROMPT_MODE_TYPE extra not found, defaulting to " + modeTypeForNewPrompt);
+            }
+            promptManager.addPrompt(text, label, modeTypeForNewPrompt); // isActive is false by default in addPrompt
             Toast.makeText(this, R.string.prompt_saved_message, Toast.LENGTH_SHORT).show();
         }
         setResult(Activity.RESULT_OK);

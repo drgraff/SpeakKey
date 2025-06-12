@@ -154,7 +154,7 @@ public class PromptsActivity extends AppCompatActivity { // Removed PromptsAdapt
     }
 
     private void loadPrompts() {
-        List<Prompt> loadedPrompts = promptManager.getPrompts();
+        List<Prompt> loadedPrompts = promptManager.getAllPrompts(); // Changed to getAllPrompts
         promptsAdapter.setPrompts(loadedPrompts); // Use the new setPrompts method in adapter
 
         if (loadedPrompts == null || loadedPrompts.isEmpty()) {
