@@ -209,21 +209,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Update activePromptsDisplay for "Direct Transcription" if no prompts are active
             // This part of the logic will also be handled/refined in updateActivePromptsDisplay()
             // For now, ensure that updateActivePromptsDisplay() is aware of the mode or is called after this.
-            if (promptManager != null) { // promptManager should be initialized
-                List<Prompt> activePrompts = promptManager.getPrompts().stream()
-                                                 .filter(Prompt::isActive)
-                                                 .collect(Collectors.toList());
-                if (activePrompts.isEmpty() && activePromptsDisplay != null) {
-                    activePromptsDisplay.setText("One Step Transcription");
-                    activePromptsDisplay.setVisibility(View.VISIBLE); // Ensure it's visible
-                } else if (activePromptsDisplay != null) {
-                    // If there are active prompts, updateActivePromptsDisplay will handle showing them.
-                    // Call it to refresh, as it contains the full logic.
-                    updateActivePromptsDisplay();
-                }
-            }
+            // The specific logic for activePrompts list here is removed,
+            // as updateActivePromptsDisplay() will handle it.
+            updateActivePromptsDisplay(); // Ensure it's called to reflect mode change.
 
-        } else { // "whisper" mode (default)
+        } else { // "two_step_transcription" mode (default)
             whisperSectionContainer.setVisibility(View.VISIBLE);
             Log.d(TAG, "updateUiForTranscriptionMode: whisperSectionContainer visibility set to VISIBLE");
             // chatGptText.setHint("ChatGPT Response"); // Reset hint if changed
@@ -1003,7 +993,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
 
-        List<Prompt> activePrompts = promptManager.getPrompts().stream().filter(Prompt::isActive).collect(Collectors.toList());
+        List<Prompt> activePrompts = promptManager.getPromptsForMode("one_step").stream().filter(Prompt::isActive).collect(Collectors.toList());
         String userPrompt = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
         if (userPrompt.isEmpty()) {
             userPrompt = "Please transcribe the audio file.  Do not add anything else before or after the transcribed text."; // Default prompt
@@ -1075,7 +1065,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return;
             }
 
-            List<Prompt> activePrompts = promptManager.getPrompts().stream().filter(Prompt::isActive).collect(Collectors.toList());
+        List<Prompt> activePrompts = promptManager.getPromptsForMode("two_step_processing").stream().filter(Prompt::isActive).collect(Collectors.toList());
             String promptsText = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
             String finalTextPayload = promptsText.isEmpty() ? transcript : promptsText + "\n\n" + transcript;
             // Use the specific model for Step 2 processing
@@ -1227,35 +1217,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
 
-        String transcriptionMode = sharedPreferences.getString("transcription_mode", "whisper");
-        List<Prompt> allPrompts = promptManager.getPrompts();
-        List<Prompt> activeSystemPrompts = allPrompts.stream()
+        String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
+        List<Prompt> modeSpecificPrompts;
+        if ("one_step_transcription".equals(transcriptionMode)) {
+            modeSpecificPrompts = promptManager.getPromptsForMode("one_step");
+        } else { // two_step_transcription (or any other default)
+            modeSpecificPrompts = promptManager.getPromptsForMode("two_step_processing");
+        }
+
+        List<Prompt> activeSystemPrompts = modeSpecificPrompts.stream()
                                              .filter(Prompt::isActive)
                                              .collect(Collectors.toList());
 
         if ("one_step_transcription".equals(transcriptionMode)) {
             if (activeSystemPrompts.isEmpty()) {
-                activePromptsDisplay.setText("One Step Transcription");
+                activePromptsDisplay.setText("One Step Transcription"); // This text indicates the mode is active
                 activePromptsDisplay.setVisibility(View.VISIBLE);
             } else {
-                // Show actual active prompts
+                // Show active "one_step" prompts
                 String promptsText = activeSystemPrompts.stream()
-                                        .map(Prompt::getLabel)
-                                        .collect(Collectors.joining("\n"));
+                                        .map(prompt -> prompt.getLabel() + (prompt.getText().isEmpty() ? "" : ": \"" + truncate(prompt.getText(), 20) + "\""))
+                                        .collect(Collectors.joining(" | "));
                 activePromptsDisplay.setText(promptsText);
                 activePromptsDisplay.setVisibility(View.VISIBLE);
             }
-        } else { // Whisper mode
+        } else { // "two_step_transcription" mode
             if (activeSystemPrompts.isEmpty()) {
-                activePromptsDisplay.setText(""); // Or "No active prompts"
-                activePromptsDisplay.setVisibility(View.GONE);
+                activePromptsDisplay.setText(""); // Or "No active prompts for two-step"
+                activePromptsDisplay.setVisibility(View.GONE); // Hide if no prompts for this mode
             } else {
+                // Show active "two_step_processing" prompts
                 String promptsText = activeSystemPrompts.stream()
-                                        .map(Prompt::getLabel)
-                                        .collect(Collectors.joining("\n"));
+                                        .map(prompt -> prompt.getLabel() + (prompt.getText().isEmpty() ? "" : ": \"" + truncate(prompt.getText(), 20) + "\""))
+                                        .collect(Collectors.joining(" | "));
                 activePromptsDisplay.setText(promptsText);
                 activePromptsDisplay.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    // Helper method to truncate string, if not already present
+    private String truncate(String str, int length) {
+        if (str.length() > length) {
+            return str.substring(0, length) + "...";
+        } else {
+            return str;
         }
     }
 

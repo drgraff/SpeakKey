@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections; // For synchronizedList if needed, though modifying copies
+import java.util.Map; // Added import
 // Assuming PhotoPrompt class is in the same package or imported if not.
 // If it's in com.drgraff.speakkey.data.PhotoPrompt, it's fine.
 
@@ -36,23 +37,46 @@ public class PromptManager {
         boolean migrationPerformed = false;
 
         if (jsonPhotoPrompts != null && !jsonPhotoPrompts.isEmpty()) {
-            Type type = new TypeToken<ArrayList<PhotoPrompt>>() {}.getType(); // Assumes PhotoPrompt.java still exists
-            List<PhotoPrompt> oldPhotoPrompts = gson.fromJson(jsonPhotoPrompts, type);
+            Type type = new TypeToken<ArrayList<Map<String, Object>>>() {}.getType(); // Changed
+            List<Map<String, Object>> oldPhotoPromptsData = gson.fromJson(jsonPhotoPrompts, type); // Changed
 
-            if (oldPhotoPrompts != null && !oldPhotoPrompts.isEmpty()) {
-                List<Prompt> mainPrompts = getAllPrompts(); // Ensure this list is mutable (it is, as it's new ArrayList from getAllPrompts)
+            if (oldPhotoPromptsData != null && !oldPhotoPromptsData.isEmpty()) { // Changed
+                List<Prompt> mainPrompts = getAllPrompts();
 
-                for (PhotoPrompt oldPhotoPrompt : oldPhotoPrompts) {
+                for (Map<String, Object> dataMap : oldPhotoPromptsData) { // Changed
+                    // Extract data from dataMap with type checks and null handling
+                    // long idFromFile = 0; // Not strictly needed as we generate newId
+                    // Object idObj = dataMap.get("id");
+                    // if (idObj instanceof Double) { idFromFile = ((Double) idObj).longValue(); }
+                    // else if (idObj instanceof Long) { idFromFile = (Long) idObj; }
+
+                    String label = (String) dataMap.get("label");
+                    String text = (String) dataMap.get("text");
+
+                    boolean isActive = false;
+                    Object isActiveObj = dataMap.get("isActive");
+                    if (isActiveObj instanceof Boolean) {
+                        isActive = (Boolean) isActiveObj;
+                    }
+
+                    long timestampFromFile = 0;
+                    Object timestampObj = dataMap.get("timestamp");
+                    if (timestampObj instanceof Double) {
+                        timestampFromFile = ((Double) timestampObj).longValue();
+                    } else if (timestampObj instanceof Long) {
+                        timestampFromFile = (Long) timestampObj;
+                    }
+
                     long newId = System.currentTimeMillis();
-                    try { Thread.sleep(1); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } // Ensure unique timestamp for ID
+                    try { Thread.sleep(1); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
                     Prompt migratedPrompt = new Prompt(
-                        newId,
-                        oldPhotoPrompt.getText(),
-                        oldPhotoPrompt.isActive(),
-                        oldPhotoPrompt.getLabel(),
+                        newId, // Use newly generated ID
+                        text != null ? text : "", // Handle null text
+                        isActive,
+                        label != null ? label : "Imported Photo Prompt", // Handle null label
                         "photo_vision", // promptModeType
-                        oldPhotoPrompt.getTimestamp() == 0 ? newId : oldPhotoPrompt.getTimestamp() // Use existing timestamp or newId as timestamp
+                        timestampFromFile == 0 ? newId : timestampFromFile // Use existing timestamp or newId
                     );
                     mainPrompts.add(migratedPrompt);
                     migrationPerformed = true;
@@ -60,8 +84,8 @@ public class PromptManager {
 
                 if (migrationPerformed) {
                     savePrompts(mainPrompts);
-                    Log.i("PromptManager", "Successfully migrated " + oldPhotoPrompts.size() + " photo prompts.");
-                    photoPrefs.edit().remove("key_photo_prompts_list").apply(); // Clear old data
+                    Log.i("PromptManager", "Successfully migrated " + oldPhotoPromptsData.size() + " photo prompts."); // Changed
+                    photoPrefs.edit().remove("key_photo_prompts_list").apply();
                 }
             }
         }

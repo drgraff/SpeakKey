@@ -149,6 +149,7 @@ public class SettingsActivity extends AppCompatActivity {
             ChatGptApi.fetchAndCacheOpenAiModels(
                     chatGptApi,
                     sharedPreferences,
+                    SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, // New argument
                     executorService,
                     mainHandler,
                     models -> { // onSuccess callback (Consumer<List<OpenAIModelData.ModelInfo>>)

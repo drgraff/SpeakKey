@@ -444,6 +444,7 @@ public class ChatGptApi {
     public static void fetchAndCacheOpenAiModels(
             final ChatGptApi apiClient, // The instance to use for listModels()
             final SharedPreferences sharedPreferences,
+            final String fetchedModelIdsPrefKey, // New parameter
             final ExecutorService executor, // Pass an executor
             final Handler mainThreadHandler, // Pass a main thread handler
             final Consumer<List<OpenAIModelData.ModelInfo>> onSuccess,
@@ -480,9 +481,9 @@ public class ChatGptApi {
                     String[] modelIdsArray = modelIdsList.toArray(new String[0]);
                     Arrays.sort(modelIdsArray);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, new HashSet<>(Arrays.asList(modelIdsArray)));
+                    editor.putStringSet(fetchedModelIdsPrefKey, new HashSet<>(Arrays.asList(modelIdsArray)));
                     editor.apply();
-                    Log.d("ChatGptApiUtil", "Fetched and saved " + modelIdsArray.length + " model IDs to SharedPreferences.");
+                    Log.d("ChatGptApiUtil", "Fetched and saved " + modelIdsArray.length + " model IDs to SharedPreferences using key: " + fetchedModelIdsPrefKey);
                 }
 
                 mainThreadHandler.post(() -> onSuccess.accept(models != null ? models : new ArrayList<>()));
