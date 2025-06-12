@@ -4,103 +4,166 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".data.PromptsActivity"> <!-- Context may need update later to ui.prompts.PromptsActivity -->
+    tools:context=".data.PromptsActivity"> <!-- Adjust context if PromptsActivity is moved -->
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-    android:theme="@style/Theme.SpeakKey.AppBarOverlay"
-    app:elevation="0dp">
+        android:theme="@style/Theme.SpeakKey.AppBarOverlay"
+        app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_prompts"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-    android:background="@color/custom_toolbar_background"
-    app:titleTextColor="@color/textPrimary"
-    app:navigationIconTint="@color/custom_toolbar_icon_tint"
+            android:background="?attr/colorPrimary"
+            app:titleTextColor="@color/textPrimary"
+            app:navigationIconTint="?attr/colorOnPrimary"
             app:popupTheme="@style/Theme.SpeakKey.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
-        android:id="@+id/content_area_prompts"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Model Selection Section -->
         <LinearLayout
-            android:id="@+id/model_selection_layout_prompts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="?attr/colorSurface"
-            android:elevation="2dp">
+            android:padding="16dp">
 
+            <!-- Section 1: One Step Transcription Prompts -->
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/tvHeadingOneStep"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select ChatGPT model for prompt processing:"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="One Step Transcription Prompts"
+                android:textAppearance="?attr/textAppearanceHeadline6"
                 android:layout_marginBottom="8dp"/>
 
-            <Spinner
-                android:id="@+id/spinner_chatgpt_models_prompts"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:minHeight="48dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
 
-            <Button
-                android:id="@+id/btn_check_chatgpt_models_prompts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Check Models"
-                android:layout_gravity="end"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"/>
-        </LinearLayout>
+                <Spinner
+                    android:id="@+id/spinnerOneStepModel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="48dp"
+                    android:layout_marginEnd="8dp"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+                <Button
+                    android:id="@+id/btnCheckOneStepModels"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Check Models"/>
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/prompts_recycler_view"
+                android:id="@+id/recyclerViewOneStepPrompts"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:clipToPadding="false"
-                tools:listitem="@layout/list_item_prompt"/>
+                android:layout_height="wrap_content"
+                android:minHeight="100dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
 
+            <!-- Section 2: Two Step Transcription Prompts (Processing Step) -->
             <TextView
-                android:id="@+id/empty_prompts_text_view"
+                android:id="@+id/tvHeadingTwoStep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/empty_prompts_text"
-                android:textSize="16sp"
-                android:visibility="gone"
-                android:layout_gravity="center"
-                tools:visibility="visible"/>
-        </FrameLayout>
-    </LinearLayout>
+                android:text="Two Step Transcription Prompts (Processing Step)"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <Spinner
+                    android:id="@+id/spinnerTwoStepProcessingModel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="48dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <Button
+                    android:id="@+id/btnCheckTwoStepModels"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Check Models"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewTwoStepPrompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="100dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+
+
+            <!-- Section 3: Photo Prompts -->
+            <TextView
+                android:id="@+id/tvHeadingPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Photo Prompts"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <Spinner
+                    android:id="@+id/spinnerPhotoVisionModel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minHeight="48dp"
+                    android:layout_marginEnd="8dp"/>
+
+                <Button
+                    android:id="@+id/btnCheckPhotoModels"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Check Models"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewPhotoPrompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="100dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+
+        </LinearLayout>
+    </ScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_prompt"
+        android:id="@+id/fabAddPrompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="@string/content_description_add_new_prompt"
+        android:contentDescription="Add New Prompt"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
