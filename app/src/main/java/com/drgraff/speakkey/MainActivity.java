@@ -109,6 +109,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressBar progressBarWhisper; // Added
     private TextView textViewWhisperStatus; // Added
 
+    private ProgressBar progressBarChatGpt; // Added
+    private TextView textViewChatGptStatus; // Added
+
     // Audio recording
 
     private AudioRecord audioRecord;
@@ -325,6 +328,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE); // Added
         if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE); // Added
 
+        progressBarChatGpt = findViewById(R.id.progressBarChatGpt); // Added
+        textViewChatGptStatus = findViewById(R.id.textViewChatGptStatus); // Added
+        if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE); // Added
+        if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE); // Added
+
         // Listener to improve EditText scrolling within ScrollView
         View.OnTouchListener editTextTouchListener = (v, event) -> {
             // Check if the view is an EditText and can scroll vertically
@@ -438,6 +446,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (chatGptText != null) {
                     chatGptText.setText("");
                 }
+                // Also reset ChatGPT progress UI
+                if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
+                if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                 
                 Toast.makeText(MainActivity.this, "All fields cleared", Toast.LENGTH_SHORT).show();
             });
@@ -941,6 +953,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (whisperText != null) whisperText.setText("");
     }
 
+    private void showChatGptProgressUI(String message) {
+        if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.VISIBLE);
+        if (textViewChatGptStatus != null) {
+            textViewChatGptStatus.setVisibility(View.VISIBLE);
+            textViewChatGptStatus.setText(message);
+        }
+        if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(false);
+        // Optional: Clear chatGptText here if desired for all progress states.
+        // if (chatGptText != null) chatGptText.setText("");
+    }
+
     private void refreshTranscriptionStatus(boolean userInitiated) {
         if (audioFilePath == null || audioFilePath.isEmpty()) {
             if (userInitiated) Toast.makeText(this, "No active recording session to check.", Toast.LENGTH_SHORT).show();
@@ -1106,10 +1129,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final String finalUserPrompt = userPrompt;
         final String modelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-4o"); // Default to gpt-4o or another suitable model
 
-        mainHandler.post(() -> {
-            chatGptText.setText("[DIRECT_MODE: Sending MP3 audio & prompt to " + modelName + "...]");
-            Toast.makeText(MainActivity.this, "DIRECT_MODE: Processing with " + modelName + "...", Toast.LENGTH_SHORT).show();
-        });
+        // mainHandler.post(() -> { // Removed old UI update
+        //     chatGptText.setText("[DIRECT_MODE: Sending MP3 audio & prompt to " + modelName + "...]");
+        //     Toast.makeText(MainActivity.this, "DIRECT_MODE: Processing with " + modelName + "...", Toast.LENGTH_SHORT).show();
+        // });
+        showChatGptProgressUI("Processing with " + modelName + "..."); // New UI update
+        if (chatGptText != null) chatGptText.setText(""); // Clear previous text
+
         AppLogManager.getInstance().addEntry("INFO", TAG + ": DIRECT_MODE: Calling getCompletionFromAudioAndPrompt with MP3.", "Model: " + modelName + ", Audio: " + currentAudioFile.getName());
 
         new Thread(() -> {
@@ -1117,7 +1143,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final String result = chatGptApi.getCompletionFromAudioAndPrompt(currentAudioFile, finalUserPrompt, modelName);
                 AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": DIRECT_MODE: Response from " + modelName + " received.", "Output Length: " + (result != null ? result.length() : "null"));
                 mainHandler.post(() -> {
-                    chatGptText.setText(result);
+                    if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                    if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE); // Or set to "Success"
+                    if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                    if (chatGptText != null) chatGptText.setText(result);
                     Toast.makeText(MainActivity.this, "DIRECT_MODE: " + modelName + " processing complete.", Toast.LENGTH_SHORT).show();
                     if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
                         sendToInputStick();
@@ -1127,14 +1156,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.e(TAG, "DIRECT_MODE: IOException during " + modelName + " processing: " + e.getMessage(), e);
                 AppLogManager.getInstance().addEntry("ERROR", TAG + ": DIRECT_MODE: IOException in " + modelName + " processing.", "Error: " + e.getMessage());
                 mainHandler.post(() -> {
-                    chatGptText.setText("[DIRECT_MODE: API Error (" + modelName + "): " + e.getMessage() + "]");
+                    if (textViewChatGptStatus != null) {
+                        textViewChatGptStatus.setText("Error: " + e.getMessage());
+                        textViewChatGptStatus.setVisibility(View.VISIBLE);
+                    }
+                    if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                    if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                    if (chatGptText != null) chatGptText.setText("");
                     Toast.makeText(MainActivity.this, "DIRECT_MODE: API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             } catch (Exception e) {
                 Log.e(TAG, "DIRECT_MODE: Unexpected error during " + modelName + " processing: " + e.getMessage(), e);
                 AppLogManager.getInstance().addEntry("ERROR", TAG + ": DIRECT_MODE: Unexpected error in " + modelName + " processing.", "Error: " + e.toString());
                 mainHandler.post(() -> {
-                    chatGptText.setText("[DIRECT_MODE: Unexpected error with " + modelName + "]");
+                    if (textViewChatGptStatus != null) {
+                        textViewChatGptStatus.setText("Unexpected error: " + e.getMessage());
+                        textViewChatGptStatus.setVisibility(View.VISIBLE);
+                    }
+                    if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                    if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                    if (chatGptText != null) chatGptText.setText("");
                     Toast.makeText(MainActivity.this, "DIRECT_MODE: Unexpected error (" + modelName + ")", Toast.LENGTH_LONG).show();
                 });
             }
@@ -1177,10 +1218,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String step2ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
             Log.d(TAG, "Using Two Step - Step 2 Processing Model: " + step2ModelName);
 
-            mainHandler.post(() -> {
-                chatGptText.setText("[TWO_STEP_MODE: Sending text to " + step2ModelName + "...]");
-                Toast.makeText(MainActivity.this, "TWO_STEP_MODE: Sending to " + step2ModelName + "...", Toast.LENGTH_SHORT).show();
-            });
+            // mainHandler.post(() -> { // Old UI update removed
+            //     chatGptText.setText("[TWO_STEP_MODE: Sending text to " + step2ModelName + "...]");
+            //     Toast.makeText(MainActivity.this, "TWO_STEP_MODE: Sending to " + step2ModelName + "...", Toast.LENGTH_SHORT).show();
+            // });
+            showChatGptProgressUI("Sending to " + step2ModelName + "..."); // New UI update
+            if (chatGptText != null) chatGptText.setText(""); // Clear previous response
+
             AppLogManager.getInstance().addEntry("INFO", TAG + ": TWO_STEP_SEND_TO_CHATGPT", "Model: " + step2ModelName + ", Payload Length: " + finalTextPayload.length());
 
             new Thread(() -> {
@@ -1188,7 +1232,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     final String result = chatGptApi.getCompletion(finalTextPayload, step2ModelName); // Pass the model
                     AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": TWO_STEP_MODE: Response from " + step2ModelName + " received.", "Output Length: " + (result != null ? result.length() : "null"));
                     mainHandler.post(() -> {
-                        chatGptText.setText(result);
+                        if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                        if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
+                        if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                        if (chatGptText != null) chatGptText.setText(result);
                         Toast.makeText(MainActivity.this, "TWO_STEP_MODE: " + step2ModelName + " processing complete.", Toast.LENGTH_SHORT).show();
                         if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
                             sendToInputStick();
@@ -1198,14 +1245,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Log.e(TAG, "TWO_STEP_MODE: IOException during " + step2ModelName + " processing: " + e.getMessage(), e);
                     AppLogManager.getInstance().addEntry("ERROR", TAG + ": TWO_STEP_MODE: IOException in " + step2ModelName + " processing.", "Error: " + e.getMessage());
                     mainHandler.post(() -> {
-                        chatGptText.setText("[TWO_STEP_MODE: API Error (" + step2ModelName + "): " + e.getMessage() + "]");
+                        if (textViewChatGptStatus != null) {
+                            textViewChatGptStatus.setText("Error: " + e.getMessage());
+                            textViewChatGptStatus.setVisibility(View.VISIBLE);
+                        }
+                        if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                        if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                        if (chatGptText != null) chatGptText.setText("");
                         Toast.makeText(MainActivity.this, "TWO_STEP_MODE: API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
                 } catch (Exception e) {
                     Log.e(TAG, "TWO_STEP_MODE: Unexpected error during " + step2ModelName + " processing: " + e.getMessage(), e);
                     AppLogManager.getInstance().addEntry("ERROR", TAG + ": TWO_STEP_MODE: Unexpected error in " + step2ModelName + " processing.", "Error: " + e.toString());
                     mainHandler.post(() -> {
-                        chatGptText.setText("[TWO_STEP_MODE: Unexpected error with " + step2ModelName + "]");
+                        if (textViewChatGptStatus != null) {
+                            textViewChatGptStatus.setText("Unexpected error: " + e.getMessage());
+                            textViewChatGptStatus.setVisibility(View.VISIBLE);
+                        }
+                        if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                        if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                        if (chatGptText != null) chatGptText.setText("");
                         Toast.makeText(MainActivity.this, "TWO_STEP_MODE: Unexpected error (" + step2ModelName + ")", Toast.LENGTH_LONG).show();
                     });
                 }
@@ -1214,7 +1273,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     
     private void clearChatGptResponse() {
-        chatGptText.setText("");
+        if (chatGptText != null) chatGptText.setText("");
+        if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+        if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
+        if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
     }
     
     private void sendToInputStick() {
