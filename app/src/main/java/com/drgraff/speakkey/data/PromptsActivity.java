@@ -17,8 +17,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import com.drgraff.speakkey.settings.SettingsActivity; // Added
-import java.util.function.Consumer; // Added (may not be strictly necessary with desugaring but good for clarity)
+import com.drgraff.speakkey.settings.SettingsActivity;
+import java.util.function.Consumer;
+import android.view.LayoutInflater; // Added
+import android.widget.EditText; // Added
+import androidx.appcompat.app.AlertDialog; // Added
+import android.content.DialogInterface; // Added
+import android.widget.Toast; // Added for Toast messages
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -247,6 +252,73 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
             intent.putExtra("PROMPT_MODE_TYPE", prompt.getPromptModeType());
         }
         startActivityForResult(intent, REQUEST_EDIT_PROMPT);
+    }
+
+    @Override
+    public void onCopyPrompt(Prompt promptToCopy) {
+        if (promptToCopy == null) {
+            Toast.makeText(this, "Error: Prompt to copy is null.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_copy_prompt, null);
+        builder.setView(dialogView);
+        builder.setTitle("Copy Prompt");
+
+        final EditText etNewLabel = dialogView.findViewById(R.id.et_copy_prompt_new_label);
+        final TextView tvOriginalText = dialogView.findViewById(R.id.tv_copy_prompt_original_text);
+        final Spinner spinnerDestinationMode = dialogView.findViewById(R.id.spinner_copy_prompt_destination_mode);
+
+        etNewLabel.setText("Copy of " + promptToCopy.getLabel());
+        if (tvOriginalText != null) {
+             tvOriginalText.setText(promptToCopy.getText());
+        }
+
+        final String[] modeDisplayNames = {"One Step Transcription", "Two Step Transcription", "Photo Vision"};
+        final String[] modeInternalValues = {"one_step", "two_step_processing", "photo_vision"};
+
+        ArrayAdapter<String> modeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, modeDisplayNames);
+        modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDestinationMode.setAdapter(modeAdapter);
+
+        int originalModeIndex = 0;
+        if (promptToCopy.getPromptModeType() != null) {
+            for (int i = 0; i < modeInternalValues.length; i++) {
+                if (promptToCopy.getPromptModeType().equals(modeInternalValues[i])) {
+                    originalModeIndex = i;
+                    break;
+                }
+            }
+        }
+        spinnerDestinationMode.setSelection(originalModeIndex);
+
+        builder.setPositiveButton("Save Copy", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String newLabel = etNewLabel.getText().toString().trim();
+                String originalText = promptToCopy.getText();
+                String destinationModeType = modeInternalValues[spinnerDestinationMode.getSelectedItemPosition()];
+
+                if (newLabel.isEmpty()) {
+                    Toast.makeText(PromptsActivity.this, "New label cannot be empty.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (promptManager != null) {
+                    promptManager.addPrompt(originalText, newLabel, destinationModeType);
+                    Toast.makeText(PromptsActivity.this, "Prompt copied to " + spinnerDestinationMode.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                    loadAllPromptsSections();
+                } else {
+                    Toast.makeText(PromptsActivity.this, "Error: PromptManager not available.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 
