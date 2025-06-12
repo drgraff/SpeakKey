@@ -201,7 +201,10 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             startActivity(intent);
         });
 
-        btnSendToChatGptPhoto.setOnClickListener(v -> sendPhotoAndPromptsToChatGpt());
+        btnSendToChatGptPhoto.setOnClickListener(v -> {
+            showPhotoUploadProgressUI(); // Added
+            sendPhotoAndPromptsToChatGpt();
+        });
 
         editTextChatGptResponsePhoto.setOnClickListener(v -> { // Added listener
             FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(editTextChatGptResponsePhoto.getText().toString());
@@ -446,12 +449,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         // We just need to pass the file path and other parameters.
 
         // progressDialog.show(); // No longer show progress here, service handles it.
-        // editTextChatGptResponsePhoto.setText(PHOTO_PROCESSING_QUEUED_PLACEHOLDER); // Replaced by new UI
-        editTextChatGptResponsePhoto.setText(""); // Clear previous results
-        progressBarPhotoProcessing.setVisibility(View.VISIBLE);
-        textViewPhotoStatus.setVisibility(View.VISIBLE);
-        textViewPhotoStatus.setText("Queued for processing...");
-        btnSendToChatGptPhoto.setEnabled(false);
+        // UI update logic moved to showPhotoUploadProgressUI() and called by callers.
         AppLogManager.getInstance().addEntry("INFO", TAG + ": Queuing photo processing task.", "File: " + currentPhotoPath);
 
         UploadTask uploadTask = new UploadTask(
@@ -474,6 +472,15 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         // Do NOT automatically call sendTextToInputStick here. This will be handled when the task completes.
     }
 
+    private void showPhotoUploadProgressUI() {
+        if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.VISIBLE);
+        if (textViewPhotoStatus != null) {
+            textViewPhotoStatus.setVisibility(View.VISIBLE);
+            textViewPhotoStatus.setText("Queued for processing..."); // Or a more generic "Processing..."
+        }
+        if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(false);
+        if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
+    }
 
     private void checkCameraPermissionAndDispatch() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -540,6 +547,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             if (resultCode == RESULT_OK) {
                 setPic(); // This will update currentPhotoPath and UI
                 if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) { // Added
+                    showPhotoUploadProgressUI(); // Added
                     sendPhotoAndPromptsToChatGpt();
                 }
             } else {
