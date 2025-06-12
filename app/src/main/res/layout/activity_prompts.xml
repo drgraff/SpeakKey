@@ -45,7 +45,7 @@
                     android:id="@+id/tvHeadingOneStep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="One Step Transcription Prompts"
+                android:text="@string/heading_one_step_prompts"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:layout_marginBottom="8dp"/>
 
@@ -68,7 +68,7 @@
                     android:id="@+id/btnCheckOneStepModels"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Check Models"/>
+                    android:text="@string/button_check_models"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -78,6 +78,15 @@
                 android:minHeight="100dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+            <TextView
+                android:id="@+id/tvEmptyOneStepPrompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_prompts_one_step_text"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout
@@ -90,7 +99,7 @@
                     android:id="@+id/tvHeadingTwoStep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Two Step Transcription Prompts (Processing Step)"
+                android:text="@string/heading_two_step_prompts"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"/>
@@ -114,7 +123,7 @@
                     android:id="@+id/btnCheckTwoStepModels"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Check Models"/>
+                    android:text="@string/button_check_models"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -124,6 +133,15 @@
                 android:minHeight="100dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+            <TextView
+                android:id="@+id/tvEmptyTwoStepPrompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_prompts_two_step_text"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout
@@ -136,7 +154,7 @@
                     android:id="@+id/tvHeadingPhoto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Photo Prompts"
+                android:text="@string/heading_photo_prompts"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"/>
@@ -160,7 +178,7 @@
                     android:id="@+id/btnCheckPhotoModels"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Check Models"/>
+                    android:text="@string/button_check_models"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -170,6 +188,15 @@
                 android:minHeight="100dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+            <TextView
+                android:id="@+id/tvEmptyPhotoPrompts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_prompts_photo_text"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
             </LinearLayout>
 
         </LinearLayout>

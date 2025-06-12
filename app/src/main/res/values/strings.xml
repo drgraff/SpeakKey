@@ -197,4 +197,44 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
     <string name="photos_vision_failed_placeholder">[Photo vision processing failed or result was empty]</string>
     <string name="transcription_failed_placeholder">[Transcription failed or result was empty]</string>
 
+    <!-- PromptsActivity - Copy Prompt Dialog -->
+    <string name="copy_prompt_dialog_title">Copy Prompt</string>
+    <string name="copy_prompt_save_button">Save Copy</string>
+    <string name="new_label_empty_error_toast">New label cannot be empty.</string>
+    <string name="prompt_copied_toast_format">Prompt copied to %s</string>
+    <string name="prompt_manager_unavailable_error_toast">Error: PromptManager not available.</string>
+    <string name="select_mode_toast">Please select a mode.</string>
+
+    <!-- PromptsActivity - Titles for filtered view -->
+    <string name="title_prompts_one_step">One Step Prompts</string>
+    <string name="title_prompts_two_step">Two Step Prompts</string>
+    <string name="title_prompts_photo">Photo Prompts</string>
+    <!-- R.string.prompts_activity_title for default "Prompts" already exists -->
+
+    <!-- PromptsActivity - FAB Dialog -->
+    <string name="create_prompt_dialog_title">Create New Prompt In…</string>
+    <string name="dialog_button_next">Next</string>
+
+    <!-- PromptsActivity - Model Fetching -->
+    <string name="api_key_not_set_for_models_toast">API Key not set. Cannot fetch models.</string> <!-- More specific -->
+    <string name="fetching_models_progress">Fetching available models…</string>
+    <string name="models_updated_toast">Models updated.</string>
+    <string name="error_fetching_models_toast_format">Error fetching models: %s</string>
+    <string name="no_models_loaded_placeholder">No models loaded - Check Models</string>
+
+    <!-- dialog_select_prompt_mode.xml -->
+    <string name="select_prompt_mode_dialog_header">Select a mode for the new prompt:</string>
+    <string name="radio_text_one_step">One Step Transcription</string>
+    <string name="radio_text_two_step">Two Step Transcription (Processing)</string>
+    <string name="radio_text_photo_vision">Photo Vision Prompt</string>
+
+    <!-- activity_prompts.xml -->
+    <string name="heading_one_step_prompts">One Step Transcription Prompts</string>
+    <string name="heading_two_step_prompts">Two Step Transcription Prompts (Processing Step)</string>
+    <string name="heading_photo_prompts">Photo Prompts</string>
+    <string name="button_check_models">Check Models</string>
+    <string name="empty_prompts_one_step_text">No One Step prompts. Click \'+\' to add.</string>
+    <string name="empty_prompts_two_step_text">No Two Step prompts. Click \'+\' to add.</string>
+    <string name="empty_prompts_photo_text">No Photo prompts. Click \'+\' to add.</string>
+
 </resources>

@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select a mode for the new prompt:"
+        android:text="@string/select_prompt_mode_dialog_header"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginBottom="16dp"/>
 
@@ -23,21 +23,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:text="One Step Transcription"/>
+            android:text="@string/radio_text_one_step"/>
 
         <RadioButton
             android:id="@+id/radio_mode_two_step"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:text="Two Step Transcription (Processing)"/>
+            android:text="@string/radio_text_two_step"/>
 
         <RadioButton
             android:id="@+id/radio_mode_photo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:text="Photo Vision Prompt"/>
+            android:text="@string/radio_text_photo_vision"/>
     </RadioGroup>
 
 </LinearLayout>
