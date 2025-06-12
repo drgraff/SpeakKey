@@ -23,13 +23,22 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
 
     private List<Prompt> prompts;
     private final PromptManager promptManager;
-    private final Context context; // Context for starting activity
+    private final Context context;
+    private final OnPromptInteractionListener listener; // Added listener
+
+    // Interface for interaction Callbacks
+    public interface OnPromptInteractionListener {
+        void onEditPrompt(Prompt prompt);
+        // void onDeletePrompt(Prompt prompt); // Example for future
+        // void onTogglePromptActive(Prompt prompt, boolean isActive); // Example for future
+    }
 
     // Constructor updated
-    public PromptsAdapter(Context context, List<Prompt> prompts, PromptManager promptManager) {
+    public PromptsAdapter(Context context, List<Prompt> prompts, PromptManager promptManager, OnPromptInteractionListener listener) {
         this.context = context;
         this.prompts = prompts != null ? prompts : new ArrayList<>();
         this.promptManager = promptManager;
+        this.listener = listener; // Assign listener
     }
 
     @NonNull
@@ -61,9 +70,9 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
         });
 
         holder.editPromptButton.setOnClickListener(v -> {
-            Intent intent = new Intent(context, PromptEditorActivity.class);
-            intent.putExtra(PromptEditorActivity.EXTRA_PROMPT_ID, currentPrompt.getId());
-            context.startActivity(intent);
+            if (listener != null && holder.getAdapterPosition() != RecyclerView.NO_POSITION) {
+                listener.onEditPrompt(prompts.get(holder.getAdapterPosition()));
+            }
         });
 
         holder.deletePromptButton.setOnClickListener(v -> {
