@@ -77,8 +77,10 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private ProgressDialog progressDialog;
+    private String currentFilterMode = null; // Added
 
     private static final String TAG = "PromptsActivity";
+    public static final String EXTRA_FILTER_MODE_TYPE = "com.drgraff.speakkey.FILTER_MODE_TYPE";
 
     // Removed local PREF_KEY constants
 
@@ -188,19 +190,84 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
         recyclerViewPhotoPrompts.setAdapter(photoPromptsAdapter);
 
         fabAddPrompt.setOnClickListener(v -> {
-            Intent intent = new Intent(PromptsActivity.this, com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class);
-            // Defaulting new prompts from unified screen to "Two Step (Processing)" for now
-            intent.putExtra("PROMPT_MODE_TYPE", "two_step_processing");
+            Intent intent = new Intent(); // Create intent
+            String modeForNewPrompt;
+            Class<?> editorActivityClass;
+
+            if (currentFilterMode != null) {
+                modeForNewPrompt = currentFilterMode;
+                if ("photo_vision".equals(currentFilterMode)) {
+                    editorActivityClass = com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.class;
+                    // PhotoPromptEditorActivity expects EXTRA_PHOTO_PROMPT_ID, not EXTRA_PROMPT_ID for new prompts.
+                    // However, since it's a new prompt, we don't pass an ID.
+                    // The editor itself handles new vs edit based on whether an ID is passed.
+                } else {
+                    editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class;
+                }
+            } else {
+                // If no filter, default to "two_step_processing" or open a dialog to choose.
+                // For now, defaulting as before for simplicity when no filter is active.
+                modeForNewPrompt = "two_step_processing";
+                editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class;
+            }
+
+            intent.setClass(this, editorActivityClass);
+            intent.putExtra("PROMPT_MODE_TYPE", modeForNewPrompt);
+            // For new prompts, PromptEditorActivity/PhotoPromptEditorActivity check if EXTRA_PROMPT_ID/EXTRA_PHOTO_PROMPT_ID is passed.
+            // If not, they assume it's a new prompt. So, no need to pass -1L explicitly here if they handle it.
             startActivityForResult(intent, REQUEST_ADD_PROMPT);
-            Log.d(TAG, "FAB clicked, launching PromptEditorActivity with mode two_step_processing.");
+            Log.d(TAG, "FAB clicked, launching editor for mode: " + modeForNewPrompt);
         });
+
+        // Filter logic
+        currentFilterMode = getIntent().getStringExtra(EXTRA_FILTER_MODE_TYPE);
+        Log.d(TAG, "onCreate: currentFilterMode = " + currentFilterMode);
+        applyFilterVisibilityAndTitle();
     }
+
+    private void setTitleBasedOnFilterMode(String filterMode) {
+        if (getSupportActionBar() == null) return;
+        if ("one_step".equals(filterMode)) {
+            getSupportActionBar().setTitle("One Step Prompts");
+        } else if ("two_step_processing".equals(filterMode)) {
+            getSupportActionBar().setTitle("Two Step Prompts");
+        } else if ("photo_vision".equals(filterMode)) {
+            getSupportActionBar().setTitle("Photo Prompts");
+        } else {
+            getSupportActionBar().setTitle(getString(R.string.prompts_activity_title));
+        }
+    }
+
+    private void applyFilterVisibilityAndTitle() {
+        View sectionOneStepContainer = findViewById(R.id.sectionOneStepContainer);
+        View sectionTwoStepContainer = findViewById(R.id.sectionTwoStepContainer);
+        View sectionPhotoContainer = findViewById(R.id.sectionPhotoContainer);
+
+        if (sectionOneStepContainer == null || sectionTwoStepContainer == null || sectionPhotoContainer == null) {
+            Log.e(TAG, "One or more section containers not found in applyFilterVisibilityAndTitle");
+            return;
+        }
+
+        if (currentFilterMode != null) {
+            setTitleBasedOnFilterMode(currentFilterMode);
+            sectionOneStepContainer.setVisibility("one_step".equals(currentFilterMode) ? View.VISIBLE : View.GONE);
+            sectionTwoStepContainer.setVisibility("two_step_processing".equals(currentFilterMode) ? View.VISIBLE : View.GONE);
+            sectionPhotoContainer.setVisibility("photo_vision".equals(currentFilterMode) ? View.VISIBLE : View.GONE);
+        } else {
+            setTitle(getString(R.string.prompts_activity_title));
+            sectionOneStepContainer.setVisibility(View.VISIBLE);
+            sectionTwoStepContainer.setVisibility(View.VISIBLE);
+            sectionPhotoContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
 
     @Override
     protected void onResume() {
         super.onResume();
         populateAllModelSpinnersFromCache(); // Refresh spinner selections
         loadAllPromptsSections(); // Load/refresh prompts for all RecyclerViews
+        applyFilterVisibilityAndTitle(); // Re-apply filter on resume
     }
 
     private void loadAllPromptsSections() {

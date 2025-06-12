@@ -285,8 +285,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // btnClearAll = findViewById(R.id.btn_clear_all); // Removed
 
         activePromptsDisplay = findViewById(R.id.active_prompts_display); // ADD THIS
-        activePromptsDisplay.setOnClickListener(v -> { // Optional: make it clickable to go to Prompts screen
+        activePromptsDisplay.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, com.drgraff.speakkey.data.PromptsActivity.class);
+            // Determine current mode to pass as filter
+            String currentMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
+            if ("one_step_transcription".equals(currentMode)) {
+                intent.putExtra(com.drgraff.speakkey.data.PromptsActivity.EXTRA_FILTER_MODE_TYPE, "one_step");
+            } else { // "two_step_transcription"
+                intent.putExtra(com.drgraff.speakkey.data.PromptsActivity.EXTRA_FILTER_MODE_TYPE, "two_step_processing");
+            }
             startActivity(intent);
         });
 

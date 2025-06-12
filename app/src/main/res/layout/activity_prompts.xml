@@ -34,9 +34,15 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Section 1: One Step Transcription Prompts -->
-            <TextView
-                android:id="@+id/tvHeadingOneStep"
+            <LinearLayout
+                android:id="@+id/sectionOneStepContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Section 1: One Step Transcription Prompts -->
+                <TextView
+                    android:id="@+id/tvHeadingOneStep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="One Step Transcription Prompts"
@@ -72,10 +78,16 @@
                 android:minHeight="100dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+            </LinearLayout>
 
-            <!-- Section 2: Two Step Transcription Prompts (Processing Step) -->
-            <TextView
-                android:id="@+id/tvHeadingTwoStep"
+            <LinearLayout
+                android:id="@+id/sectionTwoStepContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!-- Section 2: Two Step Transcription Prompts (Processing Step) -->
+                <TextView
+                    android:id="@+id/tvHeadingTwoStep"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Two Step Transcription Prompts (Processing Step)"
@@ -112,11 +124,16 @@
                 android:minHeight="100dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+            </LinearLayout>
 
-
-            <!-- Section 3: Photo Prompts -->
-            <TextView
-                android:id="@+id/tvHeadingPhoto"
+            <LinearLayout
+                android:id="@+id/sectionPhotoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <!-- Section 3: Photo Prompts -->
+                <TextView
+                    android:id="@+id/tvHeadingPhoto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Photo Prompts"
@@ -153,6 +170,7 @@
                 android:minHeight="100dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/list_item_prompt_selectable"/> <!-- Assuming a selectable item layout exists -->
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
