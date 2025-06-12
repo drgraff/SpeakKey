@@ -296,6 +296,10 @@ public class UploadService extends IntentService {
         WhisperApi whisperApi = new WhisperApi(apiKey, whisperEndpoint, language);
 
         try {
+            Log.d(TAG, "Task ID: " + task.id + " - Setting status to PROCESSING before API call (audio).");
+            task.status = UploadTask.STATUS_PROCESSING;
+            uploadTaskDao.update(task);
+
             String transcriptionResultText = whisperApi.transcribe(audioFile);
             task.transcriptionResult = transcriptionResultText;
             Log.d(TAG, "Actual audio transcription successful for task ID: " + task.id + ". Result length: " + (transcriptionResultText != null ? transcriptionResultText.length() : "null"));
@@ -362,6 +366,10 @@ public class UploadService extends IntentService {
         ChatGptApi chatGptApi = new ChatGptApi(apiKey, "");
 
         try {
+            Log.d(TAG, "Task ID: " + task.id + " - Setting status to PROCESSING before API call (photo).");
+            task.status = UploadTask.STATUS_PROCESSING;
+            uploadTaskDao.update(task);
+
             // Using a fixed maxTokens value as it was in PhotosActivity. This could also be stored in UploadTask if needed.
             String visionResponse = chatGptApi.getVisionCompletion(contentParts, task.modelName, 1024);
             task.visionApiResponse = visionResponse;

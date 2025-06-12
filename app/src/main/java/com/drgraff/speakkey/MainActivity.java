@@ -105,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CheckBox chk_auto_send_whisper_to_inputstick; // Added
     private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
 
+    private ProgressBar progressBarWhisper; // Added
+    private TextView textViewWhisperStatus; // Added
+
     // Audio recording
 
     private AudioRecord audioRecord;
@@ -316,6 +319,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         chkAutoSendToChatGpt.setChecked(sharedPreferences.getBoolean("auto_send_to_chatgpt", false));
         chk_auto_send_whisper_to_inputstick.setChecked(sharedPreferences.getBoolean("auto_send_whisper_to_inputstick", false));
 
+        progressBarWhisper = findViewById(R.id.progressBarWhisper); // Added
+        textViewWhisperStatus = findViewById(R.id.textViewWhisperStatus); // Added
+        if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE); // Added
+        if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE); // Added
+
         // Listener to improve EditText scrolling within ScrollView
         View.OnTouchListener editTextTouchListener = (v, event) -> {
             // Check if the view is an EditText and can scroll vertically
@@ -507,22 +515,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 // Compare with the audioFilePath that triggered the transcription in *this* MainActivity instance
                 if (receivedFilePath != null && receivedFilePath.equals(MainActivity.this.audioFilePath)) {
-                    if (transcriptionResult != null) {
-                        whisperText.setText(transcriptionResult);
+                    if (transcriptionResult != null) { // Success
+                        if (whisperText != null) whisperText.setText(transcriptionResult);
                         Log.i(TAG, "Whisper transcription updated via broadcast for task ID: " + taskId);
+
+                        if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE);
+                        if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                        if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
 
                         // Optional: Auto-send to ChatGPT or InputStick if checked
                         if (chkAutoSendToChatGpt.isChecked()) {
                             Log.d(TAG, "Auto-sending to ChatGPT from broadcast receiver.");
-                            sendToChatGpt(); // Make sure this method can handle being called here
+                            sendToChatGpt();
                         }
                         if (chk_auto_send_whisper_to_inputstick.isChecked()) {
                             Log.d(TAG, "Auto-sending Whisper text to InputStick from broadcast receiver.");
-                            sendWhisperToInputStick(); // Make sure this method can handle being called here
+                            sendWhisperToInputStick();
                         }
-                    } else {
+                    } else { // Failure (transcriptionResult is null)
                         Log.w(TAG, "Received null transcription result for matched file path: " + receivedFilePath);
-                        whisperText.setText(getString(R.string.transcription_failed_placeholder)); // Or some error placeholder
+                        String errorMessage = intent.getStringExtra(UploadService.EXTRA_ERROR_MESSAGE); // Check if service sends specific error
+                        if (errorMessage == null || errorMessage.isEmpty()) {
+                            errorMessage = getString(R.string.transcription_failed_placeholder);
+                        }
+                        if (textViewWhisperStatus != null) {
+                            textViewWhisperStatus.setText(errorMessage);
+                            textViewWhisperStatus.setVisibility(View.VISIBLE);
+                        }
+                        if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                        if (whisperText != null) whisperText.setText(""); // Clear text area
+                        if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
                     }
                 } else {
                     Log.d(TAG, "Received transcription for a different/unknown file path. Current: " + MainActivity.this.audioFilePath + ", Received: " + receivedFilePath + ". No UI update for whisperText.");
@@ -888,7 +910,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Update UI (e.g., clear previous transcription or show "queued" status)
         mainHandler.post(() -> {
-            whisperText.setText(TRANSCRIPTION_QUEUED_PLACEHOLDER); // Update placeholder text
+            // whisperText.setText(TRANSCRIPTION_QUEUED_PLACEHOLDER); // Replaced by new UI
+            if (whisperText != null) whisperText.setText("");
+
+            if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
+            if (textViewWhisperStatus != null) {
+                textViewWhisperStatus.setVisibility(View.VISIBLE);
+                textViewWhisperStatus.setText("Queued for transcription...");
+            }
+            if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
             // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
             // That logic will move to when the task is actually completed by the service.
         });
@@ -922,32 +952,78 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     if (latestTaskForFile != null) {
                         Log.d(TAG, "Refresh found task ID " + latestTaskForFile.id + " with status: " + latestTaskForFile.status + " for path: " + audioFilePath);
-                        if (UploadTask.STATUS_SUCCESS.equals(latestTaskForFile.status)) {
-                            whisperText.setText(latestTaskForFile.transcriptionResult);
-                            Toast.makeText(MainActivity.this, "Transcription loaded.", Toast.LENGTH_SHORT).show();
-                            // Potentially trigger auto-send actions if they were pending on this result
-                            if (chkAutoSendToChatGpt.isChecked()) {
-                                AppLogManager.getInstance().addEntry("INFO", "Auto-sending refreshed transcript to ChatGPT...", null);
-                                sendToChatGpt();
-                            }
-                            if (chk_auto_send_whisper_to_inputstick.isChecked()) {
-                                AppLogManager.getInstance().addEntry("INFO", "Auto-sending refreshed Whisper transcript to InputStick...", null);
-                                sendWhisperToInputStick();
-                            }
-                        } else if (UploadTask.STATUS_FAILED.equals(latestTaskForFile.status)) {
-                            String errorMsg = "Transcription failed: " + latestTaskForFile.errorMessage;
-                            whisperText.setText(errorMsg);
-                            Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                        } else if (UploadTask.STATUS_PENDING.equals(latestTaskForFile.status) || UploadTask.STATUS_UPLOADING.equals(latestTaskForFile.status)) {
-                            whisperText.setText("[" + latestTaskForFile.status + "... Tap to refresh]");
-                            if (userInitiated) Toast.makeText(MainActivity.this, "Transcription is " + latestTaskForFile.status.toLowerCase() + ".", Toast.LENGTH_SHORT).show();
-                        } else {
-                             if (userInitiated) Toast.makeText(MainActivity.this, "Task status: " + latestTaskForFile.status, Toast.LENGTH_SHORT).show();
+                        String status = latestTaskForFile.status;
+                        if (status == null) status = UploadTask.STATUS_PENDING; // Default if somehow null
+
+                        switch (status) {
+                            case UploadTask.STATUS_SUCCESS:
+                                if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE);
+                                if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                                if (whisperText != null) whisperText.setText(latestTaskForFile.transcriptionResult);
+                                if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
+                                if (userInitiated) Toast.makeText(MainActivity.this, "Transcription loaded.", Toast.LENGTH_SHORT).show();
+                                // Auto-send logic
+                                if (chkAutoSendToChatGpt.isChecked()) sendToChatGpt();
+                                if (chk_auto_send_whisper_to_inputstick.isChecked()) sendWhisperToInputStick();
+                                break;
+                            case UploadTask.STATUS_FAILED:
+                                String errorMsg = "Transcription failed: " + latestTaskForFile.errorMessage;
+                                if (textViewWhisperStatus != null) {
+                                    textViewWhisperStatus.setText(errorMsg);
+                                    textViewWhisperStatus.setVisibility(View.VISIBLE);
+                                }
+                                if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                                if (whisperText != null) whisperText.setText(""); // Clear text area
+                                if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
+                                if (userInitiated) Toast.makeText(MainActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                                break;
+                            case UploadTask.STATUS_PENDING:
+                                if (textViewWhisperStatus != null) {
+                                    textViewWhisperStatus.setText("Transcription queued.");
+                                    textViewWhisperStatus.setVisibility(View.VISIBLE);
+                                }
+                                if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
+                                if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
+                                if (whisperText != null) whisperText.setText("");
+                                if (userInitiated) Toast.makeText(MainActivity.this, "Transcription is queued.", Toast.LENGTH_SHORT).show();
+                                break;
+                            case UploadTask.STATUS_UPLOADING:
+                                if (textViewWhisperStatus != null) {
+                                    textViewWhisperStatus.setText("Uploading audio...");
+                                    textViewWhisperStatus.setVisibility(View.VISIBLE);
+                                }
+                                if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
+                                if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
+                                if (whisperText != null) whisperText.setText("");
+                                if (userInitiated) Toast.makeText(MainActivity.this, "Uploading audio...", Toast.LENGTH_SHORT).show();
+                                break;
+                            case UploadTask.STATUS_PROCESSING:
+                                if (textViewWhisperStatus != null) {
+                                    textViewWhisperStatus.setText("Processing transcription...");
+                                    textViewWhisperStatus.setVisibility(View.VISIBLE);
+                                }
+                                if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
+                                if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
+                                if (whisperText != null) whisperText.setText("");
+                                if (userInitiated) Toast.makeText(MainActivity.this, "Processing transcription...", Toast.LENGTH_SHORT).show();
+                                break;
+                            default: // Unknown status or no task
+                                if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE);
+                                if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                                if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
+                                if (userInitiated) Toast.makeText(MainActivity.this, "Task status: " + latestTaskForFile.status, Toast.LENGTH_SHORT).show();
+                                break;
                         }
-                    } else {
+                    } else { // No specific task found for this audio file
+                        if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE);
+                        if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                        if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
                         if (userInitiated) Toast.makeText(MainActivity.this, "No transcription task found for the last recording.", Toast.LENGTH_SHORT).show();
                     }
-                } else {
+                } else { // No tasks at all in the DB for this file path
+                    if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE);
+                    if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+                    if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
                     if (userInitiated) Toast.makeText(MainActivity.this, "No transcription tasks found in queue for this file.", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -969,8 +1045,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     
     private void clearTranscription() {
-        whisperText.setText("");
-        clearRecording();
+        if (whisperText != null) whisperText.setText("");
+        clearRecording(); // This handles deleting audio files and resetting recording duration.
+
+        // Reset Whisper specific UI elements
+        if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.GONE);
+        if (textViewWhisperStatus != null) textViewWhisperStatus.setVisibility(View.GONE);
+        if (btnSendWhisper != null) btnSendWhisper.setEnabled(true);
+        // No need for a toast here as this is often called as part of a larger clear operation.
     }
     
     private void transcribeAudioWithChatGpt() {

@@ -25,6 +25,7 @@ public class UploadTask {
     // Status constants
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_UPLOADING = "UPLOADING";
+    public static final String STATUS_PROCESSING = "PROCESSING";
     public static final String STATUS_SUCCESS = "SUCCESS";
     public static final String STATUS_FAILED = "FAILED";
 
