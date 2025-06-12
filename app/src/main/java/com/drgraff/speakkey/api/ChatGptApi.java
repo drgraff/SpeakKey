@@ -25,6 +25,19 @@ import org.json.JSONObject; // Already present
 import org.json.JSONException; // Already present
 // okhttp3.Request and okhttp3.Response are used fully qualified, so direct imports not strictly needed but can be added for clarity if preferred.
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
+import com.drgraff.speakkey.settings.SettingsActivity;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
+
+
 /**
  * API client for OpenAI's ChatGPT API
  */
@@ -426,5 +439,58 @@ public class ChatGptApi {
                 throw new IOException("Error parsing JSON from API response (JSON audio chat): " + e.getMessage(), e);
             }
         }
+    }
+
+    public static void fetchAndCacheOpenAiModels(
+            final ChatGptApi apiClient, // The instance to use for listModels()
+            final SharedPreferences sharedPreferences,
+            final ExecutorService executor, // Pass an executor
+            final Handler mainThreadHandler, // Pass a main thread handler
+            final Consumer<List<OpenAIModelData.ModelInfo>> onSuccess,
+            final Consumer<Exception> onError) {
+
+        if (apiClient == null) {
+            Log.e("ChatGptApiUtil", "fetchAndCacheOpenAiModels: ChatGptApi client is null.");
+            mainThreadHandler.post(() -> onError.accept(new IllegalArgumentException("API client cannot be null.")));
+            return;
+        }
+        if (sharedPreferences == null) {
+            Log.e("ChatGptApiUtil", "fetchAndCacheOpenAiModels: SharedPreferences is null.");
+            mainThreadHandler.post(() -> onError.accept(new IllegalArgumentException("SharedPreferences cannot be null.")));
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                Log.d("ChatGptApiUtil", "Fetching models via static utility...");
+                final List<OpenAIModelData.ModelInfo> models = apiClient.listModels(); // Use the instance
+
+                List<String> modelIdsList = new ArrayList<>();
+                if (models != null) {
+                    for (OpenAIModelData.ModelInfo model : models) {
+                        if (model.getId() != null && !model.getId().trim().isEmpty()) {
+                            modelIdsList.add(model.getId());
+                        }
+                    }
+                }
+
+                if (modelIdsList.isEmpty()) {
+                    Log.w("ChatGptApiUtil", "No suitable model IDs found in the API response.");
+                } else {
+                    String[] modelIdsArray = modelIdsList.toArray(new String[0]);
+                    Arrays.sort(modelIdsArray);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, new HashSet<>(Arrays.asList(modelIdsArray)));
+                    editor.apply();
+                    Log.d("ChatGptApiUtil", "Fetched and saved " + modelIdsArray.length + " model IDs to SharedPreferences.");
+                }
+
+                mainThreadHandler.post(() -> onSuccess.accept(models != null ? models : new ArrayList<>()));
+
+            } catch (Exception e) {
+                Log.e("ChatGptApiUtil", "Failed to fetch or cache models", e);
+                mainThreadHandler.post(() -> onError.accept(e));
+            }
+        });
     }
 }

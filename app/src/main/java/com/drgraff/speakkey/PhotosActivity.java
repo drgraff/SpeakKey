@@ -54,8 +54,8 @@ import java.util.stream.Collectors;
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.ChatGptRequest;
 import com.drgraff.speakkey.data.AppDatabase; // Added for UploadTask
-import com.drgraff.speakkey.data.PhotoPrompt;
-import com.drgraff.speakkey.data.PhotoPromptManager;
+import com.drgraff.speakkey.data.Prompt; // Added
+import com.drgraff.speakkey.data.PromptManager; // Added
 import com.drgraff.speakkey.data.UploadTask; // Added for UploadTask
 import com.drgraff.speakkey.inputstick.InputStickBroadcast; // Added
 import com.drgraff.speakkey.service.UploadService; // Added for UploadService
@@ -79,7 +79,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     private Button btnClearPhoto;
     private Button btnPhotoPrompts;
     private TextView textActivePhotoPromptsDisplay;
-    private PhotoPromptManager photoPromptManager;
+    private PromptManager promptManager; // Changed
 
     private Button btnSendToChatGptPhoto; // Added
     private EditText editTextChatGptResponsePhoto; // Added
@@ -117,7 +117,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         btnClearPhoto = findViewById(R.id.btn_clear_photo);
         btnPhotoPrompts = findViewById(R.id.btn_photo_prompts);
         textActivePhotoPromptsDisplay = findViewById(R.id.text_active_photo_prompts_display);
-        photoPromptManager = new PhotoPromptManager(this);
+        promptManager = new PromptManager(this); // Changed
 
         btnSendToChatGptPhoto = findViewById(R.id.btn_send_to_chatgpt_photo);
         editTextChatGptResponsePhoto = findViewById(R.id.edittext_chatgpt_response_photo);
@@ -239,16 +239,16 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     }
 
     private void updateActivePhotoPromptsDisplay() { // Added method
-        if (photoPromptManager == null) photoPromptManager = new PhotoPromptManager(this); // Defensive init
-        List<PhotoPrompt> activePrompts = photoPromptManager.getPhotoPrompts().stream()
-                .filter(PhotoPrompt::isActive)
+        if (promptManager == null) promptManager = new PromptManager(this); // Defensive init
+        List<Prompt> activePrompts = promptManager.getPromptsForMode("photo_vision").stream()
+                .filter(Prompt::isActive) // Assumes Prompt.isActive() exists
                 .collect(Collectors.toList());
 
         if (activePrompts.isEmpty()) {
             textActivePhotoPromptsDisplay.setText(getString(R.string.photos_text_no_active_prompts));
         } else {
             String displayText = activePrompts.stream()
-                    .map(PhotoPrompt::getLabel)
+                    .map(Prompt::getLabel) // Assumes Prompt.getLabel() exists
                     .collect(Collectors.joining("\n")); // Using newline as separator
             textActivePhotoPromptsDisplay.setText(displayText);
         }
@@ -363,14 +363,14 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         }
         String dataUri = "data:image/jpeg;base64," + base64Image;
 
-        List<PhotoPrompt> activePhotoPrompts = photoPromptManager.getPhotoPrompts().stream()
-                .filter(PhotoPrompt::isActive)
+        List<Prompt> activePhotoPrompts = promptManager.getPromptsForMode("photo_vision").stream()
+                .filter(Prompt::isActive)
                 .collect(Collectors.toList());
 
         String concatenatedPromptText = "";
         if (!activePhotoPrompts.isEmpty()) {
             concatenatedPromptText = activePhotoPrompts.stream()
-                                    .map(PhotoPrompt::getText)
+                                    .map(Prompt::getText) // Assumes Prompt.getText() exists
                                     .collect(Collectors.joining("\n\n"));
         } else {
             concatenatedPromptText = getString(R.string.photos_default_image_description_prompt);

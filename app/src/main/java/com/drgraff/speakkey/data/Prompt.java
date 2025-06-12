@@ -8,18 +8,21 @@ public class Prompt {
     private boolean isActive;
     private String label;
     private String promptModeType;
+    private long timestamp;
 
     // Default constructor for GSON
     public Prompt() {
         this.promptModeType = "two_step_transcription"; // Default for new prompts from UI if not specified
+        this.timestamp = System.currentTimeMillis();
     }
 
-    public Prompt(long id, String text, boolean isActive, String label, String promptModeType) {
+    public Prompt(long id, String text, boolean isActive, String label, String promptModeType, long timestamp) {
         this.id = id;
         this.text = text;
         this.isActive = isActive;
         this.label = label;
         this.promptModeType = promptModeType;
+        this.timestamp = (timestamp == 0) ? System.currentTimeMillis() : timestamp; // Ensure valid timestamp
     }
 
     public long getId() {
@@ -62,6 +65,14 @@ public class Prompt {
         this.promptModeType = promptModeType;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,6 +80,7 @@ public class Prompt {
         Prompt prompt = (Prompt) o;
         return id == prompt.id &&
                 isActive == prompt.isActive &&
+                timestamp == prompt.timestamp &&
                 Objects.equals(text, prompt.text) &&
                 Objects.equals(label, prompt.label) &&
                 Objects.equals(promptModeType, prompt.promptModeType);
@@ -76,7 +88,7 @@ public class Prompt {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, text, isActive, label, promptModeType);
+        return Objects.hash(id, text, isActive, label, promptModeType, timestamp);
     }
 
     @Override
@@ -87,6 +99,7 @@ public class Prompt {
                 ", isActive=" + isActive +
                 ", label='" + label + '\'' +
                 ", promptModeType='" + promptModeType + '\'' +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }
