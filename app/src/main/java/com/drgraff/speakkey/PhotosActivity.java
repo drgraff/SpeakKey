@@ -27,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton; // Added
 import android.widget.ImageView;
+import android.widget.ProgressBar; // Added
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -705,10 +706,11 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                         }
                     } else { // Failure case (visionResult is null)
                         // Attempt to get error message from intent, if UploadService provides it
-                        String errorMessage = intent.getStringExtra(UploadService.EXTRA_ERROR_MESSAGE);
-                        if (errorMessage == null || errorMessage.isEmpty()) {
-                            errorMessage = getString(R.string.photos_vision_failed_placeholder); // Generic failure
-                        }
+                        // String errorMessage = intent.getStringExtra(UploadService.EXTRA_ERROR_MESSAGE); // Removed
+                        String errorMessage = getString(R.string.photos_vision_failed_placeholder); // Default to placeholder
+                        // if (errorMessage == null || errorMessage.isEmpty()) { // This check is now redundant
+                        //     errorMessage = getString(R.string.photos_vision_failed_placeholder); // Generic failure
+                        // }
                         Log.w(TAG, "Received null vision result or error for matched file path: " + receivedFilePath + ". Error: " + errorMessage);
 
                         textViewPhotoStatus.setText(errorMessage);

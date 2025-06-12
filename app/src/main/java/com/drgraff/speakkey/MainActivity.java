@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton; // Added for ImageButton
+import android.widget.ProgressBar; // Added
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -534,10 +535,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     } else { // Failure (transcriptionResult is null)
                         Log.w(TAG, "Received null transcription result for matched file path: " + receivedFilePath);
-                        String errorMessage = intent.getStringExtra(UploadService.EXTRA_ERROR_MESSAGE); // Check if service sends specific error
-                        if (errorMessage == null || errorMessage.isEmpty()) {
-                            errorMessage = getString(R.string.transcription_failed_placeholder);
-                        }
+                        // String errorMessage = intent.getStringExtra(UploadService.EXTRA_ERROR_MESSAGE); // Check if service sends specific error
+                        String errorMessage = getString(R.string.transcription_failed_placeholder); // Default to placeholder
+                        // if (errorMessage == null || errorMessage.isEmpty()) { // This check is now redundant if we always default above
+                        //     errorMessage = getString(R.string.transcription_failed_placeholder);
+                        // }
                         if (textViewWhisperStatus != null) {
                             textViewWhisperStatus.setText(errorMessage);
                             textViewWhisperStatus.setVisibility(View.VISIBLE);
