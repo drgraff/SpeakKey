@@ -30,6 +30,7 @@ import java.util.List; // Added
 import java.util.Set;
 import java.util.concurrent.ExecutorService; // Added
 import java.util.concurrent.Executors; // Added
+import java.util.function.Consumer; // Added for API 24+ or with desugaring
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -130,67 +131,51 @@ public class SettingsActivity extends AppCompatActivity {
             progressDialog.setCancelable(false);
             progressDialog.show();
 
-            executorService.execute(() -> {
-                try {
-                    final List<OpenAIModelData.ModelInfo> models = chatGptApi.listModels();
-                    mainHandler.post(() -> {
-                        if (progressDialog.isShowing()) {
+            if (chatGptApi == null) {
+                Toast.makeText(getContext(), "API client not initialized (check API key).", Toast.LENGTH_LONG).show();
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                return;
+            }
+            if (sharedPreferences == null) {
+                 Toast.makeText(getContext(), "SharedPreferences not available.", Toast.LENGTH_LONG).show();
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                return;
+            }
+
+            ChatGptApi.fetchAndCacheOpenAiModels(
+                    chatGptApi,
+                    sharedPreferences,
+                    executorService,
+                    mainHandler,
+                    models -> { // onSuccess callback (Consumer<List<OpenAIModelData.ModelInfo>>)
+                        if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
                         if (models == null || models.isEmpty()) {
-                            Toast.makeText(getContext(), "No models returned or error in fetching.", Toast.LENGTH_LONG).show();
-                            return;
+                            // The static method logs warnings, but we can also toast here if needed
+                            // or rely on the static method to have informed the user via a generic error if it passed one to onError
+                            Toast.makeText(getContext(), "No models returned or error in fetching (check logs).", Toast.LENGTH_LONG).show();
+                            // return; // No return here, still call loadAndPopulate to reflect empty cache
                         }
-
-                        List<String> modelIdsList = new ArrayList<>();
-                        for (OpenAIModelData.ModelInfo model : models) {
-                            if (model.getId() != null && !model.getId().trim().isEmpty()) {
-                                 modelIdsList.add(model.getId());
-                            }
-                        }
-                        
-                        if (modelIdsList.isEmpty()) {
-                            Toast.makeText(getContext(), "No suitable model IDs found in the response.", Toast.LENGTH_LONG).show();
-                            return;
-                        }
-
-                        String[] modelIdsArray = modelIdsList.toArray(new String[0]);
-                        Arrays.sort(modelIdsArray); 
-
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putStringSet(PREF_KEY_FETCHED_MODEL_IDS, new HashSet<>(Arrays.asList(modelIdsArray)));
-                        
-                        String currentSelectedModel = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, null); // Updated key
-                        boolean currentSelectionStillValid = false;
-                        if (currentSelectedModel != null) {
-                            for (String id : modelIdsArray) {
-                                if (id.equals(currentSelectedModel)) {
-                                    currentSelectionStillValid = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!currentSelectionStillValid && modelIdsArray.length > 0) {
-                            currentSelectedModel = modelIdsArray[0]; 
-                            editor.putString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, currentSelectedModel); // Updated key
-                        }
-                        editor.apply();
-
+                        // The saving of PREF_KEY_FETCHED_MODEL_IDS is now done inside fetchAndCacheOpenAiModels.
+                        // The logic for checking current selection and updating default for PREF_KEY_ONESTEP_PROCESSING_MODEL
+                        // is also now inside fetchAndCacheOpenAiModels if we adapt it, or it can be handled by loadAndPopulateModels.
+                        // For now, just reload and repopulate.
                         loadAndPopulateModels(); 
-
-                        Toast.makeText(getContext(), "ChatGPT models updated successfully.", Toast.LENGTH_SHORT).show();
-                    });
-                } catch (Exception e) {
-                    Log.e("SettingsFragment", "Failed to fetch models", e);
-                    mainHandler.post(() -> {
-                        if (progressDialog.isShowing()) {
+                        Toast.makeText(getContext(), "ChatGPT models updated.", Toast.LENGTH_SHORT).show();
+                    },
+                    exception -> { // onError callback (Consumer<Exception>)
+                        Log.e("SettingsFragment", "Failed to fetch models via utility", exception);
+                        if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.dismiss();
                         }
-                        Toast.makeText(getContext(), "Error fetching models: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
-                }
-            });
+                        Toast.makeText(getContext(), "Error fetching models: " + exception.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+            );
         }
 
         private void loadAndPopulateModels() {
