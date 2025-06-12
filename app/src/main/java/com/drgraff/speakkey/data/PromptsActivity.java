@@ -21,9 +21,10 @@ import com.drgraff.speakkey.settings.SettingsActivity;
 import java.util.function.Consumer;
 import android.view.LayoutInflater; // Added
 import android.widget.EditText; // Added
-import androidx.appcompat.app.AlertDialog; // Added
-import android.content.DialogInterface; // Added
-import android.widget.Toast; // Added for Toast messages
+import androidx.appcompat.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.Toast;
+import android.widget.RadioGroup; // Added
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -190,33 +191,73 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
         recyclerViewPhotoPrompts.setAdapter(photoPromptsAdapter);
 
         fabAddPrompt.setOnClickListener(v -> {
-            Intent intent = new Intent(); // Create intent
-            String modeForNewPrompt;
-            Class<?> editorActivityClass;
-
             if (currentFilterMode != null) {
-                modeForNewPrompt = currentFilterMode;
-                if ("photo_vision".equals(currentFilterMode)) {
-                    editorActivityClass = com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.class;
-                    // PhotoPromptEditorActivity expects EXTRA_PHOTO_PROMPT_ID, not EXTRA_PROMPT_ID for new prompts.
-                    // However, since it's a new prompt, we don't pass an ID.
-                    // The editor itself handles new vs edit based on whether an ID is passed.
-                } else {
-                    editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class;
-                }
-            } else {
-                // If no filter, default to "two_step_processing" or open a dialog to choose.
-                // For now, defaulting as before for simplicity when no filter is active.
-                modeForNewPrompt = "two_step_processing";
-                editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class;
-            }
+                // Activity is filtered, launch editor for the current mode
+                Intent intent;
+                Class<?> editorActivityClass;
+                String modeForNewPrompt = currentFilterMode;
 
-            intent.setClass(this, editorActivityClass);
-            intent.putExtra("PROMPT_MODE_TYPE", modeForNewPrompt);
-            // For new prompts, PromptEditorActivity/PhotoPromptEditorActivity check if EXTRA_PROMPT_ID/EXTRA_PHOTO_PROMPT_ID is passed.
-            // If not, they assume it's a new prompt. So, no need to pass -1L explicitly here if they handle it.
-            startActivityForResult(intent, REQUEST_ADD_PROMPT);
-            Log.d(TAG, "FAB clicked, launching editor for mode: " + modeForNewPrompt);
+                if ("photo_vision".equals(modeForNewPrompt)) {
+                    editorActivityClass = com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.class;
+                    intent = new Intent(PromptsActivity.this, editorActivityClass);
+                    intent.putExtra(com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.EXTRA_PHOTO_PROMPT_ID, -1L); // Indicate new prompt
+                } else { // "one_step" or "two_step_processing"
+                    editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class;
+                    intent = new Intent(PromptsActivity.this, editorActivityClass);
+                    intent.putExtra(com.drgraff.speakkey.ui.prompts.PromptEditorActivity.EXTRA_PROMPT_ID, -1L); // Indicate new prompt
+                }
+                intent.putExtra("PROMPT_MODE_TYPE", modeForNewPrompt);
+                startActivityForResult(intent, REQUEST_ADD_PROMPT);
+                Log.d(TAG, "FAB clicked (filtered view), launching editor for mode: " + modeForNewPrompt);
+
+            } else {
+                // Activity is not filtered (showing all sections), show mode selection dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(PromptsActivity.this);
+                LayoutInflater inflater = PromptsActivity.this.getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.dialog_select_prompt_mode, null);
+                builder.setView(dialogView);
+                builder.setTitle("Create New Prompt In...");
+
+                final RadioGroup rgModeSelection = dialogView.findViewById(R.id.radio_group_prompt_mode_selection);
+                // Optional: Pre-select a default radio button, e.g., Two Step
+                // RadioButton radioTwoStep = dialogView.findViewById(R.id.radio_mode_two_step);
+                // if (radioTwoStep != null) radioTwoStep.setChecked(true);
+
+
+                builder.setPositiveButton("Next", (dialog, which) -> {
+                    int selectedId = rgModeSelection.getCheckedRadioButtonId();
+                    String selectedModeType = null;
+                    Class<?> editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class; // Default
+
+                    if (selectedId == R.id.radio_mode_one_step) {
+                        selectedModeType = "one_step";
+                    } else if (selectedId == R.id.radio_mode_two_step) {
+                        selectedModeType = "two_step_processing";
+                    } else if (selectedId == R.id.radio_mode_photo) {
+                        selectedModeType = "photo_vision";
+                        editorActivityClass = com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.class;
+                    }
+
+                    if (selectedModeType != null) {
+                        Intent intent = new Intent(PromptsActivity.this, editorActivityClass);
+                        intent.putExtra("PROMPT_MODE_TYPE", selectedModeType);
+                        if ("photo_vision".equals(selectedModeType)) {
+                             intent.putExtra(com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.EXTRA_PHOTO_PROMPT_ID, -1L);
+                        } else {
+                             intent.putExtra(com.drgraff.speakkey.ui.prompts.PromptEditorActivity.EXTRA_PROMPT_ID, -1L);
+                        }
+                        startActivityForResult(intent, REQUEST_ADD_PROMPT);
+                        Log.d(TAG, "FAB clicked (dialog), launching editor for selected mode: " + selectedModeType);
+                    } else {
+                        Toast.makeText(PromptsActivity.this, "Please select a mode.", Toast.LENGTH_SHORT).show();
+                        // Note: To prevent dialog dismissal on error, more complex dialog handling is needed.
+                    }
+                });
+                builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         });
 
         // Filter logic
