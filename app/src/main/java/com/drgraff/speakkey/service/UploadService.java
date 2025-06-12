@@ -56,6 +56,7 @@ public class UploadService extends IntentService {
     private static final int ONGOING_NOTIFICATION_ID = 1001;
     private static final int SUCCESS_NOTIFICATION_ID_OFFSET = 2000; // So each success can have a unique ID
     private static final int FAILED_NOTIFICATION_ID_OFFSET = 3000; // So each failure can have a unique ID
+    private static final int MAX_RETRIES = 5; // Added
 
     private UploadTaskDao uploadTaskDao;
     private NotificationManagerCompat notificationManager;
@@ -230,14 +231,14 @@ public class UploadService extends IntentService {
                     Intent broadcastIntent = new Intent(ACTION_TRANSCRIPTION_COMPLETE);
                     broadcastIntent.putExtra(EXTRA_FILE_PATH, task.filePath);
                     broadcastIntent.putExtra(EXTRA_TRANSCRIPTION_RESULT, task.transcriptionResult);
-                    broadcastIntent.putExtra(EXTRA_TASK_ID_LONG, task.id); // Pass the task ID
+                    broadcastIntent.putExtra(EXTRA_TASK_ID_LONG, (long) task.id); // Cast task.id to long
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                     Log.d(TAG, "Sent ACTION_TRANSCRIPTION_COMPLETE broadcast for task ID: " + task.id);
                 } else if (UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType)) {
                     Intent broadcastIntent = new Intent(ACTION_PHOTO_VISION_COMPLETE);
                     broadcastIntent.putExtra(EXTRA_PHOTO_FILE_PATH, task.filePath);
                     broadcastIntent.putExtra(EXTRA_VISION_RESULT, task.visionApiResponse); // Assuming vision result is in task.visionApiResponse
-                    broadcastIntent.putExtra(EXTRA_PHOTO_TASK_ID_LONG, task.id);
+                    broadcastIntent.putExtra(EXTRA_PHOTO_TASK_ID_LONG, (long) task.id); // Cast task.id to long
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
                     Log.d(TAG, "Sent ACTION_PHOTO_VISION_COMPLETE broadcast for task ID: " + task.id);
                 }
@@ -274,6 +275,14 @@ public class UploadService extends IntentService {
     // encodeImageToBase64 remains the same
 
     private boolean performAudioTranscription(UploadTask task) {
+        File audioFileCheck = new File(task.filePath);
+        if (!audioFileCheck.exists() || audioFileCheck.length() == 0) {
+            Log.e(TAG, "Audio file does not exist or is empty for task ID: " + task.id + " Path: " + task.filePath);
+            task.errorMessage = "Audio file missing or empty at path: " + task.filePath;
+            task.retryCount = MAX_RETRIES;
+            return false;
+        }
+
         Log.d(TAG, "Performing actual audio transcription for: " + task.filePath);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String apiKey = sharedPreferences.getString("openai_api_key", "");
@@ -324,6 +333,20 @@ public class UploadService extends IntentService {
     }
 
     private boolean performPhotoVisionProcessing(UploadTask task) {
+        if (task.filePath == null || task.filePath.isEmpty()) {
+            Log.e(TAG, "File path is missing for photo vision task ID: " + task.id);
+            task.errorMessage = "File path is missing for photo vision task.";
+            task.retryCount = MAX_RETRIES;
+            return false;
+        }
+        File photoFileCheck = new File(task.filePath);
+        if (!photoFileCheck.exists() || photoFileCheck.length() == 0) {
+            Log.e(TAG, "Photo file does not exist or is empty for task ID: " + task.id + " Path: " + task.filePath);
+            task.errorMessage = "Photo file missing or empty at path: " + task.filePath;
+            task.retryCount = MAX_RETRIES;
+            return false;
+        }
+
         Log.d(TAG, "Performing actual photo vision processing for: " + task.filePath);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String apiKey = sharedPreferences.getString("openai_api_key", "");
