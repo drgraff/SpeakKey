@@ -386,7 +386,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnPauseRecording.setOnClickListener(v -> pauseRecording());
         btnStopRecording.setOnClickListener(v -> stopRecording());
         
-        btnSendWhisper.setOnClickListener(v -> transcribeAudio());
+        btnSendWhisper.setOnClickListener(v -> {
+            showAudioTranscriptionProgressUI(); // Added
+            transcribeAudio();
+        });
         // btnClearRecording.setOnClickListener(v -> clearRecording()); // Removed
         // btnClearTranscription.setOnClickListener(v -> clearTranscription()); // Removed old listener
 
@@ -773,6 +776,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (converted != null) {
                         audioFilePath = converted;
                         if (chkAutoSendWhisper.isChecked()) {
+                            showAudioTranscriptionProgressUI(); // Added
                             transcribeAudio(); // Queues via UploadService
                         }
                     } else {
@@ -911,20 +915,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         // Update UI (e.g., clear previous transcription or show "queued" status)
-        mainHandler.post(() -> {
-            // whisperText.setText(TRANSCRIPTION_QUEUED_PLACEHOLDER); // Replaced by new UI
-            if (whisperText != null) whisperText.setText("");
-
-            if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
-            if (textViewWhisperStatus != null) {
-                textViewWhisperStatus.setVisibility(View.VISIBLE);
-                textViewWhisperStatus.setText("Queued for transcription...");
-            }
-            if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
-            // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
-            // That logic will move to when the task is actually completed by the service.
-        });
+        // mainHandler.post(() -> { // UI update logic moved to showAudioTranscriptionProgressUI() and called by callers
+        //     // whisperText.setText(TRANSCRIPTION_QUEUED_PLACEHOLDER); // Replaced by new UI
+        //     if (whisperText != null) whisperText.setText("");
+        //
+        //     if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
+        //     if (textViewWhisperStatus != null) {
+        //         textViewWhisperStatus.setVisibility(View.VISIBLE);
+        //         textViewWhisperStatus.setText("Queued for transcription...");
+        //     }
+        //     if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
+        //     // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
+        //     // That logic will move to when the task is actually completed by the service.
+        // });
         Log.i(TAG, "MainActivity.transcribeAudio: Queued recording for Whisper transcription via UploadService.");
+    }
+
+    private void showAudioTranscriptionProgressUI() {
+        if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
+        if (textViewWhisperStatus != null) {
+            textViewWhisperStatus.setVisibility(View.VISIBLE);
+            textViewWhisperStatus.setText("Queued for transcription...");
+        }
+        if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
+        if (whisperText != null) whisperText.setText("");
     }
 
     private void refreshTranscriptionStatus(boolean userInitiated) {
