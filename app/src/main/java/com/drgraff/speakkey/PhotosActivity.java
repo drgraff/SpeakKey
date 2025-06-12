@@ -181,12 +181,14 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         });
 
         btnPhotoPrompts.setOnClickListener(v -> {
-            Intent intent = new Intent(PhotosActivity.this, PhotoPromptsActivity.class);
+            Intent intent = new Intent(PhotosActivity.this, com.drgraff.speakkey.data.PromptsActivity.class);
+            intent.putExtra(com.drgraff.speakkey.data.PromptsActivity.EXTRA_FILTER_MODE_TYPE, "photo_vision");
             startActivity(intent);
         });
 
-        textActivePhotoPromptsDisplay.setOnClickListener(v -> { // Added
-            Intent intent = new Intent(PhotosActivity.this, PhotoPromptsActivity.class);
+        textActivePhotoPromptsDisplay.setOnClickListener(v -> {
+            Intent intent = new Intent(PhotosActivity.this, com.drgraff.speakkey.data.PromptsActivity.class);
+            intent.putExtra(com.drgraff.speakkey.data.PromptsActivity.EXTRA_FILTER_MODE_TYPE, "photo_vision");
             startActivity(intent);
         });
 
