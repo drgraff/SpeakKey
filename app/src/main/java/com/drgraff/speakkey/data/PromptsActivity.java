@@ -43,6 +43,7 @@ import com.drgraff.speakkey.data.PromptsAdapter; // Added
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Arrays; // Added
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -66,6 +67,7 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
     private Button btnCheckOneStepModels, btnCheckTwoStepModels, btnCheckPhotoModels;
     private RecyclerView recyclerViewOneStepPrompts, recyclerViewTwoStepPrompts, recyclerViewPhotoPrompts;
     private FloatingActionButton fabAddPrompt;
+    private TextView tvEmptyOneStepPrompts, tvEmptyTwoStepPrompts, tvEmptyPhotoPrompts; // Added
 
     // Adapters for Spinners
     private ArrayAdapter<String> oneStepModelAdapter, twoStepProcessingModelAdapter, photoVisionModelAdapter;
@@ -121,6 +123,10 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
         spinnerPhotoVisionModel = findViewById(R.id.spinnerPhotoVisionModel);
         btnCheckPhotoModels = findViewById(R.id.btnCheckPhotoModels);
         recyclerViewPhotoPrompts = findViewById(R.id.recyclerViewPhotoPrompts);
+
+        tvEmptyOneStepPrompts = findViewById(R.id.tvEmptyOneStepPrompts); // Added
+        tvEmptyTwoStepPrompts = findViewById(R.id.tvEmptyTwoStepPrompts); // Added
+        tvEmptyPhotoPrompts = findViewById(R.id.tvEmptyPhotoPrompts);   // Added
 
         fabAddPrompt = findViewById(R.id.fabAddPrompt);
 
@@ -216,7 +222,7 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
                 LayoutInflater inflater = PromptsActivity.this.getLayoutInflater();
                 View dialogView = inflater.inflate(R.layout.dialog_select_prompt_mode, null);
                 builder.setView(dialogView);
-                builder.setTitle("Create New Prompt In...");
+                builder.setTitle(getString(R.string.create_prompt_dialog_title));
 
                 final RadioGroup rgModeSelection = dialogView.findViewById(R.id.radio_group_prompt_mode_selection);
                 // Optional: Pre-select a default radio button, e.g., Two Step
@@ -224,7 +230,7 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
                 // if (radioTwoStep != null) radioTwoStep.setChecked(true);
 
 
-                builder.setPositiveButton("Next", (dialog, which) -> {
+                builder.setPositiveButton(getString(R.string.dialog_button_next), (dialog, which) -> {
                     int selectedId = rgModeSelection.getCheckedRadioButtonId();
                     String selectedModeType = null;
                     Class<?> editorActivityClass = com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class; // Default
@@ -249,11 +255,11 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
                         startActivityForResult(intent, REQUEST_ADD_PROMPT);
                         Log.d(TAG, "FAB clicked (dialog), launching editor for selected mode: " + selectedModeType);
                     } else {
-                        Toast.makeText(PromptsActivity.this, "Please select a mode.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PromptsActivity.this, getString(R.string.select_mode_toast), Toast.LENGTH_SHORT).show();
                         // Note: To prevent dialog dismissal on error, more complex dialog handling is needed.
                     }
                 });
-                builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+                builder.setNegativeButton(getString(android.R.string.cancel), (dialog, which) -> dialog.dismiss());
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
@@ -269,11 +275,11 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
     private void setTitleBasedOnFilterMode(String filterMode) {
         if (getSupportActionBar() == null) return;
         if ("one_step".equals(filterMode)) {
-            getSupportActionBar().setTitle("One Step Prompts");
+            getSupportActionBar().setTitle(getString(R.string.title_prompts_one_step));
         } else if ("two_step_processing".equals(filterMode)) {
-            getSupportActionBar().setTitle("Two Step Prompts");
+            getSupportActionBar().setTitle(getString(R.string.title_prompts_two_step));
         } else if ("photo_vision".equals(filterMode)) {
-            getSupportActionBar().setTitle("Photo Prompts");
+            getSupportActionBar().setTitle(getString(R.string.title_prompts_photo));
         } else {
             getSupportActionBar().setTitle(getString(R.string.prompts_activity_title));
         }
@@ -321,19 +327,43 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
         if (oneStepPromptsAdapter != null) {
             oneStepPromptsAdapter.setPrompts(oneStepPrompts);
         }
-        // TODO: Show/hide empty text view for oneStepPrompts RecyclerView
+        if (recyclerViewOneStepPrompts != null && tvEmptyOneStepPrompts != null) {
+            if (oneStepPrompts.isEmpty()) {
+                recyclerViewOneStepPrompts.setVisibility(View.GONE);
+                tvEmptyOneStepPrompts.setVisibility(View.VISIBLE);
+            } else {
+                recyclerViewOneStepPrompts.setVisibility(View.VISIBLE);
+                tvEmptyOneStepPrompts.setVisibility(View.GONE);
+            }
+        }
 
         List<Prompt> twoStepPrompts = promptManager.getPromptsForMode("two_step_processing");
         if (twoStepPromptsAdapter != null) {
             twoStepPromptsAdapter.setPrompts(twoStepPrompts);
         }
-        // TODO: Show/hide empty text view for twoStepPrompts RecyclerView
+        if (recyclerViewTwoStepPrompts != null && tvEmptyTwoStepPrompts != null) {
+            if (twoStepPrompts.isEmpty()) {
+                recyclerViewTwoStepPrompts.setVisibility(View.GONE);
+                tvEmptyTwoStepPrompts.setVisibility(View.VISIBLE);
+            } else {
+                recyclerViewTwoStepPrompts.setVisibility(View.VISIBLE);
+                tvEmptyTwoStepPrompts.setVisibility(View.GONE);
+            }
+        }
 
         List<Prompt> photoPrompts = promptManager.getPromptsForMode("photo_vision");
         if (photoPromptsAdapter != null) {
             photoPromptsAdapter.setPrompts(photoPrompts);
         }
-        // TODO: Show/hide empty text view for photoPrompts RecyclerView
+        if (recyclerViewPhotoPrompts != null && tvEmptyPhotoPrompts != null) {
+            if (photoPrompts.isEmpty()) {
+                recyclerViewPhotoPrompts.setVisibility(View.GONE);
+                tvEmptyPhotoPrompts.setVisibility(View.VISIBLE);
+            } else {
+                recyclerViewPhotoPrompts.setVisibility(View.VISIBLE);
+                tvEmptyPhotoPrompts.setVisibility(View.GONE);
+            }
+        }
         Log.d(TAG, "All prompt sections reloaded.");
     }
 
@@ -373,7 +403,7 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_copy_prompt, null);
         builder.setView(dialogView);
-        builder.setTitle("Copy Prompt");
+        builder.setTitle(getString(R.string.copy_prompt_dialog_title));
 
         final EditText etNewLabel = dialogView.findViewById(R.id.et_copy_prompt_new_label);
         final TextView tvOriginalText = dialogView.findViewById(R.id.tv_copy_prompt_original_text);
@@ -402,7 +432,7 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
         }
         spinnerDestinationMode.setSelection(originalModeIndex);
 
-        builder.setPositiveButton("Save Copy", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.copy_prompt_save_button), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String newLabel = etNewLabel.getText().toString().trim();
@@ -410,20 +440,20 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
                 String destinationModeType = modeInternalValues[spinnerDestinationMode.getSelectedItemPosition()];
 
                 if (newLabel.isEmpty()) {
-                    Toast.makeText(PromptsActivity.this, "New label cannot be empty.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PromptsActivity.this, getString(R.string.new_label_empty_error_toast), Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if (promptManager != null) {
                     promptManager.addPrompt(originalText, newLabel, destinationModeType);
-                    Toast.makeText(PromptsActivity.this, "Prompt copied to " + spinnerDestinationMode.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PromptsActivity.this, getString(R.string.prompt_copied_toast_format, spinnerDestinationMode.getSelectedItem().toString()), Toast.LENGTH_SHORT).show();
                     loadAllPromptsSections();
                 } else {
-                    Toast.makeText(PromptsActivity.this, "Error: PromptManager not available.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PromptsActivity.this, getString(R.string.prompt_manager_unavailable_error_toast), Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.setNegativeButton(getString(android.R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -432,11 +462,11 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
 
     private void fetchModelsForSpinners() {
         if (chatGptApi == null || sharedPreferences.getString("openai_api_key", "").isEmpty()) {
-            android.widget.Toast.makeText(this, "API Key not set in app settings.", android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(this, getString(R.string.api_key_not_set_for_models_toast), android.widget.Toast.LENGTH_SHORT).show();
             return;
         }
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Fetching available models...");
+        progressDialog.setMessage(getString(R.string.fetching_models_progress));
         progressDialog.setCancelable(false);
         progressDialog.show();
 
@@ -448,49 +478,55 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
                 mainHandler,
                 models -> { // onSuccess
                     if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
-                    android.widget.Toast.makeText(PromptsActivity.this, "Models updated.", android.widget.Toast.LENGTH_SHORT).show();
+                    android.widget.Toast.makeText(PromptsActivity.this, getString(R.string.models_updated_toast), android.widget.Toast.LENGTH_SHORT).show();
                     populateAllModelSpinnersFromCache(); // Repopulate all spinners
                 },
                 exception -> { // onError
                     if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
-                    android.widget.Toast.makeText(PromptsActivity.this, "Error fetching models: " + exception.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                    android.widget.Toast.makeText(PromptsActivity.this, getString(R.string.error_fetching_models_toast_format, exception.getMessage()), android.widget.Toast.LENGTH_LONG).show();
                     Log.e(TAG, "Error fetching models: ", exception);
                 }
         );
     }
 
     private void populateAllModelSpinnersFromCache() {
+        final List<String> placeholderItem = Arrays.asList(getString(R.string.no_models_loaded_placeholder));
         Set<String> fetchedModelIdsSet = sharedPreferences.getStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, null);
-        modelList.clear(); // This is the shared list
-        if (fetchedModelIdsSet != null && !fetchedModelIdsSet.isEmpty()) {
+        boolean modelsAvailable = (fetchedModelIdsSet != null && !fetchedModelIdsSet.isEmpty());
+
+        modelList.clear(); // Clear the shared backing list first
+
+        if (modelsAvailable) {
             modelList.addAll(new ArrayList<>(fetchedModelIdsSet));
             Collections.sort(modelList);
             Log.d(TAG, "Populating spinners with " + modelList.size() + " cached models.");
         } else {
-            Log.w(TAG, "No cached models found in SharedPreferences for key: " + SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS);
-            // Optionally, add some default models if modelList is empty
-            // modelList.addAll(Arrays.asList("gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo")); // Example defaults
-            // Collections.sort(modelList);
+            Log.w(TAG, "No cached models found. Using placeholder for spinners.");
+            modelList.addAll(placeholderItem); // Add placeholder to the shared list
         }
 
-        // Update all adapters with a new copy of the shared modelList
+        // Update all adapters with the content of modelList (which is either real models or the placeholder)
         if (oneStepModelAdapter != null) {
             oneStepModelAdapter.clear();
-            oneStepModelAdapter.addAll(new ArrayList<>(modelList));
+            oneStepModelAdapter.addAll(modelList);
             oneStepModelAdapter.notifyDataSetChanged();
+            spinnerOneStepModel.setEnabled(modelsAvailable);
         }
         if (twoStepProcessingModelAdapter != null) {
             twoStepProcessingModelAdapter.clear();
-            twoStepProcessingModelAdapter.addAll(new ArrayList<>(modelList));
+            twoStepProcessingModelAdapter.addAll(modelList);
             twoStepProcessingModelAdapter.notifyDataSetChanged();
+            spinnerTwoStepProcessingModel.setEnabled(modelsAvailable);
         }
         if (photoVisionModelAdapter != null) {
             photoVisionModelAdapter.clear();
-            photoVisionModelAdapter.addAll(new ArrayList<>(modelList));
+            photoVisionModelAdapter.addAll(modelList);
             photoVisionModelAdapter.notifyDataSetChanged();
+            spinnerPhotoVisionModel.setEnabled(modelsAvailable);
         }
 
         // After repopulating adapters, re-apply saved selections for each spinner
+        // If models are not available, this will select the placeholder.
         loadAndSetSpinnerSelection(spinnerOneStepModel, oneStepModelAdapter, SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-4o");
         loadAndSetSpinnerSelection(spinnerTwoStepProcessingModel, twoStepProcessingModelAdapter, SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
         loadAndSetSpinnerSelection(spinnerPhotoVisionModel, photoVisionModelAdapter, SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, "gpt-4-vision-preview");
