@@ -40,6 +40,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL = "pref_twostep_step1_chatgpt_model";
     public static final String PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL = "pref_twostep_step2_processing_model";
     public static final String PREF_KEY_PHOTOVISION_PROCESSING_MODEL = "pref_photovision_processing_model";
+    public static final String PREF_KEY_FETCHED_MODEL_IDS = "fetched_model_ids"; // Added
     // The old key "chatgpt_model" will be replaced by PREF_KEY_ONESTEP_PROCESSING_MODEL in root_preferences.xml next.
     // The old key "pref_key_selected_photo_model" from PhotoPromptsActivity will be superseded by PREF_KEY_PHOTOVISION_PROCESSING_MODEL.
 
@@ -77,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
         private Preference prefCheckModelsButton;
         private ChatGptApi chatGptApi;
         private SharedPreferences sharedPreferences;
-        private static final String PREF_KEY_FETCHED_MODEL_IDS = "fetched_model_ids";
+        // Removed: private static final String PREF_KEY_FETCHED_MODEL_IDS = "fetched_model_ids";
         // private static final String PREF_KEY_FETCHED_MODEL_NAMES = "fetched_model_names"; // Not strictly needed if IDs are names
 
         private ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -182,7 +183,7 @@ public class SettingsActivity extends AppCompatActivity {
         private void loadAndPopulateModels() {
             if (chatGptModelPreference == null) return;
 
-            Set<String> modelIdsSet = sharedPreferences.getStringSet(PREF_KEY_FETCHED_MODEL_IDS, null);
+            Set<String> modelIdsSet = sharedPreferences.getStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, null); // Changed to use SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS
             // Use IDs for names too, as PREF_KEY_FETCHED_MODEL_NAMES is not saved by fetchModelsAndUpdatePreference
             Set<String> modelNamesSet = modelIdsSet; 
             String currentSelectedModel = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-3.5-turbo"); // Updated key
