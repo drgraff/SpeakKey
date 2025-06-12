@@ -174,18 +174,43 @@ public class UploadService extends IntentService {
         showOngoingNotification("Preparing to upload...", 0, 0, true);
 
         List<UploadTask> pendingTasks = uploadTaskDao.getPendingUploads();
-        int totalTasks = pendingTasks.size();
-        int tasksProcessed = 0;
 
         if (pendingTasks == null || pendingTasks.isEmpty()) {
-            Log.d(TAG, "No pending uploads found.");
+            Log.d(TAG, "No pending uploads found from DAO."); // Modified log message
             stopForeground(true); // Remove ongoing notification
             return;
         }
+        Log.d(TAG, "Fetched " + pendingTasks.size() + " tasks from DAO. Filtering by retryCount < " + MAX_RETRIES);
 
-        Log.d(TAG, "Found " + totalTasks + " pending tasks.");
-
+        List<UploadTask> processableTasks = new ArrayList<>();
         for (UploadTask task : pendingTasks) {
+            if (task.retryCount < MAX_RETRIES) {
+                processableTasks.add(task);
+            } else {
+                Log.w(TAG, "Skipping task ID: " + task.id + " (" + task.uploadType + ") as it has reached max retries (" + task.retryCount + "). File: " + task.filePath);
+                if (!UploadTask.STATUS_FAILED.equals(task.status)) {
+                    task.status = UploadTask.STATUS_FAILED;
+                    if (task.errorMessage == null) {
+                        task.errorMessage = "Task exceeded max retries.";
+                    }
+                    uploadTaskDao.update(task);
+                }
+            }
+        }
+
+        if (processableTasks.isEmpty()) {
+            Log.d(TAG, "No processable tasks after filtering by retryCount.");
+            stopForeground(true);
+            return;
+        }
+
+        Log.d(TAG, "Processing " + processableTasks.size() + " tasks after filtering.");
+        int totalTasks = processableTasks.size(); // Use processableTasks
+        int tasksProcessed = 0;
+
+        // Log.d(TAG, "Found " + totalTasks + " pending tasks."); // Original log, use new totalTasks
+
+        for (UploadTask task : processableTasks) { // Use processableTasks
             tasksProcessed++;
             String fileName = new File(task.filePath).getName();
             showOngoingNotification("Processing: " + fileName + " (" + tasksProcessed + "/" + totalTasks + ")", tasksProcessed, totalTasks, false);
@@ -214,16 +239,21 @@ public class UploadService extends IntentService {
                 Log.d(TAG, "Task ID: " + task.id + " processed successfully.");
                 showSuccessNotification(task);
 
-                // Cleanup for successful task
-                File localFile = new File(task.filePath);
-                if (localFile.exists()) {
-                    if (localFile.delete()) {
-                        Log.i(TAG, "Successfully deleted local file: " + task.filePath + " for task ID: " + task.id);
+                // Cleanup for successful task - conditionally delete
+                if (UploadTask.TYPE_AUDIO_TRANSCRIPTION.equals(task.uploadType)) {
+                    File localFile = new File(task.filePath);
+                    if (localFile.exists()) {
+                        if (localFile.delete()) {
+                            Log.i(TAG, "Successfully deleted local audio file: " + task.filePath + " for task ID: " + task.id);
+                        } else {
+                            Log.w(TAG, "Failed to delete local audio file: " + task.filePath + " for task ID: " + task.id);
+                        }
                     } else {
-                        Log.w(TAG, "Failed to delete local file: " + task.filePath + " for task ID: " + task.id);
+                        Log.w(TAG, "Local audio file not found for deletion: " + task.filePath + " for task ID: " + task.id);
                     }
-                } else {
-                    Log.w(TAG, "Local file not found for deletion: " + task.filePath + " for task ID: " + task.id);
+                } else if (UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType)) {
+                    Log.i(TAG, "Skipping file deletion for photo task ID: " + task.id + ", File: " + task.filePath);
+                    // Photo files are not deleted by the service to allow reprocessing from PhotosActivity.
                 }
                 // Delete task from DB (Option A)
                 // Broadcast success before deleting
