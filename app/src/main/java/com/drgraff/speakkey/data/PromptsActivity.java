@@ -17,6 +17,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import com.drgraff.speakkey.settings.SettingsActivity; // Added
+import java.util.function.Consumer; // Added (may not be strictly necessary with desugaring but good for clarity)
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,8 +31,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.drgraff.speakkey.R;
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.OpenAIModelData;
-import com.drgraff.speakkey.ui.prompts.PromptEditorActivity; // Correct path for PromptEditorActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton; // Added for FAB
+import com.drgraff.speakkey.ui.prompts.PromptEditorActivity;
+import com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity; // Added for intent
+import com.drgraff.speakkey.data.PromptsAdapter; // Added
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,239 +45,310 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class PromptsActivity extends AppCompatActivity { // Removed PromptsAdapter.OnPromptInteractionListener
+public class PromptsActivity extends AppCompatActivity implements PromptsAdapter.OnPromptInteractionListener {
 
-    private RecyclerView promptsRecyclerView;
-    private PromptsAdapter promptsAdapter;
+    // Adapters for RecyclerViews
+    private PromptsAdapter oneStepPromptsAdapter, twoStepPromptsAdapter, photoPromptsAdapter;
+
+    // private RecyclerView promptsRecyclerView; // Old single RecyclerView
+    // private PromptsAdapter promptsAdapter; // Old single adapter
+    // private TextView emptyPromptsTextView; // Old empty view
+
+    // New UI Elements
+    private Toolbar toolbarPrompts;
+    private Spinner spinnerOneStepModel, spinnerTwoStepProcessingModel, spinnerPhotoVisionModel;
+    private Button btnCheckOneStepModels, btnCheckTwoStepModels, btnCheckPhotoModels;
+    private RecyclerView recyclerViewOneStepPrompts, recyclerViewTwoStepPrompts, recyclerViewPhotoPrompts;
+    private FloatingActionButton fabAddPrompt;
+
+    // Adapters for Spinners
+    private ArrayAdapter<String> oneStepModelAdapter, twoStepProcessingModelAdapter, photoVisionModelAdapter;
+    private List<String> modelList = new ArrayList<>(); // Common list for all spinners
+
+    // Core components
     private PromptManager promptManager;
-    // Removed promptList as adapter will hold its own list
-    private TextView emptyPromptsTextView; // Added for empty state
-    private FloatingActionButton fabAddPrompt; // Added for FAB
-
-    private Button btnCheckChatGptModels; // For prompts
-    private Spinner spinnerChatGptModels; // For prompts
-
     private ChatGptApi chatGptApi;
     private SharedPreferences sharedPreferences;
-    private ProgressDialog progressDialog;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor(); // Or re-use if one exists
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private List<String> modelListPrompts = new ArrayList<>();
-    private ArrayAdapter<String> modelAdapterPrompts;
+    private ProgressDialog progressDialog;
 
-    // Define new preference keys for this activity's model selection
-    public static final String PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS = "selected_chatgpt_model_prompts";
-    public static final String PREF_KEY_FETCHED_CHATGPT_MODEL_IDS_PROMPTS = "fetched_chatgpt_model_ids_prompts";
+    private static final String TAG = "PromptsActivity";
 
-
-    // Removed promptInputText, addPromptButton, currentEditingPrompt
+    // Removed local PREF_KEY constants
 
     private static final int ADD_PROMPT_REQUEST = 1;
-    // private static final int EDIT_PROMPT_REQUEST = 2; // For future use if adapter starts activity for result
+    private static final int REQUEST_ADD_PROMPT = ADD_PROMPT_REQUEST; // Alias for clarity if used elsewhere
+    private static final int REQUEST_EDIT_PROMPT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_prompts); // New layout
+        setContentView(R.layout.activity_prompts);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_prompts); // New Toolbar ID
-        setSupportActionBar(toolbar);
+        toolbarPrompts = findViewById(R.id.toolbar_prompts);
+        setSupportActionBar(toolbarPrompts);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(R.string.prompts_activity_title);
+            actionBar.setTitle(R.string.prompts_activity_title); // Assuming this string resource exists
         }
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String apiKey = sharedPreferences.getString("openai_api_key", "");
-        String openAiModel = sharedPreferences.getString(PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS, "gpt-3.5-turbo"); // Default model
-        chatGptApi = new ChatGptApi(apiKey, openAiModel);
-
+        // Initialize chatGptApi without a default model for this screen, as each section has its own
+        chatGptApi = new ChatGptApi(apiKey, ""); // Model will be set based on spinner/section
 
         promptManager = new PromptManager(this);
 
-        promptsRecyclerView = findViewById(R.id.prompts_recycler_view);
-        emptyPromptsTextView = findViewById(R.id.empty_prompts_text_view); // Initialize empty view
-        fabAddPrompt = findViewById(R.id.fab_add_prompt); // Initialize FAB
+        // Initialize new UI elements
+        spinnerOneStepModel = findViewById(R.id.spinnerOneStepModel);
+        btnCheckOneStepModels = findViewById(R.id.btnCheckOneStepModels);
+        recyclerViewOneStepPrompts = findViewById(R.id.recyclerViewOneStepPrompts);
 
-        btnCheckChatGptModels = findViewById(R.id.btn_check_chatgpt_models_prompts);
-        spinnerChatGptModels = findViewById(R.id.spinner_chatgpt_models_prompts);
+        spinnerTwoStepProcessingModel = findViewById(R.id.spinnerTwoStepProcessingModel);
+        btnCheckTwoStepModels = findViewById(R.id.btnCheckTwoStepModels);
+        recyclerViewTwoStepPrompts = findViewById(R.id.recyclerViewTwoStepPrompts);
 
-        modelAdapterPrompts = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, modelListPrompts);
-        modelAdapterPrompts.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerChatGptModels.setAdapter(modelAdapterPrompts);
+        spinnerPhotoVisionModel = findViewById(R.id.spinnerPhotoVisionModel);
+        btnCheckPhotoModels = findViewById(R.id.btnCheckPhotoModels);
+        recyclerViewPhotoPrompts = findViewById(R.id.recyclerViewPhotoPrompts);
 
-        if (apiKey.isEmpty()) {
-            btnCheckChatGptModels.setEnabled(false);
-            btnCheckChatGptModels.setText(R.string.api_key_not_set_short); // Assuming you have this string
-        } else {
-            btnCheckChatGptModels.setEnabled(true);
-            btnCheckChatGptModels.setText("Check Models"); // Or from strings.xml
-        }
+        fabAddPrompt = findViewById(R.id.fabAddPrompt);
 
-        btnCheckChatGptModels.setOnClickListener(v -> fetchChatGptModelsAndUpdateSpinner());
-
-        spinnerChatGptModels.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        // Setup Spinners
+        oneStepModelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>());
+        oneStepModelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerOneStepModel.setAdapter(oneStepModelAdapter);
+        spinnerOneStepModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedModel = (String) parent.getItemAtPosition(position);
-                sharedPreferences.edit().putString(PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS, selectedModel).apply();
-                // Update chatGptApi if model changes, or ensure it's read fresh when used
-                if (chatGptApi != null) {
-                    chatGptApi.setModel(selectedModel);
-                }
+                sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, selectedModel).apply();
+                Log.d(TAG, "OneStep Model saved: " + selectedModel);
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
+        btnCheckOneStepModels.setOnClickListener(v -> fetchModelsForSpinners());
 
-        loadAndPopulateChatGptModelsSpinner();
-
-
-        promptsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // PromptsAdapter constructor was changed to PromptsAdapter(Context context, List<Prompt> prompts, PromptManager promptManager)
-        promptsAdapter = new PromptsAdapter(this, new ArrayList<>(), promptManager);
-        promptsRecyclerView.setAdapter(promptsAdapter);
-
-        fabAddPrompt.setOnClickListener(new View.OnClickListener() {
+        twoStepProcessingModelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>());
+        twoStepProcessingModelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerTwoStepProcessingModel.setAdapter(twoStepProcessingModelAdapter);
+        spinnerTwoStepProcessingModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(PromptsActivity.this, PromptEditorActivity.class);
-                // For adding a new prompt, we don't pass an ID
-                startActivityForResult(intent, ADD_PROMPT_REQUEST);
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedModel = (String) parent.getItemAtPosition(position);
+                sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, selectedModel).apply();
+                Log.d(TAG, "TwoStep Processing Model saved: " + selectedModel);
             }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        btnCheckTwoStepModels.setOnClickListener(v -> fetchModelsForSpinners());
+
+        photoVisionModelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>());
+        photoVisionModelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPhotoVisionModel.setAdapter(photoVisionModelAdapter);
+        spinnerPhotoVisionModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedModel = (String) parent.getItemAtPosition(position);
+                sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, selectedModel).apply();
+                Log.d(TAG, "PhotoVision Model saved: " + selectedModel);
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        btnCheckPhotoModels.setOnClickListener(v -> fetchModelsForSpinners());
+
+        if (apiKey.isEmpty()) {
+            btnCheckOneStepModels.setEnabled(false);
+            btnCheckTwoStepModels.setEnabled(false);
+            btnCheckPhotoModels.setEnabled(false);
+             android.widget.Toast.makeText(this, "OpenAI API Key not set in app settings.", android.widget.Toast.LENGTH_LONG).show();
+        }
+
+
+        populateAllModelSpinnersFromCache(); // Load initial data into spinners
+
+        // Setup RecyclerViews
+        recyclerViewOneStepPrompts.setLayoutManager(new LinearLayoutManager(this));
+        oneStepPromptsAdapter = new PromptsAdapter(this, new ArrayList<>(), promptManager, this);
+        recyclerViewOneStepPrompts.setAdapter(oneStepPromptsAdapter);
+
+        recyclerViewTwoStepPrompts.setLayoutManager(new LinearLayoutManager(this));
+        twoStepPromptsAdapter = new PromptsAdapter(this, new ArrayList<>(), promptManager, this);
+        recyclerViewTwoStepPrompts.setAdapter(twoStepPromptsAdapter);
+
+        recyclerViewPhotoPrompts.setLayoutManager(new LinearLayoutManager(this));
+        photoPromptsAdapter = new PromptsAdapter(this, new ArrayList<>(), promptManager, this);
+        recyclerViewPhotoPrompts.setAdapter(photoPromptsAdapter);
+
+        fabAddPrompt.setOnClickListener(v -> {
+            Intent intent = new Intent(PromptsActivity.this, com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class);
+            // Defaulting new prompts from unified screen to "Two Step (Processing)" for now
+            intent.putExtra("PROMPT_MODE_TYPE", "two_step_processing");
+            startActivityForResult(intent, REQUEST_ADD_PROMPT);
+            Log.d(TAG, "FAB clicked, launching PromptEditorActivity with mode two_step_processing.");
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadPrompts();
+        populateAllModelSpinnersFromCache(); // Refresh spinner selections
+        loadAllPromptsSections(); // Load/refresh prompts for all RecyclerViews
     }
 
-    private void loadPrompts() {
-        List<Prompt> loadedPrompts = promptManager.getAllPrompts(); // Changed to getAllPrompts
-        promptsAdapter.setPrompts(loadedPrompts); // Use the new setPrompts method in adapter
-
-        if (loadedPrompts == null || loadedPrompts.isEmpty()) {
-            promptsRecyclerView.setVisibility(View.GONE);
-            emptyPromptsTextView.setVisibility(View.VISIBLE);
-        } else {
-            promptsRecyclerView.setVisibility(View.VISIBLE);
-            emptyPromptsTextView.setVisibility(View.GONE);
+    private void loadAllPromptsSections() {
+        if (promptManager == null) {
+            Log.e(TAG, "PromptManager not initialized in loadAllPromptsSections");
+            return;
         }
+
+        List<Prompt> oneStepPrompts = promptManager.getPromptsForMode("one_step");
+        if (oneStepPromptsAdapter != null) {
+            oneStepPromptsAdapter.setPrompts(oneStepPrompts);
+        }
+        // TODO: Show/hide empty text view for oneStepPrompts RecyclerView
+
+        List<Prompt> twoStepPrompts = promptManager.getPromptsForMode("two_step_processing");
+        if (twoStepPromptsAdapter != null) {
+            twoStepPromptsAdapter.setPrompts(twoStepPrompts);
+        }
+        // TODO: Show/hide empty text view for twoStepPrompts RecyclerView
+
+        List<Prompt> photoPrompts = promptManager.getPromptsForMode("photo_vision");
+        if (photoPromptsAdapter != null) {
+            photoPromptsAdapter.setPrompts(photoPrompts);
+        }
+        // TODO: Show/hide empty text view for photoPrompts RecyclerView
+        Log.d(TAG, "All prompt sections reloaded.");
     }
 
-    // Removed saveOrUpdatePrompt method
-
-    // Removed onPromptActivateToggle, onEditPrompt, onDeletePrompt listener methods
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ADD_PROMPT_REQUEST && resultCode == Activity.RESULT_OK) {
-            // Prompts were added/edited, onResume will call loadPrompts()
-            // loadPrompts(); // Explicitly calling here is also fine, but onResume handles it
+        if ((requestCode == REQUEST_ADD_PROMPT || requestCode == REQUEST_EDIT_PROMPT) && resultCode == Activity.RESULT_OK) {
+            loadAllPromptsSections(); // Refresh the relevant list(s)
+            Log.d(TAG, "Returned from EditorActivity with RESULT_OK, reloaded prompts.");
         }
-        // Handle EDIT_PROMPT_REQUEST if implemented
     }
 
-    private void fetchChatGptModelsAndUpdateSpinner() {
+    // Implementation for PromptsAdapter.OnPromptInteractionListener
+    @Override
+    public void onEditPrompt(Prompt prompt) {
+        Intent intent;
+        if ("photo_vision".equals(prompt.getPromptModeType())) {
+            intent = new Intent(this, com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.class);
+            intent.putExtra(com.drgraff.speakkey.ui.prompts.PhotoPromptEditorActivity.EXTRA_PHOTO_PROMPT_ID, prompt.getId());
+        } else { // "one_step" or "two_step_processing"
+            intent = new Intent(this, com.drgraff.speakkey.ui.prompts.PromptEditorActivity.class);
+            intent.putExtra(com.drgraff.speakkey.ui.prompts.PromptEditorActivity.EXTRA_PROMPT_ID, prompt.getId());
+            intent.putExtra("PROMPT_MODE_TYPE", prompt.getPromptModeType());
+        }
+        startActivityForResult(intent, REQUEST_EDIT_PROMPT);
+    }
+
+
+    private void fetchModelsForSpinners() {
         if (chatGptApi == null || sharedPreferences.getString("openai_api_key", "").isEmpty()) {
-            android.widget.Toast.makeText(this, "API client not initialized or API Key missing.", android.widget.Toast.LENGTH_LONG).show();
+            android.widget.Toast.makeText(this, "API Key not set in app settings.", android.widget.Toast.LENGTH_SHORT).show();
             return;
         }
-
         progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Fetching available ChatGPT models...");
+        progressDialog.setMessage("Fetching available models...");
         progressDialog.setCancelable(false);
         progressDialog.show();
 
-        executorService.execute(() -> {
-            try {
-                final List<OpenAIModelData.ModelInfo> models = chatGptApi.listModels(); // This is a synchronous call
-                mainHandler.post(() -> {
-                    if (progressDialog.isShowing()) {
-                        progressDialog.dismiss();
-                    }
-                    if (models == null || models.isEmpty()) {
-                        android.widget.Toast.makeText(PromptsActivity.this, "No models returned or error fetching.", android.widget.Toast.LENGTH_LONG).show();
-                        return;
-                    }
-
-                    modelListPrompts.clear();
-                    List<String> modelIds = new ArrayList<>();
-                    for (OpenAIModelData.ModelInfo model : models) {
-                        String id = model.getId();
-                        // Basic filtering for text-based models, can be refined
-                        if (id != null && !id.trim().isEmpty() &&
-                            (id.contains("gpt") || id.contains("text-davinci") || id.contains("claude") || id.contains("gemini")) && // Common text model identifiers
-                            !id.contains("vision") && !id.contains("image") && !id.contains("audio") &&
-                            !id.contains("tts") && !id.contains("whisper") && !id.contains("dall-e") &&
-                            !id.contains("embedding") && !id.contains("moderation")) {
-                            modelListPrompts.add(id);
-                            modelIds.add(id);
-                        }
-                    }
-                    Collections.sort(modelListPrompts);
-
-                    if (modelListPrompts.isEmpty()) {
-                        android.widget.Toast.makeText(PromptsActivity.this, "No suitable text-based ChatGPT models found.", android.widget.Toast.LENGTH_LONG).show();
-                    } else {
-                        modelAdapterPrompts.notifyDataSetChanged();
-                        sharedPreferences.edit().putStringSet(PREF_KEY_FETCHED_CHATGPT_MODEL_IDS_PROMPTS, new HashSet<>(modelIds)).apply();
-
-                        String previouslySelectedModel = sharedPreferences.getString(PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS, null);
-                        if (previouslySelectedModel != null && modelListPrompts.contains(previouslySelectedModel)) {
-                            spinnerChatGptModels.setSelection(modelListPrompts.indexOf(previouslySelectedModel));
-                        } else if (!modelListPrompts.isEmpty()) {
-                            spinnerChatGptModels.setSelection(0); // Select the first one
-                            sharedPreferences.edit().putString(PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS, modelListPrompts.get(0)).apply();
-                             if (chatGptApi != null) chatGptApi.setModel(modelListPrompts.get(0));
-                        }
-                        android.widget.Toast.makeText(PromptsActivity.this, "ChatGPT models updated.", android.widget.Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } catch (Exception e) {
-                Log.e("PromptsActivity", "Failed to fetch models", e);
-                mainHandler.post(() -> {
-                    if (progressDialog != null && progressDialog.isShowing()) {
-                        progressDialog.dismiss();
-                    }
-                    android.widget.Toast.makeText(PromptsActivity.this, "Error fetching models: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
-                });
-            }
-        });
+        ChatGptApi.fetchAndCacheOpenAiModels(
+                chatGptApi,
+                sharedPreferences,
+                SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, // Key to save/read all fetched model IDs
+                executorService,
+                mainHandler,
+                models -> { // onSuccess
+                    if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
+                    android.widget.Toast.makeText(PromptsActivity.this, "Models updated.", android.widget.Toast.LENGTH_SHORT).show();
+                    populateAllModelSpinnersFromCache(); // Repopulate all spinners
+                },
+                exception -> { // onError
+                    if (progressDialog != null && progressDialog.isShowing()) progressDialog.dismiss();
+                    android.widget.Toast.makeText(PromptsActivity.this, "Error fetching models: " + exception.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Error fetching models: ", exception);
+                }
+        );
     }
 
-    private void loadAndPopulateChatGptModelsSpinner() {
-        Set<String> fetchedModelIds = sharedPreferences.getStringSet(PREF_KEY_FETCHED_CHATGPT_MODEL_IDS_PROMPTS, null);
-        modelListPrompts.clear();
-
-        if (fetchedModelIds != null && !fetchedModelIds.isEmpty()) {
-            modelListPrompts.addAll(fetchedModelIds);
-            Collections.sort(modelListPrompts); // Ensure sorted order
+    private void populateAllModelSpinnersFromCache() {
+        Set<String> fetchedModelIdsSet = sharedPreferences.getStringSet(SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS, null);
+        modelList.clear(); // This is the shared list
+        if (fetchedModelIdsSet != null && !fetchedModelIdsSet.isEmpty()) {
+            modelList.addAll(new ArrayList<>(fetchedModelIdsSet));
+            Collections.sort(modelList);
+            Log.d(TAG, "Populating spinners with " + modelList.size() + " cached models.");
         } else {
-            // Fallback to a minimal default list if nothing is fetched or stored
-            // This could be expanded or loaded from an XML array resource
-            modelListPrompts.add("gpt-4-turbo");
-            modelListPrompts.add("gpt-3.5-turbo");
+            Log.w(TAG, "No cached models found in SharedPreferences for key: " + SettingsActivity.PREF_KEY_FETCHED_MODEL_IDS);
+            // Optionally, add some default models if modelList is empty
+            // modelList.addAll(Arrays.asList("gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo")); // Example defaults
+            // Collections.sort(modelList);
         }
-        modelAdapterPrompts.notifyDataSetChanged();
 
-        String selectedModel = sharedPreferences.getString(PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS, modelListPrompts.get(0));
-        int selectionIndex = modelListPrompts.indexOf(selectedModel);
-        if (selectionIndex >= 0) {
-            spinnerChatGptModels.setSelection(selectionIndex);
-        } else if (!modelListPrompts.isEmpty()) {
-            spinnerChatGptModels.setSelection(0); // Default to the first item if saved one isn't in the list
-            sharedPreferences.edit().putString(PREF_KEY_SELECTED_CHATGPT_MODEL_PROMPTS, modelListPrompts.get(0)).apply();
-            if (chatGptApi != null) chatGptApi.setModel(modelListPrompts.get(0));
+        // Update all adapters with a new copy of the shared modelList
+        if (oneStepModelAdapter != null) {
+            oneStepModelAdapter.clear();
+            oneStepModelAdapter.addAll(new ArrayList<>(modelList));
+            oneStepModelAdapter.notifyDataSetChanged();
         }
+        if (twoStepProcessingModelAdapter != null) {
+            twoStepProcessingModelAdapter.clear();
+            twoStepProcessingModelAdapter.addAll(new ArrayList<>(modelList));
+            twoStepProcessingModelAdapter.notifyDataSetChanged();
+        }
+        if (photoVisionModelAdapter != null) {
+            photoVisionModelAdapter.clear();
+            photoVisionModelAdapter.addAll(new ArrayList<>(modelList));
+            photoVisionModelAdapter.notifyDataSetChanged();
+        }
+
+        // After repopulating adapters, re-apply saved selections for each spinner
+        loadAndSetSpinnerSelection(spinnerOneStepModel, oneStepModelAdapter, SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-4o");
+        loadAndSetSpinnerSelection(spinnerTwoStepProcessingModel, twoStepProcessingModelAdapter, SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
+        loadAndSetSpinnerSelection(spinnerPhotoVisionModel, photoVisionModelAdapter, SettingsActivity.PREF_KEY_PHOTOVISION_PROCESSING_MODEL, "gpt-4-vision-preview");
     }
 
+    private void loadAndSetSpinnerSelection(Spinner spinner, ArrayAdapter<String> adapter, String prefKey, String defaultModel) {
+        if (spinner == null || adapter == null) {
+            Log.w(TAG, "Spinner or Adapter is null for prefKey: " + prefKey);
+            return;
+        }
+        String selectedModel = sharedPreferences.getString(prefKey, defaultModel);
+        // Ensure the adapter has items before trying to get a position or item.
+        if (adapter.getCount() == 0) {
+            Log.w(TAG, "Adapter for " + prefKey + " is empty. Cannot set selection. Default model " + selectedModel + " might be saved if not present.");
+            // If adapter is empty, it might be that models haven't been fetched yet.
+            // We could save the default to prefs if no specific selection for this key exists yet.
+            if(sharedPreferences.getString(prefKey, null) == null) { // only if no selection ever made for this key
+                 sharedPreferences.edit().putString(prefKey, defaultModel).apply();
+            }
+            return;
+        }
+
+        int position = adapter.getPosition(selectedModel);
+        if (position >= 0) {
+            spinner.setSelection(position);
+        } else { // Saved model not in the current list
+            Log.w(TAG, "Saved model '" + selectedModel + "' for " + prefKey + " not found in adapter. Selecting first available.");
+            if (adapter.getCount() > 0) {
+                spinner.setSelection(0);
+                sharedPreferences.edit().putString(prefKey, adapter.getItem(0)).apply(); // Save this new default
+            } else {
+                Log.w(TAG, "Adapter for " + prefKey + " is empty after attempting to select first item.");
+                // If nothing is in adapter, and saved model is not there, ensure default is in prefs
+                sharedPreferences.edit().putString(prefKey, defaultModel).apply();
+            }
+        }
+        // Log.d(TAG, "Spinner for " + prefKey + " set to: " + spinner.getSelectedItem() + " (intended: " + selectedModel + ")");
+    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
