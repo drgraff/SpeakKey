@@ -29,6 +29,7 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
     // Interface for interaction Callbacks
     public interface OnPromptInteractionListener {
         void onEditPrompt(Prompt prompt);
+        void onCopyPrompt(Prompt promptToCopy); // New method
         // void onDeletePrompt(Prompt prompt); // Example for future
         // void onTogglePromptActive(Prompt prompt, boolean isActive); // Example for future
     }
@@ -75,6 +76,12 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
             }
         });
 
+        holder.promptCopyButton.setOnClickListener(v -> {
+            if (listener != null && holder.getAdapterPosition() != RecyclerView.NO_POSITION) {
+                listener.onCopyPrompt(prompts.get(holder.getAdapterPosition()));
+            }
+        });
+
         holder.deletePromptButton.setOnClickListener(v -> {
             // Get position before removing from list
             int adapterPosition = holder.getAdapterPosition();
@@ -108,16 +115,18 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
 
     // ViewHolder updated
     static class PromptViewHolder extends RecyclerView.ViewHolder {
-        TextView promptLabelTextView; // Changed from promptTextView
-        SwitchCompat promptActiveSwitch; // Changed from CheckBox
+        TextView promptLabelTextView;
+        SwitchCompat promptActiveSwitch;
         ImageButton editPromptButton;
+        ImageButton promptCopyButton; // Added
         ImageButton deletePromptButton;
 
         PromptViewHolder(View itemView) {
             super(itemView);
-            promptLabelTextView = itemView.findViewById(R.id.prompt_label_text_view); // Updated ID
-            promptActiveSwitch = itemView.findViewById(R.id.prompt_active_switch); // Updated ID
+            promptLabelTextView = itemView.findViewById(R.id.prompt_label_text_view);
+            promptActiveSwitch = itemView.findViewById(R.id.prompt_active_switch);
             editPromptButton = itemView.findViewById(R.id.prompt_edit_button);
+            promptCopyButton = itemView.findViewById(R.id.prompt_copy_button); // Added
             deletePromptButton = itemView.findViewById(R.id.prompt_delete_button);
         }
     }
