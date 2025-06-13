@@ -576,9 +576,9 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             if (resultCode == RESULT_OK) {
                 setPic(); // This will update currentPhotoPath and UI
                 if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) {
-                    isNewPhotoTaskJustQueued = true; // Set flag immediately
-                    // Post only the sendPhotoAndPromptsToChatGpt call to the handler.
-                    // NO call to showPhotoUploadProgressUI() should be in this onActivityResult block for auto-send.
+                    // Call showPhotoUploadProgressUI() before posting to the handler
+                    showPhotoUploadProgressUI();
+                    // The isNewPhotoTaskJustQueued = true flag is set inside showPhotoUploadProgressUI(), so no need to set it here explicitly.
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
