@@ -557,11 +557,22 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 setPic(); // This will update currentPhotoPath and UI
                 if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) { // Added
                     isNewPhotoTaskJustQueued = true; // Set flag immediately
-                    showPhotoUploadProgressUI();    // Attempt synchronous UI update
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    // Removed direct call to showPhotoUploadProgressUI() here. It's now in the first post.
+                    mainHandler.post(new Runnable() { // Post the UI update
                         @Override
                         public void run() {
-                            sendPhotoAndPromptsToChatGpt();
+                            showPhotoUploadProgressUI();
+                            // After showing UI, post the next action with a delay
+                            mainHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Check if the activity is still in a valid state to proceed,
+                                    // as a delay has occurred. This is an optional guard.
+                                    if (!isFinishing() && !isDestroyed()) {
+                                         sendPhotoAndPromptsToChatGpt();
+                                    }
+                                }
+                            }, 100); // 100 millisecond delay
                         }
                     });
                 }
