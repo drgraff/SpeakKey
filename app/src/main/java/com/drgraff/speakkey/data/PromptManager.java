@@ -129,17 +129,17 @@ public class PromptManager {
         sharedPreferences.edit().putString(PROMPTS_KEY, json).apply();
     }
 
-    public void addPrompt(String text, String label, String promptModeType) {
+    // Signature changed: label first, then text
+    public void addPrompt(String label, String text, String promptModeType) {
         List<Prompt> prompts = getAllPrompts();
         long newId = System.currentTimeMillis(); // Simple unique ID
         // Add timestamp to the Prompt constructor call
-        // Swapped 'text' and 'label' parameters in the Prompt constructor call
-        // to correctly map from PhotoPromptEditorActivity's call:
-        // addPrompt(labelFromUi, textFromUi, mode)
-        // where addPrompt's 'text' param receives uiLabel and 'label' param receives uiText.
-        // Prompt constructor wants (..., promptText, ..., promptLabel, ...),
-        // so we pass addPrompt's 'label' param for promptText, and 'text' param for promptLabel.
-        prompts.add(new Prompt(newId, label, false, text, promptModeType, newId));
+        // Parameters to Prompt constructor now directly match the new method signature:
+        // Prompt(id, textValue, isActive, labelValue, mode, order)
+        // New addPrompt signature is (label, text, mode), so:
+        // textValue for Prompt is 'text' (2nd param of addPrompt)
+        // labelValue for Prompt is 'label' (1st param of addPrompt)
+        prompts.add(new Prompt(newId, text, false, label, promptModeType, newId));
         savePrompts(prompts);
     }
 

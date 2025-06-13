@@ -445,7 +445,8 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
                 }
 
                 if (promptManager != null) {
-                    promptManager.addPrompt(originalText, newLabel, destinationModeType);
+                    // Updated to match new signature: addPrompt(label, text, mode)
+                    promptManager.addPrompt(newLabel, originalText, destinationModeType);
                     Toast.makeText(PromptsActivity.this, getString(R.string.prompt_copied_toast_format, spinnerDestinationMode.getSelectedItem().toString()), Toast.LENGTH_SHORT).show();
                     loadAllPromptsSections();
                 } else {
