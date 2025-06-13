@@ -560,7 +560,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            showPhotoUploadProgressUI();
+                            // showPhotoUploadProgressUI(); // REMOVED
                             sendPhotoAndPromptsToChatGpt();
                         }
                     });
