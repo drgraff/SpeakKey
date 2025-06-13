@@ -293,107 +293,86 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     private void refreshPhotoProcessingStatus(boolean userInitiated) {
         if (currentPhotoPath == null || currentPhotoPath.isEmpty()) {
             if (userInitiated) Toast.makeText(this, "No active photo to check status for.", Toast.LENGTH_SHORT).show();
+            // Ensure UI is reset if no photo path
+            if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
+            if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
+            if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+            isNewPhotoTaskJustQueued = false; // No active photo, so no task is "just queued" for it
             return;
         }
 
         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
-        // Assuming currentPhotoPath is the key to find the relevant task.
-        // We might need a more robust way if multiple tasks can be associated with the same photo path over time.
-        // For now, getting the latest task for this path.
         Executors.newSingleThreadExecutor().execute(() -> {
             List<UploadTask> tasks = database.uploadTaskDao().getTasksByFilePath(currentPhotoPath);
+            UploadTask latestTaskForFile = null; // Initialize here
 
+            if (tasks != null && !tasks.isEmpty()) {
+                for (UploadTask task : tasks) {
+                    if (task.filePath.equals(currentPhotoPath) && UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType)) {
+                        if (latestTaskForFile == null || task.creationTimestamp > latestTaskForFile.creationTimestamp) {
+                            latestTaskForFile = task;
+                        }
+                    }
+                }
+            }
+
+            final UploadTask finalLatestTaskForFile = latestTaskForFile; // effectively final for lambda
             mainHandler.post(() -> {
-                if (tasks != null && !tasks.isEmpty()) {
-                    UploadTask latestTaskForFile = null;
-                    for(UploadTask task : tasks) {
-                        if (task.filePath.equals(currentPhotoPath) && UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType)) {
-                            if (latestTaskForFile == null || task.creationTimestamp > latestTaskForFile.creationTimestamp) {
-                                latestTaskForFile = task;
-                            }
+                if (finalLatestTaskForFile != null) {
+                    Log.d(TAG, "Refresh found photo task ID " + finalLatestTaskForFile.id + " with status: " + finalLatestTaskForFile.status + " for path: " + currentPhotoPath);
+                    String status = finalLatestTaskForFile.status != null ? finalLatestTaskForFile.status : UploadTask.STATUS_PENDING;
+
+                    if (UploadTask.STATUS_PENDING.equals(status) ||
+                        UploadTask.STATUS_UPLOADING.equals(status) ||
+                        UploadTask.STATUS_PROCESSING.equals(status)) {
+
+                        isNewPhotoTaskJustQueued = false; // DB has caught up to an active task.
+
+                        if (textViewPhotoStatus != null) {
+                            if(UploadTask.STATUS_PENDING.equals(status)) textViewPhotoStatus.setText("Photo processing is queued.");
+                            else if(UploadTask.STATUS_UPLOADING.equals(status)) textViewPhotoStatus.setText("Uploading photo...");
+                            else textViewPhotoStatus.setText("Processing photo..."); // STATUS_PROCESSING
+                            textViewPhotoStatus.setVisibility(View.VISIBLE);
                         }
+                        if (progressBarPhotoProcessing != null) {
+                            progressBarPhotoProcessing.setIndeterminate(true);
+                            progressBarPhotoProcessing.setVisibility(View.VISIBLE);
+                        }
+                        if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(false);
+                        if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
+                        if (userInitiated && textViewPhotoStatus != null) Toast.makeText(PhotosActivity.this, textViewPhotoStatus.getText().toString(), Toast.LENGTH_SHORT).show();
+
+                    } else if (UploadTask.STATUS_SUCCESS.equals(status)) {
+                        isNewPhotoTaskJustQueued = false;
+                        if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
+                        if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
+                        if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText(finalLatestTaskForFile.visionApiResponse);
+                        if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+                        if (userInitiated) Toast.makeText(PhotosActivity.this, "Photo processing complete.", Toast.LENGTH_SHORT).show();
+                        if (chkAutoSendInputStickPhoto != null && chkAutoSendInputStickPhoto.isChecked()) {
+                            sendTextToInputStick();
+                        }
+                    } else if (UploadTask.STATUS_FAILED.equals(status)) {
+                        isNewPhotoTaskJustQueued = false;
+                        String errorMsg = "Photo processing failed: " + finalLatestTaskForFile.errorMessage;
+                        if (textViewPhotoStatus != null) {
+                            textViewPhotoStatus.setText(errorMsg);
+                            textViewPhotoStatus.setVisibility(View.VISIBLE);
+                        }
+                        if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
+                        if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
+                        if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+                        if (userInitiated) Toast.makeText(PhotosActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    } else { // Other unknown status from DB
+                         isNewPhotoTaskJustQueued = false;
+                         if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
+                         if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
+                         if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+                         if (userInitiated) Toast.makeText(PhotosActivity.this, "Unknown task status: " + status, Toast.LENGTH_SHORT).show();
                     }
-
-                    if (latestTaskForFile != null) {
-                        Log.d(TAG, "Refresh found photo task ID " + latestTaskForFile.id + " with status: " + latestTaskForFile.status + " for path: " + currentPhotoPath);
-                        String status = latestTaskForFile.status != null ? latestTaskForFile.status : UploadTask.STATUS_PENDING;
-
-                        if (UploadTask.STATUS_PENDING.equals(status) ||
-                            UploadTask.STATUS_UPLOADING.equals(status) ||
-                            UploadTask.STATUS_PROCESSING.equals(status)) {
-
-                            isNewPhotoTaskJustQueued = false; // We found an active task for the current photo.
-
-                            if (textViewPhotoStatus != null) {
-                                if(UploadTask.STATUS_PENDING.equals(status)) textViewPhotoStatus.setText("Photo processing is queued.");
-                                else if(UploadTask.STATUS_UPLOADING.equals(status)) textViewPhotoStatus.setText("Uploading photo...");
-                                else textViewPhotoStatus.setText("Processing photo...");
-                                textViewPhotoStatus.setVisibility(View.VISIBLE);
-                            }
-                            if (progressBarPhotoProcessing != null) {
-                                progressBarPhotoProcessing.setIndeterminate(true);
-                                progressBarPhotoProcessing.setVisibility(View.VISIBLE);
-                            }
-                            if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(false);
-                            if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
-                            if (userInitiated) Toast.makeText(PhotosActivity.this, textViewPhotoStatus != null ? textViewPhotoStatus.getText() : status, Toast.LENGTH_SHORT).show();
-
-                        } else if (UploadTask.STATUS_SUCCESS.equals(status)) {
-                            isNewPhotoTaskJustQueued = false;
-                            if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
-                            if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
-                            if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText(latestTaskForFile.visionApiResponse);
-                            if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
-                            if (userInitiated) Toast.makeText(PhotosActivity.this, "Photo processing complete.", Toast.LENGTH_SHORT).show();
-                            if (chkAutoSendInputStickPhoto != null && chkAutoSendInputStickPhoto.isChecked()) {
-                                sendTextToInputStick();
-                            }
-                        } else if (UploadTask.STATUS_FAILED.equals(status)) {
-                            isNewPhotoTaskJustQueued = false;
-                            String errorMsg = "Photo processing failed: " + latestTaskForFile.errorMessage;
-                            if (textViewPhotoStatus != null) {
-                                textViewPhotoStatus.setText(errorMsg);
-                                textViewPhotoStatus.setVisibility(View.VISIBLE);
-                            }
-                            if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
-                            if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
-                            if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
-                            if (userInitiated) Toast.makeText(PhotosActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                        } else { // Other unknown status from DB
-                             isNewPhotoTaskJustQueued = false;
-                             if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
-                             if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
-                             if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
-                             if (userInitiated) Toast.makeText(PhotosActivity.this, "Unknown task status: " + status, Toast.LENGTH_SHORT).show();
-                        }
-                    } else { // latestTaskForFile is null (no task of TYPE_PHOTO_VISION for currentPhotoPath)
-                        if (isNewPhotoTaskJustQueued) {
-                            // Keep "Queued..." UI visible as the new task might not be in DB yet
-                            if (textViewPhotoStatus != null) {
-                                textViewPhotoStatus.setText("Queued for processing...");
-                                textViewPhotoStatus.setVisibility(View.VISIBLE);
-                            }
-                            if (progressBarPhotoProcessing != null) {
-                                progressBarPhotoProcessing.setIndeterminate(true);
-                                progressBarPhotoProcessing.setVisibility(View.VISIBLE);
-                            }
-                            if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(false);
-                            if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
-                        } else {
-                            // No task just queued, and no task found. Reset UI.
-                            if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
-                            if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
-                            if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
-                            // The original toast condition was: userInitiated && !editTextChatGptResponsePhoto.getText().toString().startsWith("[")
-                            // Let's keep it simple: only show if user initiated and we're certain no task is expected.
-                            if (userInitiated) {
-                                Toast.makeText(PhotosActivity.this, "No active processing task found for this photo.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                } else { // tasks list itself is null or empty
+                } else { // finalLatestTaskForFile is null (no task of TYPE_PHOTO_VISION for currentPhotoPath)
                     if (isNewPhotoTaskJustQueued) {
-                        // Keep "Queued..." UI visible
+                        // Keep "Queued..." UI visible as the new task might not be in DB yet
                         if (textViewPhotoStatus != null) {
                             textViewPhotoStatus.setText("Queued for processing...");
                             textViewPhotoStatus.setVisibility(View.VISIBLE);
@@ -405,11 +384,13 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                         if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(false);
                         if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
                     } else {
-                        // No task just queued, and no tasks found. Reset UI.
+                        // No task just queued, and no task found. Reset UI.
                         if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
                         if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
                         if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
-                        if (userInitiated) Toast.makeText(PhotosActivity.this, "No processing tasks found in queue for this photo.", Toast.LENGTH_SHORT).show();
+                        if (userInitiated) {
+                            Toast.makeText(PhotosActivity.this, "No active processing task found for this photo.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
@@ -575,11 +556,11 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             if (resultCode == RESULT_OK) {
                 setPic(); // This will update currentPhotoPath and UI
                 if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) { // Added
-                    // showPhotoUploadProgressUI(); // Removed from here
+                    isNewPhotoTaskJustQueued = true; // Set flag immediately
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            showPhotoUploadProgressUI(); // Added here
+                            showPhotoUploadProgressUI();
                             sendPhotoAndPromptsToChatGpt();
                         }
                     });
