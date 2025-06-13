@@ -578,29 +578,54 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             return;
         }
 
-        File imgFile = new File(currentPhotoPath);
-        if (imgFile.exists()) {
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            if (myBitmap != null) {
-                imageViewPhoto.setImageBitmap(myBitmap);
-                imageViewPhoto.setVisibility(View.VISIBLE);
-                btnTakePhotoArea.setVisibility(View.GONE);
-                btnClearPhoto.setVisibility(View.VISIBLE);
-                editTextChatGptResponsePhoto.setText(""); // Clear previous/status messages
+        final String path = currentPhotoPath; // Use a final variable for lambda/runnable
 
-                if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE); // Added
-                if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE); // Added
-                if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true); // Added
-                // refreshPhotoProcessingStatus(false); // Consider calling this to immediately check for existing tasks for this new photo. For now, onResume handles it.
-            } else {
-                Log.e(TAG, "Failed to decode bitmap from path: " + currentPhotoPath);
-                Toast.makeText(this, getString(R.string.photos_toast_failed_load_image_text), Toast.LENGTH_SHORT).show();
-                clearPhoto();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                File imgFile = new File(path);
+                if (imgFile.exists()) {
+                    // Consider adding BitmapFactory.Options for scaling large images
+                    // to prevent OutOfMemoryError, e.g.:
+                    // BitmapFactory.Options options = new BitmapFactory.Options();
+                    // options.inSampleSize = 2; // Adjust as needed
+                    // final Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath(), options);
+                    final Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (myBitmap != null) {
+                                if (imageViewPhoto != null) { // Add null check for UI elements
+                                    imageViewPhoto.setImageBitmap(myBitmap);
+                                    imageViewPhoto.setVisibility(View.VISIBLE);
+                                }
+                                if (btnTakePhotoArea != null) btnTakePhotoArea.setVisibility(View.GONE);
+                                if (btnClearPhoto != null) btnClearPhoto.setVisibility(View.VISIBLE);
+                                if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText(""); // Clear previous/status messages
+
+                                if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
+                                if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
+                                if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+                            } else {
+                                Log.e(TAG, "Failed to decode bitmap from path: " + path);
+                                Toast.makeText(PhotosActivity.this, getString(R.string.photos_toast_failed_load_image_text), Toast.LENGTH_SHORT).show();
+                                clearPhoto(); // Reset UI if bitmap is null
+                            }
+                        }
+                    });
+                } else {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.w(TAG, "Image file does not exist at path: " + path);
+                            Toast.makeText(PhotosActivity.this, "Image file no longer exists.", Toast.LENGTH_SHORT).show();
+                            clearPhoto(); // Reset UI if file doesn't exist
+                        }
+                    });
+                }
             }
-        } else {
-            Log.w(TAG, "Image file does not exist at path: " + currentPhotoPath);
-            clearPhoto(); // Reset if file doesn't exist
-        }
+        });
     }
 
     private void clearPhoto() {
