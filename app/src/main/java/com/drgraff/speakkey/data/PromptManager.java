@@ -133,12 +133,11 @@ public class PromptManager {
     public void addPrompt(String label, String text, String promptModeType) {
         List<Prompt> prompts = getAllPrompts();
         long newId = System.currentTimeMillis(); // Simple unique ID
-        // Add timestamp to the Prompt constructor call
-        // Parameters to Prompt constructor now directly match the new method signature:
-        // Prompt(id, textValue, isActive, labelValue, mode, order)
-        // New addPrompt signature is (label, text, mode), so:
-        // textValue for Prompt is 'text' (2nd param of addPrompt)
-        // labelValue for Prompt is 'label' (1st param of addPrompt)
+        // Parameters to Prompt constructor correctly map to the method signature:
+        // addPrompt's 'label' parameter (1st string arg) is for Prompt's label.
+        // addPrompt's 'text' parameter (2nd string arg) is for Prompt's text.
+        // Prompt constructor: Prompt(id, textVal, isActive, labelVal, mode, timestamp)
+        // So, textVal = text (from method), labelVal = label (from method).
         prompts.add(new Prompt(newId, text, false, label, promptModeType, newId));
         savePrompts(prompts);
     }
