@@ -576,12 +576,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             if (resultCode == RESULT_OK) {
                 setPic(); // This will update currentPhotoPath and UI
                 if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) {
-                    mainHandler.post(new Runnable() { // Post showPhotoUploadProgressUI
-                        @Override
-                        public void run() {
-                            showPhotoUploadProgressUI();
-                        }
-                    });
+                    showPhotoUploadProgressUI(); // Call directly
                     mainHandler.post(new Runnable() { // Post sendPhotoAndPromptsToChatGpt
                         @Override
                         public void run() {
@@ -638,9 +633,17 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                                 if (btnClearPhoto != null) btnClearPhoto.setVisibility(View.VISIBLE);
                                 if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText(""); // Clear previous/status messages
 
-                                if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
-                                if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
-                                if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+                                // Only hide progress if auto-send is NOT checked.
+                                // If auto-send IS checked, showPhotoUploadProgressUI() will soon be called
+                                // to manage the visibility of these elements.
+                                if (chkAutoSendChatGptPhoto != null && !chkAutoSendChatGptPhoto.isChecked()) {
+                                    if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
+                                    if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
+                                    if (btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
+                                }
+                                // If chkAutoSendChatGptPhoto IS checked, we intentionally leave the
+                                // progress bar and status text as they are, because showPhotoUploadProgressUI()
+                                // will handle them. The btnSendToChatGptPhoto will also be managed by it.
                             } else {
                                 Log.e(TAG, "Failed to decode bitmap from path: " + path);
                                 Toast.makeText(PhotosActivity.this, getString(R.string.photos_toast_failed_load_image_text), Toast.LENGTH_SHORT).show();
