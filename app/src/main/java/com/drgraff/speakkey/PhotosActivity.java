@@ -548,7 +548,12 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 setPic(); // This will update currentPhotoPath and UI
                 if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) { // Added
                     showPhotoUploadProgressUI(); // Added
-                    sendPhotoAndPromptsToChatGpt();
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendPhotoAndPromptsToChatGpt();
+                        }
+                    });
                 }
             } else {
                 // If the user cancelled or an error occurred, delete the empty file.
