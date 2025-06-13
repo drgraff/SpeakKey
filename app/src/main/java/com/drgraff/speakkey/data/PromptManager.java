@@ -133,7 +133,13 @@ public class PromptManager {
         List<Prompt> prompts = getAllPrompts();
         long newId = System.currentTimeMillis(); // Simple unique ID
         // Add timestamp to the Prompt constructor call
-        prompts.add(new Prompt(newId, text, false, label, promptModeType, newId));
+        // Swapped 'text' and 'label' parameters in the Prompt constructor call
+        // to correctly map from PhotoPromptEditorActivity's call:
+        // addPrompt(labelFromUi, textFromUi, mode)
+        // where addPrompt's 'text' param receives uiLabel and 'label' param receives uiText.
+        // Prompt constructor wants (..., promptText, ..., promptLabel, ...),
+        // so we pass addPrompt's 'label' param for promptText, and 'text' param for promptLabel.
+        prompts.add(new Prompt(newId, label, false, text, promptModeType, newId));
         savePrompts(prompts);
     }
 
