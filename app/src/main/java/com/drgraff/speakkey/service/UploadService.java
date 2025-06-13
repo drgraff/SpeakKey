@@ -52,6 +52,7 @@ public class UploadService extends IntentService {
     public static final String EXTRA_PHOTO_FILE_PATH = "com.drgraff.speakkey.service.extra.PHOTO_FILE_PATH";
     public static final String EXTRA_VISION_RESULT = "com.drgraff.speakkey.service.extra.VISION_RESULT";
     public static final String EXTRA_PHOTO_TASK_ID_LONG = "com.drgraff.speakkey.service.extra.PHOTO_TASK_ID_LONG";
+    public static final String ACTION_PHOTO_TASK_QUEUED = "com.drgraff.speakkey.service.action.PHOTO_TASK_QUEUED"; // Added
 
     private static final int ONGOING_NOTIFICATION_ID = 1001;
     private static final int SUCCESS_NOTIFICATION_ID_OFFSET = 2000; // So each success can have a unique ID
@@ -214,6 +215,24 @@ public class UploadService extends IntentService {
             tasksProcessed++;
             String fileName = new File(task.filePath).getName();
             showOngoingNotification("Processing: " + fileName + " (" + tasksProcessed + "/" + totalTasks + ")", tasksProcessed, totalTasks, false);
+
+            // Check if it's a photo task and its status is PENDING (meaning it's just been picked up)
+            // The status check here is a bit tricky because getPendingUploads() fetches based on STATUS_PENDING.
+            // However, if the service was stopped and restarted, a task might be re-fetched from DB
+            // while it was already STATUS_UPLOADING or STATUS_PROCESSING.
+            // For this broadcast, we're interested in the *first time* it's picked from PENDING.
+            // The current logic in onHandleIntent already filters for retryCount < MAX_RETRIES.
+            // If a task is picked up here, its status *should* be PENDING if it's truly new.
+            // To be more precise, we might need to check the status *before* it's set to UPLOADING below.
+            // However, the DAO call `getPendingUploads()` should ideally only return tasks that are indeed PENDING.
+            // Let's assume `task.status` reflects its state from the DB at this point (before being set to UPLOADING).
+            if (UploadTask.TYPE_PHOTO_VISION.equals(task.uploadType) && UploadTask.STATUS_PENDING.equals(task.status)) {
+                Intent queuedBroadcastIntent = new Intent(ACTION_PHOTO_TASK_QUEUED);
+                queuedBroadcastIntent.putExtra(EXTRA_PHOTO_FILE_PATH, task.filePath);
+                queuedBroadcastIntent.putExtra(EXTRA_PHOTO_TASK_ID_LONG, (long) task.id); // Ensure task.id is cast to long
+                LocalBroadcastManager.getInstance(this).sendBroadcast(queuedBroadcastIntent);
+                Log.d(TAG, "Sent ACTION_PHOTO_TASK_QUEUED broadcast for photo task ID: " + task.id + ", File: " + task.filePath);
+            }
 
             Log.d(TAG, "Processing task ID: " + task.id + ", Type: " + task.uploadType + ", File: " + task.filePath);
             task.status = UploadTask.STATUS_UPLOADING;

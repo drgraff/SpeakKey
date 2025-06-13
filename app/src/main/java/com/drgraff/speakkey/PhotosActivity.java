@@ -798,3 +798,5 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         }
     }
 }
+
+[end of app/src/main/java/com/drgraff/speakkey/PhotosActivity.java]
