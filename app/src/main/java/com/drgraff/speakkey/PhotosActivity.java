@@ -275,6 +275,26 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         LocalBroadcastManager.getInstance(this).registerReceiver(photoVisionReceiver, filter);
         Log.d(TAG, "PhotoVisionBroadcastReceiver registered.");
         updateActivePhotoPromptsDisplay();
+
+        if (isNewPhotoTaskJustQueued) {
+            Log.d(TAG, "onResume: isNewPhotoTaskJustQueued is true, attempting to show 'Queued...' UI synchronously.");
+            if (textViewPhotoStatus != null) {
+                textViewPhotoStatus.setText("Queued for processing...");
+                textViewPhotoStatus.setVisibility(View.VISIBLE);
+            }
+            if (progressBarPhotoProcessing != null) {
+                progressBarPhotoProcessing.setIndeterminate(true);
+                progressBarPhotoProcessing.setVisibility(View.VISIBLE);
+            }
+            if (btnSendToChatGptPhoto != null) {
+                btnSendToChatGptPhoto.setEnabled(false);
+            }
+            if (editTextChatGptResponsePhoto != null) {
+                editTextChatGptResponsePhoto.setText("");
+            }
+            // Do not reset isNewPhotoTaskJustQueued here;
+            // refreshPhotoProcessingStatus or the broadcast receiver will handle it.
+        }
         refreshPhotoProcessingStatus(false); // Add this call
     }
 
@@ -555,24 +575,14 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         if (requestCode == REQUEST_IMAGE_CAPTURE) {
             if (resultCode == RESULT_OK) {
                 setPic(); // This will update currentPhotoPath and UI
-                if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) { // Added
+                if (chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) {
                     isNewPhotoTaskJustQueued = true; // Set flag immediately
-                    // Removed direct call to showPhotoUploadProgressUI() here. It's now in the first post.
-                    mainHandler.post(new Runnable() { // Post the UI update
+                    // Post only the sendPhotoAndPromptsToChatGpt call to the handler.
+                    // NO call to showPhotoUploadProgressUI() should be in this onActivityResult block for auto-send.
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            showPhotoUploadProgressUI();
-                            // After showing UI, post the next action with a delay
-                            mainHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Check if the activity is still in a valid state to proceed,
-                                    // as a delay has occurred. This is an optional guard.
-                                    if (!isFinishing() && !isDestroyed()) {
-                                         sendPhotoAndPromptsToChatGpt();
-                                    }
-                                }
-                            }, 100); // 100 millisecond delay
+                            sendPhotoAndPromptsToChatGpt();
                         }
                     });
                 }
