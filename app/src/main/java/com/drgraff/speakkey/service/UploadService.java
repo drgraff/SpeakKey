@@ -351,14 +351,26 @@ public class UploadService extends IntentService {
             return false;
         }
 
-        WhisperApi whisperApi = new WhisperApi(apiKey, whisperEndpoint, language);
+        // WhisperApi whisperApi = new WhisperApi(apiKey, whisperEndpoint, language); // Old direct WhisperApi call
+        ChatGptApi chatGptApi = new ChatGptApi(apiKey, ""); // Initialize ChatGptApi; model param not directly used by getTranscriptionFromAudio
+
+        String modelToUse = (task.modelNameForTranscription != null && !task.modelNameForTranscription.isEmpty())
+                            ? task.modelNameForTranscription
+                            : "whisper-1"; // Fallback if somehow still null/empty
+        String hintToUse = (task.transcriptionHint != null)
+                            ? task.transcriptionHint
+                            : ""; // Fallback if somehow null
+
+        Log.d(TAG, "UploadService: Transcribing audio task ID: " + task.id +
+                   " with model: " + modelToUse + " and hint: '" + hintToUse + "'");
 
         try {
             Log.d(TAG, "Task ID: " + task.id + " - Setting status to PROCESSING before API call (audio).");
             task.status = UploadTask.STATUS_PROCESSING;
             uploadTaskDao.update(task);
 
-            String transcriptionResultText = whisperApi.transcribe(audioFile);
+            // final String transcription = chatGptApi.getTranscriptionFromAudio(audioFile, hintToUse, modelToUse);
+            String transcriptionResultText = chatGptApi.getTranscriptionFromAudio(audioFile, hintToUse, modelToUse); // Corrected variable name
             task.transcriptionResult = transcriptionResultText;
             Log.d(TAG, "Actual audio transcription successful for task ID: " + task.id + ". Result length: " + (transcriptionResultText != null ? transcriptionResultText.length() : "null"));
             return true;
