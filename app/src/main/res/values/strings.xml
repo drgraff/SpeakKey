@@ -17,6 +17,7 @@
     <string name="save_edit">Save</string> <!-- String for Save button in full-screen edit dialog -->
     <string name="clear_all_button_text">Clear All</string>
     <string name="clear_all_content_description">Clear all text fields</string>
+    <string name="default_two_step_prompt_label">Transcription only: Click to activate prompt</string>
     
     <!-- Settings -->
     <string name="title_activity_settings">Settings</string>

@@ -1410,8 +1410,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         } else { // "two_step_transcription" mode
             if (activeSystemPrompts.isEmpty()) {
-                activePromptsDisplay.setText(""); // Or "No active prompts for two-step"
-                activePromptsDisplay.setVisibility(View.GONE); // Hide if no prompts for this mode
+                // Get the default text from a string resource
+                activePromptsDisplay.setText(getString(R.string.default_two_step_prompt_label));
+                activePromptsDisplay.setVisibility(View.VISIBLE); // Ensure it's visible
             } else {
                 // Show active "two_step_processing" prompts
                 String promptsText = activeSystemPrompts.stream()
