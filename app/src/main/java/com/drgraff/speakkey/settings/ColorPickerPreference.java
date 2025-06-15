@@ -13,6 +13,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.drgraff.speakkey.R; // For R.layout.pref_color_picker
+import android.content.DialogInterface; // Added for android.content.DialogInterface
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -124,14 +125,14 @@ public class ColorPickerPreference extends Preference {
                 })
                 .setPositiveButton("OK", new ColorPickerClickListener() {
                     @Override
-                    public void onClick(com.flask.colorpicker.DialogInterface d, int lastSelectedColor, Integer[] allColors) {
+                        public void onClick(DialogInterface d, int lastSelectedColor, Integer[] allColors) { // d is now android.content.DialogInterface
                         saveColor(lastSelectedColor);
                         updateColorPreview(); // Make sure preview updates
                     }
                 })
-                .setNegativeButton("Cancel", new com.flask.colorpicker.DialogInterface.OnClickListener() {
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() { // Uses android.content.DialogInterface
                     @Override
-                    public void onClick(com.flask.colorpicker.DialogInterface d, int i) {
+                        public void onClick(DialogInterface d, int i) { // d is android.content.DialogInterface
                         d.dismiss();
                     }
                 })

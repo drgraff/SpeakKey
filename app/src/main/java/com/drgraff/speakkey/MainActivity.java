@@ -165,11 +165,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // NO 'else' block calling setTheme(R.style.Theme_SpeakKey)
         
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // setContentView is called
+        setContentView(R.layout.activity_main);
 
-        // Apply custom OLED colors if OLED theme is active
-        if (ThemeManager.THEME_OLED.equals(themeValue)) { // Check themeValue again
-            DynamicThemeApplicator.applyOledColors(this, sharedPreferences);
+        initializeUiElements(); // Initializes whisperText, chatGptText, and finds R.id.toolbar
+
+        // Apply dynamic colors AFTER UI elements are initialized
+        if (ThemeManager.THEME_OLED.equals(themeValue)) {
+            DynamicThemeApplicator.applyOledColors(this, sharedPreferences); // Applies to Toolbar, Window
+
+            int oledEditTextBackgroundColor = sharedPreferences.getInt(
+                "pref_oled_edit_text_background",
+                DynamicThemeApplicator.DEFAULT_OLED_EDIT_TEXT_BACKGROUND
+            );
+            if (whisperText != null) {
+                whisperText.setBackgroundColor(oledEditTextBackgroundColor);
+            }
+            if (chatGptText != null) {
+                chatGptText.setBackgroundColor(oledEditTextBackgroundColor);
+            }
         }
 
         // Re-fetch transcriptionMode if it was removed above, or ensure it's fetched after setContentView if needed by UI below.
@@ -180,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         macroExecutorService = Executors.newSingleThreadExecutor(); // Initialize ExecutorService
         
         // Initialize toolbar and navigation
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar); // This is already found in initializeUiElements
         setSupportActionBar(toolbar);
         
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -191,9 +204,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.nav_header_desc, R.string.nav_header_desc);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-        
-        // Initialize UI elements
-        initializeUiElements();
         
         // Initialize APIs and MacroRepository
         initializeApis();
@@ -1417,9 +1427,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        final String[] oledColorKeys = {
+            "pref_oled_color_primary", "pref_oled_color_secondary",
+            "pref_oled_color_background", "pref_oled_color_surface",
+            "pref_oled_color_text_primary", "pref_oled_color_text_secondary",
+            "pref_oled_color_icon_tint", "pref_oled_color_edit_text_background"
+        };
+        boolean isOledColorKey = false;
+        for (String oledKey : oledColorKeys) {
+            if (oledKey.equals(key)) {
+                isOledColorKey = true;
+                break;
+            }
+        }
+
         if (ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
-            Log.d(TAG, "Theme preference changed. Recreating MainActivity.");
+            Log.d(TAG, "Main theme preference changed (dark_mode). Recreating MainActivity.");
             recreate();
+        } else if (isOledColorKey) {
+            // If an OLED color key changed, check if the current theme is OLED before recreating.
+            // The sharedPreferences parameter here is the one passed to this method,
+            // which should be up-to-date.
+            String currentTheme = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+            if (ThemeManager.THEME_OLED.equals(currentTheme)) {
+                Log.d(TAG, "OLED color preference changed: " + key + ". Recreating MainActivity.");
+                recreate();
+            }
         }
     }
 

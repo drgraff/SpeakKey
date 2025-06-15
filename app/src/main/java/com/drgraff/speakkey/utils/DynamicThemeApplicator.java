@@ -20,7 +20,7 @@ public class DynamicThemeApplicator {
     public static final int DEFAULT_OLED_TEXT_PRIMARY = Color.parseColor("#FFFFFF");
     // public static final int DEFAULT_OLED_TEXT_SECONDARY = Color.parseColor("#AAAAAA"); // Currently unused
     public static final int DEFAULT_OLED_ICON_TINT = Color.parseColor("#FFFFFF");
-    // public static final int DEFAULT_OLED_EDIT_TEXT_BACKGROUND = Color.parseColor("#1A1A1A"); // Currently unused
+    public static final int DEFAULT_OLED_EDIT_TEXT_BACKGROUND = Color.parseColor("#1A1A1A");
 
     public static void applyOledColors(Activity activity, SharedPreferences prefs) {
         if (activity == null || prefs == null) {
@@ -35,6 +35,9 @@ public class DynamicThemeApplicator {
 
         activity.getWindow().setStatusBarColor(oledBackgroundColor);
         activity.getWindow().setNavigationBarColor(oledBackgroundColor);
+
+        // Explicitly set window background
+        activity.getWindow().getDecorView().setBackgroundColor(oledBackgroundColor);
 
         // Assuming the activity has a Toolbar with id R.id.toolbar
         // This is a common convention but might need to be made more flexible if not all activities use this ID.

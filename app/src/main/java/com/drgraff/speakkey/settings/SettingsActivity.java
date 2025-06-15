@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService; // Added
 import java.util.concurrent.Executors; // Added
 import java.util.function.Consumer; // Added for API 24+ or with desugaring
+// android.util.Log will be imported by the FQN in the code block
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -458,13 +459,40 @@ public class SettingsActivity extends AppCompatActivity {
         
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
-                // Apply the theme preference globally via ThemeManager
-                com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
-                // Recreate the current activity to apply the theme change immediately
+            final String[] oledColorKeys = {
+                "pref_oled_color_primary", "pref_oled_color_secondary",
+                "pref_oled_color_background", "pref_oled_color_surface",
+                "pref_oled_color_text_primary", "pref_oled_color_text_secondary",
+                "pref_oled_color_icon_tint", "pref_oled_color_edit_text_background"
+            };
+            boolean isOledColorKey = false;
+            for (String oledKey : oledColorKeys) {
+                if (oledKey.equals(key)) {
+                    isOledColorKey = true;
+                    break;
+                }
+            }
+
+            if (ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
+                ThemeManager.applyTheme(sharedPreferences);
                 if (getActivity() != null) {
                     getActivity().recreate();
                 }
+            } else if (isOledColorKey) {
+                // If an OLED color key changed, and the current theme is OLED, recreate.
+                String currentTheme = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+                if (ThemeManager.THEME_OLED.equals(currentTheme)) {
+                    if (getActivity() != null) {
+                        android.util.Log.d("SettingsFragment", "OLED color preference changed: " + key + ". Recreating activity.");
+                        getActivity().recreate();
+                    }
+                }
+                // Also, update the summary of the ColorPickerPreference itself if possible (to reflect new color string or similar)
+                // ColorPickerPreference changedPref = findPreference(key);
+                // if (changedPref != null) {
+                //     // The ColorPickerPreference itself should update its preview via notifyChanged() when color is saved.
+                //     // No explicit summary update might be needed here unless we want to show hex string.
+                // }
             } else if (key.equals(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL) ||
                        key.equals(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE) ||
                        key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE) ||
@@ -477,13 +505,11 @@ public class SettingsActivity extends AppCompatActivity {
                     if (listPref.getEntry() != null) {
                         listPref.setSummary(listPref.getEntry());
                     }
-                    // Add this call for the specific key:
                     if (key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE)) {
                         updateTwoStepStep1ModelVisibility(listPref.getValue());
                     }
                 }
             }
-            // Potentially add logic here to show/hide model preferences based on transcription_mode or step1_engine
         }
 
         @Override
