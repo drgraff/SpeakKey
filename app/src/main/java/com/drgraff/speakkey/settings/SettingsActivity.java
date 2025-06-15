@@ -46,6 +46,17 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Apply AppCompatDelegate default night mode FIRST
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
+
+        // Then, if OLED is specifically chosen, override with the specific OLED theme
+        String themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(themeValue)) {
+            setTheme(R.style.AppTheme_OLED);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         
@@ -411,8 +422,13 @@ public class SettingsActivity extends AppCompatActivity {
         
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals("dark_mode")) {
-                ThemeManager.applyTheme(sharedPreferences);
+            if (com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
+                // Apply the theme preference globally via ThemeManager
+                com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
+                // Recreate the current activity to apply the theme change immediately
+                if (getActivity() != null) {
+                    getActivity().recreate();
+                }
             } else if (key.equals(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL) ||
                        key.equals(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE) ||
                        key.equals(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE) ||
