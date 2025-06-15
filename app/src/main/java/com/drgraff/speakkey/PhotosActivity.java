@@ -105,10 +105,12 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Theme application logic
-        android.content.SharedPreferences sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
-        String themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+        // Initialize MEMBER sharedPreferences ONCE at the top
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Theme application logic uses the MEMBER variable
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(this.sharedPreferences); // Or just sharedPreferences
+        String themeValue = this.sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
         if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(themeValue)) {
             setTheme(R.style.AppTheme_OLED);
         }
@@ -134,7 +136,8 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
 
         btnSendToChatGptPhoto = findViewById(R.id.btn_send_to_chatgpt_photo);
         editTextChatGptResponsePhoto = findViewById(R.id.edittext_chatgpt_response_photo);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // Member sharedPreferences is already initialized at the top.
+        // This line is redundant: sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         chkAutoSendChatGptPhoto = findViewById(R.id.chk_auto_send_chatgpt_photo);
         btnClearChatGptResponsePhoto = findViewById(R.id.btn_clear_chatgpt_response_photo);
         btnShareChatGptResponsePhoto = findViewById(R.id.btn_share_chatgpt_response_photo); // Initialize share button
@@ -160,18 +163,18 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         progressDialog.setMessage(getString(R.string.photos_progress_sending_to_chatgpt_message));
         progressDialog.setCancelable(false);
 
-        chkAutoSendChatGptPhoto.setChecked(sharedPreferences.getBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, false));
+        chkAutoSendChatGptPhoto.setChecked(this.sharedPreferences.getBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, false));
         chkAutoSendChatGptPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, isChecked).apply();
+            this.sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, isChecked).apply();
         });
 
         btnClearChatGptResponsePhoto.setOnClickListener(v -> {
             editTextChatGptResponsePhoto.setText("");
         });
 
-        chkAutoSendInputStickPhoto.setChecked(sharedPreferences.getBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, false)); // Added
+        chkAutoSendInputStickPhoto.setChecked(this.sharedPreferences.getBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, false)); // Added
         chkAutoSendInputStickPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> { // Added
-            sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, isChecked).apply();
+            this.sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, isChecked).apply();
         });
 
         btnSendToInputStickPhoto.setOnClickListener(v -> {
