@@ -1,7 +1,6 @@
 package com.drgraff.speakkey.utils;
 
 import android.content.SharedPreferences;
-
 import androidx.appcompat.app.AppCompatDelegate;
 
 /**
@@ -9,20 +8,37 @@ import androidx.appcompat.app.AppCompatDelegate;
  */
 public class ThemeManager {
     
-    private static final String DARK_MODE_PREF = "dark_mode";
-    
+    // Key for the theme selection preference
+    public static final String PREF_KEY_DARK_MODE = "dark_mode";
+    // Default value if the preference is not set
+    public static final String THEME_DEFAULT = "default";
+
     /**
-     * Apply the appropriate theme based on the dark_mode preference
+     * Apply the appropriate theme based on the theme preference
      * 
-     * @param preferences SharedPreferences instance containing theme settings
+     * @param sharedPreferences SharedPreferences instance containing theme settings
      */
-    public static void applyTheme(SharedPreferences preferences) {
-        boolean darkMode = preferences.getBoolean(DARK_MODE_PREF, false);
+    public static void applyTheme(SharedPreferences sharedPreferences) {
+        // Read the theme preference. Fallback to "default" (system default).
+        String themeValue = sharedPreferences.getString(PREF_KEY_DARK_MODE, THEME_DEFAULT);
         
-        if (darkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        switch (themeValue) {
+            case "light":
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case "dark":
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                // Assumes AppTheme.Dark or base dark theme is applied by the system
+                break;
+            case "oled":
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                // Assumes R.style.AppTheme_OLED is correctly parented from a DayNight theme
+                // and will be picked up when MODE_NIGHT_YES is active.
+                break;
+            case "default":
+            default: // Handles "default" or any unexpected values
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
         }
     }
 }
