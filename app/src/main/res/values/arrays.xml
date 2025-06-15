@@ -54,4 +54,19 @@
         <item>whisper</item> <!-- Internal value for choosing Whisper -->
         <item>chatgpt</item> <!-- Internal value for choosing ChatGPT for transcription step -->
     </string-array>
+
+    <!-- Dark Mode Options -->
+    <string-array name="dark_mode_entries">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>OLED Mode (True Black)</item>
+        <item>System Default</item>
+    </string-array>
+
+    <string-array name="dark_mode_values">
+        <item>light</item>
+        <item>dark</item>
+        <item>oled</item>
+        <item>default</item>
+    </string-array>
 </resources>
