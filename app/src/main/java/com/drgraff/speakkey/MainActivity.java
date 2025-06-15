@@ -764,38 +764,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                     Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Using model: " + step1ModelName + ", Hint: '" + transcriptionHint + "'");
 
-                    String converted = convertToMp3(new File(pcmFilePath));
-                    if (converted != null) {
-                        audioFilePath = converted;
-                        lastRecordedAudioPathForChatGPTDirect = converted; // Still useful if user switches modes
+                    String convertedFilePath = convertToMp3(new File(pcmFilePath));
+                    if (convertedFilePath != null) {
+                        audioFilePath = convertedFilePath; // Keep this to ensure broadcast receiver can match
+                        // lastRecordedAudioPathForChatGPTDirect = convertedFilePath; // This might not be needed anymore
 
-                        final String finalTranscriptionHint = transcriptionHint; // For lambda
-                        final String finalStep1ModelName = step1ModelName; // For lambda
+                        // Create UploadTask with the specific model and hint
+                        UploadTask uploadTask = new UploadTask(
+                            audioFilePath,
+                            UploadTask.TYPE_AUDIO_TRANSCRIPTION,
+                            step1ModelName, // modelNameForTranscription
+                            transcriptionHint // transcriptionHint
+                        );
 
-                        new Thread(() -> {
-                            try {
-                                // String systemPromptForTranscription = "Transcribe this audio."; // No longer needed directly
-                                Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcribing with model: " + finalStep1ModelName);
-                                final String transcript = chatGptApi.getTranscriptionFromAudio(new File(converted), finalTranscriptionHint, finalStep1ModelName);
+                        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            database.uploadTaskDao().insert(uploadTask);
+                            Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Queued UploadTask ID: " + uploadTask.id +
+                                       " with model: " + step1ModelName + " and hint: '" + transcriptionHint + "'");
+                            AppLogManager.getInstance().addEntry("INFO", TAG + ": OpenAI Transcription task queued in DB.",
+                                                               "File: " + audioFilePath + ", Model: " + step1ModelName);
+                            UploadService.startUploadService(MainActivity.this);
+                        });
 
-                                mainHandler.post(() -> {
-                                    if (transcript != null) {
-                                        Log.i(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcription successful.");
-                                        whisperText.setText(transcript);
-                                        if (chkAutoSendToChatGpt.isChecked()) {
-                                            Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Auto-sending transcript for Step 2 processing.");
-                                            sendToChatGpt();
-                                        }
-                                    } else {
-                                        Log.w(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcription returned null.");
-                                        whisperText.setText(getString(R.string.transcription_failed_placeholder));
-                                    }
-                                });
-                            } catch (Exception e) {
-                                Log.e(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcription error", e);
-                                mainHandler.post(() -> whisperText.setText(getString(R.string.transcription_failed_placeholder) + " - " + e.getMessage()));
-                            }
-                        }).start();
+                        showAudioTranscriptionProgressUI(); // Show "Queued..." UI, same as default Whisper path
+
                     } else {
                         Toast.makeText(this, "Failed to convert recording to MP3 for two-step (OpenAI Transcription).", Toast.LENGTH_LONG).show();
                     }

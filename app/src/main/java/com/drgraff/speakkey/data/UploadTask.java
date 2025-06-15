@@ -1,7 +1,8 @@
 package com.drgraff.speakkey.data;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore; // Added
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "upload_tasks")
@@ -17,10 +18,18 @@ public class UploadTask {
     public long lastAttemptTimestamp;
     public long creationTimestamp;
     public String errorMessage; // Nullable
-    public String transcriptionResult; // For storing the result of audio transcription
-    public String promptText; // For TYPE_PHOTO_VISION
-    public String modelName; // For TYPE_PHOTO_VISION
-    public String visionApiResponse; // For TYPE_PHOTO_VISION result
+
+    // Fields for AUDIO_TRANSCRIPTION
+    public String transcriptionResult;
+    @ColumnInfo(name = "model_name_for_transcription")
+    public String modelNameForTranscription;
+    @ColumnInfo(name = "transcription_hint")
+    public String transcriptionHint;
+
+    // Fields for PHOTO_VISION
+    public String promptText;
+    public String modelName;  // This is for the vision model
+    public String visionApiResponse;
 
     // Status constants
     public static final String STATUS_PENDING = "PENDING";
@@ -33,40 +42,51 @@ public class UploadTask {
     public static final String TYPE_AUDIO_TRANSCRIPTION = "AUDIO_TRANSCRIPTION";
     public static final String TYPE_PHOTO_VISION = "PHOTO_VISION";
 
-
-    public UploadTask(String filePath, String uploadType) {
-        this.filePath = filePath;
-        this.uploadType = uploadType;
-        this.status = STATUS_PENDING; // Use constant
+    // No-arg constructor for Room
+    public UploadTask() {
+        this.status = STATUS_PENDING;
         this.retryCount = 0;
         this.creationTimestamp = System.currentTimeMillis();
-        this.lastAttemptTimestamp = 0; // Or System.currentTimeMillis() if attempting immediately
-        this.transcriptionResult = null;
-        this.promptText = null;
-        this.modelName = null;
-        this.visionApiResponse = null;
     }
 
-    // Constructor for Audio Transcription
-    @Ignore // Added
-    public UploadTask(String filePath, String uploadType, boolean isAudio) {
-        this(filePath, uploadType); // Calls the main constructor
-        if (!isAudio) {
-            // This is a simple way to differentiate, could be more robust
-            throw new IllegalArgumentException("This constructor is for audio tasks.");
+    // General purpose constructor for manual instantiation, especially for older audio tasks or basic setup
+    // This will be called by old code that only knows about filePath and uploadType for audio.
+    // New audio tasks should use the more specific constructor.
+    @Ignore
+    public UploadTask(String filePath, String uploadType) {
+        this(); // Calls no-arg constructor for defaults
+        this.filePath = filePath;
+        this.uploadType = uploadType;
+        // Default transcription model and hint if not specified (e.g. for older Whisper via UploadService path)
+        if (TYPE_AUDIO_TRANSCRIPTION.equals(uploadType)) {
+            this.modelNameForTranscription = "whisper-1"; // Default model
+            this.transcriptionHint = ""; // Default empty hint
         }
     }
 
-    // Constructor for Photo Vision
-    @Ignore // Added
-    public UploadTask(String filePath, String uploadType, String promptText, String modelName) {
-        this(filePath, uploadType); // Calls the main constructor
-        this.promptText = promptText;
-        this.modelName = modelName;
+    // Constructor specifically for new Audio Transcription tasks including model and hint
+    @Ignore
+    public UploadTask(String filePath, String uploadType, String modelNameForTranscription, String transcriptionHint) {
+        this(); // Calls no-arg constructor for defaults
+        if (!TYPE_AUDIO_TRANSCRIPTION.equals(uploadType)) {
+            throw new IllegalArgumentException("This constructor is for AUDIO_TRANSCRIPTION tasks. Type was: " + uploadType);
+        }
+        this.filePath = filePath;
+        this.uploadType = uploadType;
+        this.modelNameForTranscription = modelNameForTranscription;
+        this.transcriptionHint = transcriptionHint;
     }
 
-
-    // It's good practice to have a no-arg constructor for Room, though not strictly required if all fields are public
-    // Or if you provide a constructor that Room can use (like the one above if all params match fields)
-    // However, for complex objects or if you want to ensure Room uses specific constructor, you might need @Ignore annotations for others
+    // Constructor for Photo Vision tasks
+    @Ignore
+    public UploadTask(String filePath, String uploadType, String visionPrompt, String visionModel) {
+        this(); // Calls no-arg constructor for defaults
+        if (!TYPE_PHOTO_VISION.equals(uploadType)) {
+            throw new IllegalArgumentException("This constructor is for PHOTO_VISION tasks. Type was: " + uploadType);
+        }
+        this.filePath = filePath;
+        this.uploadType = uploadType;
+        this.promptText = visionPrompt;
+        this.modelName = visionModel; // This is for the vision model name
+    }
 }
