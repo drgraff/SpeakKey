@@ -147,13 +147,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         // Initialize settings
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription"); // Added
+        // String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription"); // This line is not needed here for theme application
         
-        // Apply the theme before setting content view
+        // Apply AppCompatDelegate default night mode FIRST
         ThemeManager.applyTheme(sharedPreferences);
+
+        // Then, if OLED is specifically chosen, override with the specific OLED theme
+        String themeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+        if (ThemeManager.THEME_OLED.equals(themeValue)) {
+            setTheme(R.style.AppTheme_OLED);
+        }
         
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Re-fetch transcriptionMode if it was removed above, or ensure it's fetched after setContentView if needed by UI below.
+        // For safety, let's assume it's needed by logic further down in onCreate.
+        String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
 
         macroExecutor = new MacroExecutor(this); // Initialize MacroExecutor
         macroExecutorService = Executors.newSingleThreadExecutor(); // Initialize ExecutorService
