@@ -76,7 +76,8 @@ public class PromptManager {
                         isActive,
                         label != null ? label : "Imported Photo Prompt", // Handle null label
                         "photo_vision", // promptModeType
-                        timestampFromFile == 0 ? newId : timestampFromFile // Use existing timestamp or newId
+                        timestampFromFile == 0 ? newId : timestampFromFile, // Use existing timestamp or newId
+                        "" // Empty string for transcriptionHint for migrated old prompts
                     );
                     mainPrompts.add(migratedPrompt);
                     migrationPerformed = true;
@@ -129,16 +130,17 @@ public class PromptManager {
         sharedPreferences.edit().putString(PROMPTS_KEY, json).apply();
     }
 
-    // Signature changed: label first, then text
-    public void addPrompt(String label, String text, String promptModeType) {
+    // Signature changed: label, text, transcriptionHint, then promptModeType
+    public void addPrompt(String label, String text, String transcriptionHint, String promptModeType) {
         List<Prompt> prompts = getAllPrompts();
         long newId = System.currentTimeMillis(); // Simple unique ID
         // Parameters to Prompt constructor correctly map to the method signature:
         // addPrompt's 'label' parameter (1st string arg) is for Prompt's label.
         // addPrompt's 'text' parameter (2nd string arg) is for Prompt's text.
-        // Prompt constructor: Prompt(id, textVal, isActive, labelVal, mode, timestamp)
-        // So, textVal = text (from method), labelVal = label (from method).
-        prompts.add(new Prompt(newId, text, false, label, promptModeType, newId));
+        // addPrompt's 'transcriptionHint' parameter (3rd string arg) is for Prompt's transcriptionHint.
+        // Prompt constructor: Prompt(id, textVal, isActive, labelVal, mode, timestamp, hint)
+        // So, textVal = text, labelVal = label, hint = transcriptionHint (from method params).
+        prompts.add(new Prompt(newId, text, false, label, promptModeType, newId, transcriptionHint));
         savePrompts(prompts);
     }
 
