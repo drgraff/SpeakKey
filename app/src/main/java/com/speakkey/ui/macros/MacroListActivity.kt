@@ -37,8 +37,16 @@ class MacroListActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Theme application logic
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences) // Ensure ThemeManager is correctly imported or fully qualified
+        val themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT)
+        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED == themeValue) {
+            setTheme(com.drgraff.speakkey.R.style.AppTheme_OLED) // Ensure R is correctly imported or fully qualified
+        }
+
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_macros)
+        setContentView(com.drgraff.speakkey.R.layout.activity_macros) // Ensure R is correctly imported or fully qualified
 
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_macros)
         setSupportActionBar(toolbar)

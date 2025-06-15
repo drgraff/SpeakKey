@@ -44,8 +44,21 @@ class MacroEditorActivity : AppCompatActivity() {
     private val currentActions = mutableListOf<MacroAction>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Theme application logic
+        val sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences)
+        val themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT)
+        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED == themeValue) {
+            setTheme(com.drgraff.speakkey.R.style.AppTheme_OLED)
+        }
+
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_macro)
+        setContentView(com.drgraff.speakkey.R.layout.activity_edit_macro)
+
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(com.drgraff.speakkey.R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        // Title is set later based on new/edit mode
 
         macroRepository = MacroRepository(applicationContext)
 
@@ -65,10 +78,10 @@ class MacroEditorActivity : AppCompatActivity() {
                 editMacroName.setText(it.name)
                 currentActions.addAll(it.actions)
                 // actionsAdapter.submitList(currentActions) // submitList is called in setupRecyclerView
-                supportActionBar?.title = "Edit Macro"
+                supportActionBar?.title = "Edit Macro" // This will apply to the new toolbar
             }
         } else {
-            supportActionBar?.title = "Create New Macro"
+            supportActionBar?.title = "Create New Macro" // This will apply to the new toolbar
         }
         updateActionsEmptyState() // Initial check
 
