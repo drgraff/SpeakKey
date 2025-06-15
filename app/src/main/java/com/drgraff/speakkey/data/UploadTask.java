@@ -28,7 +28,7 @@ public class UploadTask {
 
     // Fields for PHOTO_VISION
     public String promptText;
-    public String modelName;  // This is for the vision model
+    public String modelName;  // This is for the vision model used in PHOTO_VISION tasks
     public String visionApiResponse;
 
     // Status constants
@@ -42,51 +42,43 @@ public class UploadTask {
     public static final String TYPE_AUDIO_TRANSCRIPTION = "AUDIO_TRANSCRIPTION";
     public static final String TYPE_PHOTO_VISION = "PHOTO_VISION";
 
-    // No-arg constructor for Room
+    // No-arg constructor for Room and factory methods
     public UploadTask() {
         this.status = STATUS_PENDING;
         this.retryCount = 0;
         this.creationTimestamp = System.currentTimeMillis();
+        // Ensure all fields have a default state if not set by factory
+        this.filePath = null;
+        this.uploadType = null;
+        this.lastAttemptTimestamp = 0;
+        this.errorMessage = null;
+        this.transcriptionResult = null;
+        this.modelNameForTranscription = null;
+        this.transcriptionHint = null;
+        this.promptText = null;
+        this.modelName = null;
+        this.visionApiResponse = null;
     }
 
-    // General purpose constructor for manual instantiation, especially for older audio tasks or basic setup
-    // This will be called by old code that only knows about filePath and uploadType for audio.
-    // New audio tasks should use the more specific constructor.
-    @Ignore
-    public UploadTask(String filePath, String uploadType) {
-        this(); // Calls no-arg constructor for defaults
-        this.filePath = filePath;
-        this.uploadType = uploadType;
-        // Default transcription model and hint if not specified (e.g. for older Whisper via UploadService path)
-        if (TYPE_AUDIO_TRANSCRIPTION.equals(uploadType)) {
-            this.modelNameForTranscription = "whisper-1"; // Default model
-            this.transcriptionHint = ""; // Default empty hint
-        }
+    // Factory method for Photo Vision Tasks
+    public static UploadTask createPhotoVisionTask(String filePath, String visionPrompt, String visionModelName) {
+        UploadTask task = new UploadTask();
+        task.filePath = filePath;
+        task.uploadType = TYPE_PHOTO_VISION;
+        task.promptText = visionPrompt;
+        task.modelName = visionModelName; // This is for the vision model
+        // other fields (like transcription ones) remain default null/empty
+        return task;
     }
 
-    // Constructor specifically for new Audio Transcription tasks including model and hint
-    @Ignore
-    public UploadTask(String filePath, String uploadType, String modelNameForTranscription, String transcriptionHint) {
-        this(); // Calls no-arg constructor for defaults
-        if (!TYPE_AUDIO_TRANSCRIPTION.equals(uploadType)) {
-            throw new IllegalArgumentException("This constructor is for AUDIO_TRANSCRIPTION tasks. Type was: " + uploadType);
-        }
-        this.filePath = filePath;
-        this.uploadType = uploadType;
-        this.modelNameForTranscription = modelNameForTranscription;
-        this.transcriptionHint = transcriptionHint;
-    }
-
-    // Constructor for Photo Vision tasks
-    @Ignore
-    public UploadTask(String filePath, String uploadType, String visionPrompt, String visionModel) {
-        this(); // Calls no-arg constructor for defaults
-        if (!TYPE_PHOTO_VISION.equals(uploadType)) {
-            throw new IllegalArgumentException("This constructor is for PHOTO_VISION tasks. Type was: " + uploadType);
-        }
-        this.filePath = filePath;
-        this.uploadType = uploadType;
-        this.promptText = visionPrompt;
-        this.modelName = visionModel; // This is for the vision model name
+    // Factory method for Audio Transcription Tasks
+    public static UploadTask createAudioTranscriptionTask(String filePath, String modelName, String hint) {
+        UploadTask task = new UploadTask();
+        task.filePath = filePath;
+        task.uploadType = TYPE_AUDIO_TRANSCRIPTION;
+        task.modelNameForTranscription = (modelName != null && !modelName.isEmpty()) ? modelName : "whisper-1";
+        task.transcriptionHint = hint != null ? hint : "";
+        // other fields (like photo vision ones) remain default null/empty
+        return task;
     }
 }

@@ -769,10 +769,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         audioFilePath = convertedFilePath; // Keep this to ensure broadcast receiver can match
                         // lastRecordedAudioPathForChatGPTDirect = convertedFilePath; // This might not be needed anymore
 
-                        // Create UploadTask with the specific model and hint
-                        UploadTask uploadTask = new UploadTask(
+                        // Create UploadTask with the specific model and hint using factory method
+                        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
                             audioFilePath,
-                            UploadTask.TYPE_AUDIO_TRANSCRIPTION,
                             step1ModelName, // modelNameForTranscription
                             transcriptionHint // transcriptionHint
                         );
@@ -917,9 +916,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toast.makeText(this, "Queueing transcription...", Toast.LENGTH_SHORT).show(); // Changed message
         AppLogManager.getInstance().addEntry("INFO", "Whisper: Queuing transcription task...", null);
 
-        // Create UploadTask
-        UploadTask uploadTask = new UploadTask(audioFilePath, UploadTask.TYPE_AUDIO_TRANSCRIPTION);
-        // All other fields (status, retryCount, creationTimestamp) are set in the constructor
+        // Create UploadTask using factory method for default Whisper path
+        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(audioFilePath, "whisper-1", "");
 
         // Get DAO and insert in background
         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
