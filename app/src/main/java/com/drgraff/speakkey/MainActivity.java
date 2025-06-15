@@ -64,6 +64,7 @@ import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.drgraff.speakkey.utils.DynamicThemeApplicator; // Added for DynamicThemeApplicator
 import com.google.android.material.navigation.NavigationView;
+import android.content.res.ColorStateList; // Added for ColorStateList
 
 import com.hualee.lame.LameControl;
 
@@ -184,6 +185,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             if (chatGptText != null) {
                 chatGptText.setBackgroundColor(oledEditTextBackgroundColor);
+            }
+
+            // Style btnStartRecording
+            if (btnStartRecording != null) { // btnStartRecording is a field initialized in initializeUiElements()
+                int primaryOledColor = sharedPreferences.getInt(
+                    "pref_oled_color_primary",
+                    DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
+                );
+                int onPrimaryOledColor = sharedPreferences.getInt(
+                    "pref_oled_color_on_primary",
+                    DynamicThemeApplicator.DEFAULT_OLED_ON_PRIMARY
+                );
+
+                btnStartRecording.setBackgroundTintList(ColorStateList.valueOf(primaryOledColor));
+                btnStartRecording.setTextColor(onPrimaryOledColor);
+                Log.d(TAG, String.format("MainActivity: Styled btnStartRecording with BG=0x%08X, Text=0x%08X", primaryOledColor, onPrimaryOledColor));
             }
         }
 
@@ -1470,10 +1487,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         final String[] oledColorKeys = {
-            "pref_oled_color_primary", "pref_oled_color_secondary",
-            "pref_oled_color_background", "pref_oled_color_surface",
-            "pref_oled_color_text_primary", "pref_oled_color_text_secondary",
-            "pref_oled_color_icon_tint", "pref_oled_color_edit_text_background"
+            "pref_oled_color_primary",
+            "pref_oled_color_on_primary", // New key added
+            "pref_oled_color_secondary",
+            "pref_oled_color_background",
+            "pref_oled_color_surface",
+            "pref_oled_color_text_primary",
+            "pref_oled_color_text_secondary",
+            "pref_oled_color_icon_tint",
+            "pref_oled_color_edit_text_background"
         };
         boolean isOledColorKey = false;
         for (String oledKey : oledColorKeys) {

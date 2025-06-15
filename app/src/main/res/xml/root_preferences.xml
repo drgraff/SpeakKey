@@ -115,6 +115,11 @@
             android:summary="Set the primary color for OLED mode" />
 
         <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_on_primary"
+            android:title="On Primary Color"
+            android:summary="Set the text/icon color for elements using Primary Color as background" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
             android:key="pref_oled_color_secondary"
             android:title="Secondary/Accent Color"
             android:summary="Set the secondary/accent color for OLED mode" />

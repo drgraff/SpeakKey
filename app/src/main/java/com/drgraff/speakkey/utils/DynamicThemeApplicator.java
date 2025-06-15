@@ -5,10 +5,10 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.util.Log;
-import android.view.View; // Keep this import, it's used by activity.getWindow().getDecorView()
+import android.view.View;
 import androidx.appcompat.widget.Toolbar;
 
-import com.drgraff.speakkey.R; // For R.id.toolbar
+import com.drgraff.speakkey.R;
 
 public class DynamicThemeApplicator {
     private static final String TAG = "DynamicThemeApplicator";
@@ -19,6 +19,7 @@ public class DynamicThemeApplicator {
     public static final int DEFAULT_OLED_BACKGROUND = Color.parseColor("#000000");
     public static final int DEFAULT_OLED_SURFACE = Color.parseColor("#0D0D0D");
     public static final int DEFAULT_OLED_TEXT_PRIMARY = Color.parseColor("#FFFFFF");
+    public static final int DEFAULT_OLED_ON_PRIMARY = Color.parseColor("#000000"); // Black - Corrected: defined once
     public static final int DEFAULT_OLED_ICON_TINT = Color.parseColor("#FFFFFF");
     public static final int DEFAULT_OLED_EDIT_TEXT_BACKGROUND = Color.parseColor("#1A1A1A");
 
@@ -39,6 +40,10 @@ public class DynamicThemeApplicator {
         int oledTextColorPrimary = prefs.getInt("pref_oled_color_text_primary", DEFAULT_OLED_TEXT_PRIMARY);
         Log.d(TAG, String.format("pref_oled_color_text_primary: Value=0x%08X, Default=0x%08X", oledTextColorPrimary, DEFAULT_OLED_TEXT_PRIMARY));
 
+        // Logging for on_primary
+        int oledOnPrimaryColor = prefs.getInt("pref_oled_color_on_primary", DEFAULT_OLED_ON_PRIMARY);
+        Log.d(TAG, String.format("pref_oled_color_on_primary: Value=0x%08X, Default=0x%08X", oledOnPrimaryColor, DEFAULT_OLED_ON_PRIMARY));
+
         int oledIconTintColor = prefs.getInt("pref_oled_color_icon_tint", DEFAULT_OLED_ICON_TINT);
         Log.d(TAG, String.format("pref_oled_color_icon_tint: Value=0x%08X, Default=0x%08X", oledIconTintColor, DEFAULT_OLED_ICON_TINT));
 
@@ -57,18 +62,18 @@ public class DynamicThemeApplicator {
 
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
         if (toolbar != null) {
-            Log.d(TAG, "Toolbar found, applying colors."); // Removed current background as it might be complex object
-            // Use primaryOledColor for the Toolbar background
+            Log.d(TAG, "Toolbar found, applying colors.");
             toolbar.setBackgroundColor(primaryOledColor);
             toolbar.setTitleTextColor(oledTextColorPrimary);
+            // Potentially set subtitle text color if used: toolbar.setSubtitleTextColor(oledOnPrimaryColor);
+            // Potentially set menu item icon tints if needed, though this is complex here.
             if (toolbar.getNavigationIcon() != null) {
-                toolbar.getNavigationIcon().setColorFilter(oledIconTintColor, PorterDuff.Mode.SRC_ATOP);
+                toolbar.getNavigationIcon().setColorFilter(oledOnPrimaryColor, PorterDuff.Mode.SRC_ATOP); // Use onPrimary for nav icon
             }
-            // Log the primaryOledColor that was applied to the background
             Log.d(TAG, String.format("Toolbar colors applied. New Toolbar BG color: 0x%08X", primaryOledColor));
         } else {
             Log.w(TAG, "Toolbar not found (R.id.toolbar). Cannot apply toolbar specific colors.");
         }
         Log.d(TAG, "Finished applying custom OLED colors.");
-    } // End of applyOledColors method
-} // End of DynamicThemeApplicator class
+    }
+}
