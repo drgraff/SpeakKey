@@ -23,4 +23,61 @@
     
     <style name="Theme.SpeakKey.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="Theme.SpeakKey.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- OLED Theme -->
+    <style name="AppTheme.OLED" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/oled_primary</item>
+        <item name="colorPrimaryVariant">@color/oled_primary_variant</item>
+        <item name="colorOnPrimary">@color/black</item> <!-- Text/icons on primary color -->
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/oled_secondary</item>
+        <item name="colorSecondaryVariant">@color/oled_secondary</item> <!-- Often same as colorSecondary -->
+        <item name="colorOnSecondary">@color/black</item> <!-- Text/icons on secondary color -->
+
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/oled_background</item>
+        <!-- Customize your theme here. -->
+        <item name="android:colorBackground">@color/oled_background</item>
+        <item name="colorSurface">@color/oled_surface</item>
+        <item name="colorError">@color/red</item> <!-- Assuming red is defined -->
+        <item name="colorOnError">@color/white</item>
+        <item name="colorOnBackground">@color/oled_text_primary</item>
+        <item name="colorOnSurface">@color/oled_text_primary</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/oled_text_primary</item>
+        <item name="android:textColorSecondary">@color/oled_text_secondary</item>
+        <item name="android:textColorHint">@color/gray</item> <!-- Assuming gray is defined -->
+
+        <!-- Specific component styles if needed -->
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout.OLED</item>
+        <item name="editTextStyle">@style/Widget.App.TextInputEditText.OLED</item>
+
+        <!-- Custom attribute for EditText background -->
+        <item name="editTextBackgroundColorCustom">@color/oled_edit_text_background</item>
+
+        <!-- Toolbar Style -->
+        <item name="toolbarStyle">@style/Widget.App.Toolbar.OLED</item>
+    </style>
+
+    <!-- TextInputLayout style for OLED -->
+    <style name="Widget.App.TextInputLayout.OLED" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/oled_primary</item>
+        <item name="hintTextColor">@color/oled_text_secondary</item>
+    </style>
+
+    <!-- TextInputEditText style for OLED -->
+    <style name="Widget.App.TextInputEditText.OLED" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textColor">@color/oled_text_primary</item>
+        <item name="android:backgroundTint">@color/oled_edit_text_background</item> <!-- Or use a drawable -->
+    </style>
+
+    <!-- Custom Toolbar style for OLED -->
+    <style name="Widget.App.Toolbar.OLED" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/oled_surface</item> <!-- Toolbar background -->
+        <item name="titleTextColor">@color/oled_text_primary</item>
+        <item name="navigationIconTint">@color/oled_icon_tint</item> <!-- For Up button, etc. -->
+        <item name="iconTint">@color/oled_icon_tint</item> <!-- For menu items if not overridden by action menu style -->
+    </style>
 </resources>

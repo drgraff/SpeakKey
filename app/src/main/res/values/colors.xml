@@ -18,4 +18,14 @@
     <!-- Custom Toolbar Colors - Light Theme -->
     <color name="custom_toolbar_background">@color/primary</color>
     <color name="custom_toolbar_icon_tint">@color/textPrimary</color>
+    <!-- OLED Theme specific colors -->
+    <color name="oled_background">#000000</color>
+    <color name="oled_surface">#0D0D0D</color> <!-- Very dark gray, slightly off-black for surfaces if needed -->
+    <color name="oled_primary">#BB86FC</color> <!-- Example: A common purple accent for dark themes -->
+    <color name="oled_primary_variant">#3700B3</color> <!-- Darker variant of primary -->
+    <color name="oled_secondary">#03DAC6</color> <!-- Example: A common teal accent -->
+    <color name="oled_text_primary">#FFFFFF</color>
+    <color name="oled_text_secondary">#B3FFFFFF</color> <!-- 70% white -->
+    <color name="oled_icon_tint">#FFFFFF</color>
+    <color name="oled_edit_text_background">#1A1A1A</color> <!-- Darker than oled_surface for differentiation -->
 </resources>

@@ -86,11 +86,24 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="App Settings">
-        <SwitchPreferenceCompat
+        <ListPreference
             android:key="dark_mode"
             android:title="@string/settings_dark_mode_title"
             android:summary="@string/settings_dark_mode_summary"
-            android:defaultValue="false" />
+            android:defaultValue="default">
+            <entries>
+                <item>Light</item>
+                <item>Dark</item>
+                <item>OLED Mode (True Black)</item>
+                <item>System Default</item>
+            </entries>
+            <entryValues>
+                <item>light</item>
+                <item>dark</item>
+                <item>oled</item>
+                <item>default</item>
+            </entryValues>
+        </ListPreference>
 
         <SwitchPreferenceCompat
             android:key="auto_send_whisper"
