@@ -38,7 +38,7 @@ public class UploadTaskDaoTest {
 
     @Test
     public void insertAndGetTaskById() throws Exception {
-        UploadTask task = new UploadTask("path/to/file1", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask task = UploadTask.createAudioTranscriptionTask("path/to/file1", "whisper-1", "");
         uploadTaskDao.insert(task);
         // The ID is auto-generated, so we need to fetch all tasks or query by known fields if ID is not easily predictable.
         // For simplicity, let's assume it's the first task and ID is 1, or fetch it differently.
@@ -53,8 +53,8 @@ public class UploadTaskDaoTest {
 
     @Test
     public void insertAndGetTasksByFilePath() throws Exception {
-        UploadTask task1 = new UploadTask("path/file.txt", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
-        UploadTask task2 = new UploadTask("path/file.txt", UploadTask.TYPE_PHOTO_VISION, "prompt", "model");
+        UploadTask task1 = UploadTask.createAudioTranscriptionTask("path/file.txt", "whisper-1", "");
+        UploadTask task2 = UploadTask.createPhotoVisionTask("path/file.txt", "prompt", "model");
         uploadTaskDao.insert(task1);
         uploadTaskDao.insert(task2);
 
@@ -66,7 +66,7 @@ public class UploadTaskDaoTest {
 
     @Test
     public void updateTaskAndVerify() throws Exception {
-        UploadTask task = new UploadTask("path/update_me.txt", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask task = UploadTask.createAudioTranscriptionTask("path/update_me.txt", "whisper-1", "");
         uploadTaskDao.insert(task);
         List<UploadTask> tasks = uploadTaskDao.getTasksByFilePath("path/update_me.txt");
         UploadTask insertedTask = tasks.get(0); // Get the inserted task with its ID
@@ -83,7 +83,7 @@ public class UploadTaskDaoTest {
 
     @Test
     public void deleteTaskAndVerify() throws Exception {
-        UploadTask task = new UploadTask("path/delete_me.txt", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask task = UploadTask.createAudioTranscriptionTask("path/delete_me.txt", "whisper-1", "");
         uploadTaskDao.insert(task);
         List<UploadTask> tasks = uploadTaskDao.getTasksByFilePath("path/delete_me.txt");
         UploadTask insertedTask = tasks.get(0);
@@ -95,21 +95,21 @@ public class UploadTaskDaoTest {
 
     @Test
     public void getPendingUploadsFiltersAndOrders() throws Exception {
-        UploadTask pendingAudio = new UploadTask("pending/audio.mp3", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask pendingAudio = UploadTask.createAudioTranscriptionTask("pending/audio.mp3", "whisper-1", "");
         pendingAudio.status = UploadTask.STATUS_PENDING;
         pendingAudio.creationTimestamp = System.currentTimeMillis();
         uploadTaskDao.insert(pendingAudio);
 
         Thread.sleep(10); // Ensure different timestamp
 
-        UploadTask failedPhoto = new UploadTask("failed/photo.jpg", UploadTask.TYPE_PHOTO_VISION, "prompt", "model");
+        UploadTask failedPhoto = UploadTask.createPhotoVisionTask("failed/photo.jpg", "prompt", "model");
         failedPhoto.status = UploadTask.STATUS_FAILED;
         failedPhoto.creationTimestamp = System.currentTimeMillis();
         uploadTaskDao.insert(failedPhoto);
 
         Thread.sleep(10);
 
-        UploadTask successAudio = new UploadTask("success/audio.mp3", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask successAudio = UploadTask.createAudioTranscriptionTask("success/audio.mp3", "whisper-1", "");
         successAudio.status = UploadTask.STATUS_SUCCESS;
         successAudio.creationTimestamp = System.currentTimeMillis();
         uploadTaskDao.insert(successAudio);
@@ -124,11 +124,11 @@ public class UploadTaskDaoTest {
 
     @Test
     public void clearSuccessfulTasksActuallyClears() throws Exception {
-        UploadTask success1 = new UploadTask("s1.txt", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask success1 = UploadTask.createAudioTranscriptionTask("s1.txt", "whisper-1", "");
         success1.status = UploadTask.STATUS_SUCCESS;
         uploadTaskDao.insert(success1);
 
-        UploadTask pending1 = new UploadTask("p1.txt", UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask pending1 = UploadTask.createAudioTranscriptionTask("p1.txt", "whisper-1", "");
         pending1.status = UploadTask.STATUS_PENDING;
         uploadTaskDao.insert(pending1);
 
