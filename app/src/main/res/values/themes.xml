@@ -25,7 +25,7 @@
     <style name="Theme.SpeakKey.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- OLED Theme -->
-    <style name="AppTheme.OLED" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="AppTheme.OLED" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/oled_primary</item>
         <item name="colorPrimaryVariant">@color/oled_primary_variant</item>
@@ -59,6 +59,17 @@
 
         <!-- Toolbar Style -->
         <item name="toolbarStyle">@style/Widget.App.Toolbar.OLED</item>
+
+        <!-- NavigationView Styling -->
+        <item name="android:navigationBarColor">@color/oled_background</item> <!-- System navigation bar -->
+        <item name="navigationViewStyle">@style/Widget.App.NavigationView.OLED</item>
+    </style>
+
+    <style name="Widget.App.NavigationView.OLED" parent="Widget.Design.NavigationView">
+        <item name="android:background">@color/oled_background</item> <!-- Drawer background -->
+        <item name="itemIconTint">@color/oled_icon_tint</item> <!-- Icon tint for menu items -->
+        <item name="itemTextColor">@color/oled_text_primary</item> <!-- Text color for menu items -->
+        <item name="itemTextAppearance">?attr/textAppearanceBody1</item> <!-- Or a custom text appearance -->
     </style>
 
     <!-- TextInputLayout style for OLED -->

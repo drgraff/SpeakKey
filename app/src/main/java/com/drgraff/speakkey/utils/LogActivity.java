@@ -22,6 +22,14 @@ public class LogActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Theme application logic
+        android.content.SharedPreferences sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
+        String themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(themeValue)) {
+            setTheme(R.style.AppTheme_OLED);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
 
