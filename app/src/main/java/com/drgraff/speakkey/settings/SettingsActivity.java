@@ -59,6 +59,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         
         // Show the Up button in the action bar
         ActionBar actionBar = getSupportActionBar();
