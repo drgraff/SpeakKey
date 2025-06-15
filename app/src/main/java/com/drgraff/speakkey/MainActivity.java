@@ -62,6 +62,7 @@ import com.speakkey.ui.macros.MacroListActivity; // Added for Macros
 import com.drgraff.speakkey.ui.AboutActivity; // ADD THIS
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.ThemeManager;
+import com.drgraff.speakkey.utils.DynamicThemeApplicator; // Added for DynamicThemeApplicator
 import com.google.android.material.navigation.NavigationView;
 
 import com.hualee.lame.LameControl;
@@ -164,7 +165,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // NO 'else' block calling setTheme(R.style.Theme_SpeakKey)
         
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main); // setContentView is called
+
+        // Apply custom OLED colors if OLED theme is active
+        if (ThemeManager.THEME_OLED.equals(themeValue)) { // Check themeValue again
+            DynamicThemeApplicator.applyOledColors(this, sharedPreferences);
+        }
 
         // Re-fetch transcriptionMode if it was removed above, or ensure it's fetched after setContentView if needed by UI below.
         // For safety, let's assume it's needed by logic further down in onCreate.

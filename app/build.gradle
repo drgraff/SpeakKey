@@ -66,6 +66,7 @@ dependencies {
 
     // LAME library for MP3 encoding
     implementation 'io.github.lijieqing:lame:1.0.1032'
+    implementation 'com.github.QuadFlask:colorpicker:0.0.15'
 
     // InputStick API (local module)
     // implementation project(':inputstickapi')
