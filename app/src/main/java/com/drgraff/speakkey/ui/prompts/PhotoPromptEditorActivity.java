@@ -106,7 +106,8 @@ public class PhotoPromptEditorActivity extends AppCompatActivity {
             promptManager.updatePrompt(currentPrompt); // Changed
             Toast.makeText(this, getString(R.string.photo_prompt_editor_toast_updated), Toast.LENGTH_SHORT).show();
         } else {
-            promptManager.addPrompt(label, text, "photo_vision"); // Changed
+            // Added empty string for transcriptionHint as it's not used by photo prompts.
+            promptManager.addPrompt(label, text, "", "photo_vision");
             Toast.makeText(this, getString(R.string.photo_prompt_editor_toast_added), Toast.LENGTH_SHORT).show();
         }
 
