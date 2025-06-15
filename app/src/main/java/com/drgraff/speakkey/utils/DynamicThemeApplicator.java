@@ -58,12 +58,14 @@ public class DynamicThemeApplicator {
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
         if (toolbar != null) {
             Log.d(TAG, "Toolbar found, applying colors."); // Removed current background as it might be complex object
-            toolbar.setBackgroundColor(oledSurfaceColor);
+            // Use primaryOledColor for the Toolbar background
+            toolbar.setBackgroundColor(primaryOledColor);
             toolbar.setTitleTextColor(oledTextColorPrimary);
             if (toolbar.getNavigationIcon() != null) {
                 toolbar.getNavigationIcon().setColorFilter(oledIconTintColor, PorterDuff.Mode.SRC_ATOP);
             }
-            Log.d(TAG, String.format("Toolbar colors applied. New Toolbar BG color: 0x%08X", oledSurfaceColor));
+            // Log the primaryOledColor that was applied to the background
+            Log.d(TAG, String.format("Toolbar colors applied. New Toolbar BG color: 0x%08X", primaryOledColor));
         } else {
             Log.w(TAG, "Toolbar not found (R.id.toolbar). Cannot apply toolbar specific colors.");
         }
