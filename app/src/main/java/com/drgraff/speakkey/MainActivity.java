@@ -748,47 +748,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String step1Engine = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE, "whisper");
                 Log.d(TAG, "Two Step Mode - Step 1 Engine: " + step1Engine);
 
-                if ("chatgpt".equals(step1Engine)) {
-                    String step1ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "gpt-3.5-turbo");
-                    // Basic check if it's likely a chat model, otherwise fallback
-                    if (step1ModelName == null || !(step1ModelName.startsWith("gpt-") || step1ModelName.contains("-turbo") || step1ModelName.equals("gpt-4o") || step1ModelName.equals("gpt-4"))) {
-                        Log.w(TAG, "Two Step (Step 1 - ChatGPT): Invalid or non-chat model selected: '" + step1ModelName + "'. Falling back to gpt-3.5-turbo.");
-                        step1ModelName = "gpt-3.5-turbo"; // Fallback to a known good chat model
+                if ("chatgpt".equals(step1Engine)) { // This now means "OpenAI API for Transcription"
+                    String step1ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "whisper-1");
+                    // Fallback for invalid chat model is removed as this preference now points to transcription models.
+
+                    List<Prompt> activePromptsForStep1 = promptManager.getPromptsForMode("two_step_processing").stream()
+                                                             .filter(Prompt::isActive)
+                                                             .collect(Collectors.toList());
+                    String transcriptionHint = "";
+                    if (!activePromptsForStep1.isEmpty()) {
+                        String hint = activePromptsForStep1.get(0).getTranscriptionHint();
+                        if (hint != null && !hint.trim().isEmpty()) {
+                            transcriptionHint = hint.trim();
+                        }
                     }
-                    Log.d(TAG, "Two Step Mode - Step 1 using ChatGPT Model: " + step1ModelName);
+                    Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Using model: " + step1ModelName + ", Hint: '" + transcriptionHint + "'");
+
                     String converted = convertToMp3(new File(pcmFilePath));
                     if (converted != null) {
                         audioFilePath = converted;
-                        lastRecordedAudioPathForChatGPTDirect = converted;
+                        lastRecordedAudioPathForChatGPTDirect = converted; // Still useful if user switches modes
+
+                        final String finalTranscriptionHint = transcriptionHint; // For lambda
+                        final String finalStep1ModelName = step1ModelName; // For lambda
 
                         new Thread(() -> {
                             try {
-                                String systemPromptForTranscription = "Transcribe this audio.";
-                                Log.d(TAG, "Two Step (Step 1 - ChatGPT): Transcribing with model: " + step1ModelName);
-                                final String transcript = chatGptApi.getCompletionFromAudioAndPrompt(new File(converted), systemPromptForTranscription, step1ModelName);
+                                // String systemPromptForTranscription = "Transcribe this audio."; // No longer needed directly
+                                Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcribing with model: " + finalStep1ModelName);
+                                final String transcript = chatGptApi.getTranscriptionFromAudio(new File(converted), finalTranscriptionHint, finalStep1ModelName);
 
                                 mainHandler.post(() -> {
                                     if (transcript != null) {
-                                        Log.i(TAG, "Two Step (Step 1 - ChatGPT): Transcription successful.");
+                                        Log.i(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcription successful.");
                                         whisperText.setText(transcript);
                                         if (chkAutoSendToChatGpt.isChecked()) {
-                                            Log.d(TAG, "Two Step (Step 1 - ChatGPT): Auto-sending transcript for Step 2 processing.");
+                                            Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Auto-sending transcript for Step 2 processing.");
                                             sendToChatGpt();
                                         }
                                     } else {
-                                        Log.w(TAG, "Two Step (Step 1 - ChatGPT): Transcription returned null.");
+                                        Log.w(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcription returned null.");
                                         whisperText.setText(getString(R.string.transcription_failed_placeholder));
                                     }
                                 });
                             } catch (Exception e) {
-                                Log.e(TAG, "Two Step (Step 1 - ChatGPT): Transcription error", e);
+                                Log.e(TAG, "Two Step (Step 1 - OpenAI Transcription): Transcription error", e);
                                 mainHandler.post(() -> whisperText.setText(getString(R.string.transcription_failed_placeholder) + " - " + e.getMessage()));
                             }
                         }).start();
                     } else {
-                        Toast.makeText(this, "Failed to convert recording to MP3 for two-step (ChatGPT).", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Failed to convert recording to MP3 for two-step (OpenAI Transcription).", Toast.LENGTH_LONG).show();
                     }
-                } else { // Default to Whisper for Step 1
+                } else { // Default to Whisper (UploadService) for Step 1
                     String converted = convertToMp3(new File(pcmFilePath));
                     if (converted != null) {
                         audioFilePath = converted;
