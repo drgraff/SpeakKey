@@ -119,7 +119,8 @@ public class PromptEditorActivity extends AppCompatActivity {
                 modeTypeForNewPrompt = "two_step_processing"; // Fallback default
                 android.util.Log.w("PromptEditorActivity", "PROMPT_MODE_TYPE extra not found, defaulting to " + modeTypeForNewPrompt);
             }
-            promptManager.addPrompt(text, label, modeTypeForNewPrompt); // isActive is false by default in addPrompt
+        // Corrected order for addPrompt(label, text, mode)
+        promptManager.addPrompt(label, text, modeTypeForNewPrompt);
             Toast.makeText(this, R.string.prompt_saved_message, Toast.LENGTH_SHORT).show();
         }
         setResult(Activity.RESULT_OK);
