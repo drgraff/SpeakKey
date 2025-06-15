@@ -777,12 +777,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         );
 
                         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+                        // Make variables final for use in lambda
+                        final String finalStep1ModelName = step1ModelName;
+                        final String finalTranscriptionHint = transcriptionHint;
+                        final String finalAudioFilePath = audioFilePath;
+                        final UploadTask finalUploadTask = uploadTask;
+
                         Executors.newSingleThreadExecutor().execute(() -> {
-                            database.uploadTaskDao().insert(uploadTask);
-                            Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Queued UploadTask ID: " + uploadTask.id +
-                                       " with model: " + step1ModelName + " and hint: '" + transcriptionHint + "'");
+                            database.uploadTaskDao().insert(finalUploadTask);
+                            Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Queued UploadTask ID: " + finalUploadTask.id +
+                                       " with model: " + finalStep1ModelName + " and hint: '" + finalTranscriptionHint + "'");
                             AppLogManager.getInstance().addEntry("INFO", TAG + ": OpenAI Transcription task queued in DB.",
-                                                               "File: " + audioFilePath + ", Model: " + step1ModelName);
+                                                               "File: " + finalAudioFilePath + ", Model: " + finalStep1ModelName);
                             UploadService.startUploadService(MainActivity.this);
                         });
 
