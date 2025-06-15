@@ -68,7 +68,7 @@ public class UploadServiceTest {
     @Test
     public void testServiceProcessesTasks() throws Exception {
         // Task 1: Audio transcription - simulated to succeed by UploadService's current logic
-        UploadTask audioTask = new UploadTask(dummyAudioFile.getAbsolutePath(), UploadTask.TYPE_AUDIO_TRANSCRIPTION, true);
+        UploadTask audioTask = UploadTask.createAudioTranscriptionTask(dummyAudioFile.getAbsolutePath(), "whisper-1", "");
         audioTask.id = 1; // Explicitly set for predictability in test, though not best practice for real ID generation
         uploadTaskDao.insert(audioTask);
 
@@ -76,7 +76,7 @@ public class UploadServiceTest {
         // To make it more deterministic for testing failure, we could rely on the service's current random failure,
         // or ideally, inject a mock API that we control. For now, we'll assume the service's simulation can lead to failure.
         // Let's assume the default random in UploadService makes photo vision fail more often.
-        UploadTask photoTask = new UploadTask(dummyPhotoFile.getAbsolutePath(), UploadTask.TYPE_PHOTO_VISION, "describe this", "gpt-4-vision-preview");
+        UploadTask photoTask = UploadTask.createPhotoVisionTask(dummyPhotoFile.getAbsolutePath(), "describe this", "gpt-4-vision-preview");
         photoTask.id = 2;
         uploadTaskDao.insert(photoTask);
 
