@@ -79,7 +79,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import android.text.TextUtils; // Added for ellipsize
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FullScreenEditTextDialogFragment.OnSaveListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FullScreenEditTextDialogFragment.OnSaveListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     public static final String TRANSCRIPTION_QUEUED_PLACEHOLDER = "[Transcription queued... Tap to refresh]"; // Added
@@ -1369,6 +1369,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        if (sharedPreferences != null) { // Good practice to check
+            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        }
         IntentFilter filter = new IntentFilter(UploadService.ACTION_TRANSCRIPTION_COMPLETE);
         LocalBroadcastManager.getInstance(this).registerReceiver(transcriptionReceiver, filter);
         Log.d(TAG, "TranscriptionBroadcastReceiver registered.");
@@ -1394,8 +1397,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onPause() {
         super.onPause();
+        if (sharedPreferences != null) { // Good practice to check
+            sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(transcriptionReceiver);
         Log.d(TAG, "TranscriptionBroadcastReceiver unregistered.");
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
+            Log.d(TAG, "Theme preference changed. Recreating MainActivity.");
+            recreate();
+        }
     }
 
     private void updateActivePromptsDisplay() {
