@@ -107,6 +107,50 @@
             android:defaultValue="false" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="OLED Theme Customizations">
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_primary"
+            android:title="Primary Color"
+            android:summary="Set the primary color for OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_secondary"
+            android:title="Secondary/Accent Color"
+            android:summary="Set the secondary/accent color for OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_background"
+            android:title="Background Color"
+            android:summary="Set the main background color for OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_surface"
+            android:title="Surface Color"
+            android:summary="Set the surface color for elements like cards, toolbars in OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_text_primary"
+            android:title="Primary Text Color"
+            android:summary="Set the primary text color for OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_text_secondary"
+            android:title="Secondary Text Color"
+            android:summary="Set the secondary text color for OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_icon_tint"
+            android:title="Icon Tint Color"
+            android:summary="Set the icon tint color for OLED mode" />
+
+        <com.drgraff.speakkey.settings.ColorPickerPreference
+            android:key="pref_oled_color_edit_text_background"
+            android:title="Text Field Background Color"
+            android:summary="Set the background color for text fields in OLED mode" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="InputStick Text Formatting">
         <SwitchPreferenceCompat
             android:key="pref_inputstick_format_tags_enabled"

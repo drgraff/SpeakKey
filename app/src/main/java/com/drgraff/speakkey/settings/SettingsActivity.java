@@ -17,11 +17,15 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+import android.graphics.Color; // Added for Color parsing
+// PorterDuff import removed as it's now used in DynamicThemeApplicator
 
 import com.drgraff.speakkey.R;
 import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.api.OpenAIModelData; // Added
 import com.drgraff.speakkey.utils.ThemeManager;
+import com.drgraff.speakkey.settings.ColorPickerPreference; // Added for ColorPickerPreference
+import com.drgraff.speakkey.utils.DynamicThemeApplicator; // Added for DynamicThemeApplicator
 
 import java.util.ArrayList; // Added
 import java.util.Arrays;
@@ -76,7 +80,16 @@ public class SettingsActivity extends AppCompatActivity {
                     .replace(R.id.settings_container, new SettingsFragment())
                     .commit();
         }
+
+        // Apply custom OLED colors if OLED theme is active
+        // Re-check themeValue as it's local to the original block
+        String currentActivityThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+        if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
+            DynamicThemeApplicator.applyOledColors(this, sharedPreferences);
+        }
     }
+
+    // Removed applyOledCustomizations method
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -115,6 +128,26 @@ public class SettingsActivity extends AppCompatActivity {
                 if (prefCheckModelsButton != null) {
                     prefCheckModelsButton.setEnabled(false);
                     prefCheckModelsButton.setSummary("OpenAI API Key not set.");
+                }
+            }
+
+            // Set default colors for OLED ColorPickerPreferences
+            String[] oledColorKeys = {
+                "pref_oled_color_primary", "pref_oled_color_secondary",
+                "pref_oled_color_background", "pref_oled_color_surface",
+                "pref_oled_color_text_primary", "pref_oled_color_text_secondary",
+                "pref_oled_color_icon_tint", "pref_oled_color_edit_text_background"
+            };
+
+            String[] oledDefaultColorsHex = {
+                "#BB86FC", "#03DAC6", "#000000", "#0D0D0D",
+                "#FFFFFF", "#AAAAAA", "#FFFFFF", "#1A1A1A"
+            };
+
+            for (int i = 0; i < oledColorKeys.length; i++) {
+                ColorPickerPreference colorPref = findPreference(oledColorKeys[i]);
+                if (colorPref != null) {
+                    colorPref.setDefaultColorValue(Color.parseColor(oledDefaultColorsHex[i]));
                 }
             }
 
