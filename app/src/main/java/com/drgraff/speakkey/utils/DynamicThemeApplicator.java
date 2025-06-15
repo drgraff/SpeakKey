@@ -14,7 +14,7 @@ public class DynamicThemeApplicator {
     private static final String TAG = "DynamicThemeApplicator";
 
     // Default color values (ARGB integers)
-    public static final int DEFAULT_OLED_PRIMARY = Color.parseColor("#BB86FC");
+    public static final int DEFAULT_OLED_PRIMARY = Color.parseColor("#03DAC6");
     public static final int DEFAULT_OLED_SECONDARY = Color.parseColor("#03DAC6");
     public static final int DEFAULT_OLED_BACKGROUND = Color.parseColor("#000000");
     public static final int DEFAULT_OLED_SURFACE = Color.parseColor("#0D0D0D");

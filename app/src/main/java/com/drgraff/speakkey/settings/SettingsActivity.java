@@ -141,7 +141,7 @@ public class SettingsActivity extends AppCompatActivity {
             };
 
             String[] oledDefaultColorsHex = {
-                "#BB86FC", "#03DAC6", "#000000", "#0D0D0D",
+                "#03DAC6", "#03DAC6", "#000000", "#0D0D0D",
                 "#FFFFFF", "#AAAAAA", "#FFFFFF", "#1A1A1A"
             };
 

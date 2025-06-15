@@ -83,6 +83,8 @@ import android.text.TextUtils; // Added for ellipsize
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FullScreenEditTextDialogFragment.OnSaveListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private String mAppliedThemeMode = null;
+    private int mAppliedOledPrimaryColor = 0;
     public static final String TRANSCRIPTION_QUEUED_PLACEHOLDER = "[Transcription queued... Tap to refresh]"; // Added
 
     // UI elements
@@ -188,6 +190,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Re-fetch transcriptionMode if it was removed above, or ensure it's fetched after setContentView if needed by UI below.
         // For safety, let's assume it's needed by logic further down in onCreate.
         String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
+
+        // Store the currently applied theme mode and OLED primary color
+        this.mAppliedThemeMode = themeValue; // themeValue is already defined in onCreate
+        if (ThemeManager.THEME_OLED.equals(themeValue)) {
+            this.mAppliedOledPrimaryColor = sharedPreferences.getInt(
+                "pref_oled_color_primary",
+                DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
+            );
+        } else {
+            this.mAppliedOledPrimaryColor = 0; // Reset if not in OLED mode
+        }
+        Log.d(TAG, "onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ", mAppliedOledPrimaryColor=0x" + Integer.toHexString(mAppliedOledPrimaryColor));
 
         macroExecutor = new MacroExecutor(this); // Initialize MacroExecutor
         macroExecutorService = Executors.newSingleThreadExecutor(); // Initialize ExecutorService
@@ -1390,15 +1404,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (mAppliedThemeMode != null && sharedPreferences != null) {
+            String currentThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+            int currentOledPrimaryColor = 0;
+            if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
+                currentOledPrimaryColor = sharedPreferences.getInt(
+                    "pref_oled_color_primary",
+                    DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
+                );
+            }
+
+            boolean themeModeChanged = !mAppliedThemeMode.equals(currentThemeValue);
+            boolean oledPrimaryColorChanged = false;
+            if (ThemeManager.THEME_OLED.equals(currentThemeValue) && ThemeManager.THEME_OLED.equals(mAppliedThemeMode)) {
+                oledPrimaryColorChanged = (mAppliedOledPrimaryColor != currentOledPrimaryColor);
+            }
+
+            if (themeModeChanged || oledPrimaryColorChanged) {
+                 Log.d(TAG, "onResume: Detected theme/color change. Recreating MainActivity." +
+                           " OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue +
+                           " OldPrimaryOLED=" + Integer.toHexString(mAppliedOledPrimaryColor) +
+                           ", NewPrimaryOLED=" + Integer.toHexString(currentOledPrimaryColor));
+                recreate();
+                return;
+            }
+        }
+        // If not recreated, proceed with normal onResume
+
         if (sharedPreferences != null) { // Good practice to check
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         }
-        IntentFilter filter = new IntentFilter(UploadService.ACTION_TRANSCRIPTION_COMPLETE);
+        IntentFilter filter = new IntentFilter(UploadService.ACTION_TRANSCRIPTION_COMPLETE); // TODO: Ensure filter is correctly defined/scoped if it was local
         LocalBroadcastManager.getInstance(this).registerReceiver(transcriptionReceiver, filter);
         Log.d(TAG, "TranscriptionBroadcastReceiver registered.");
-        // Apply theme in case it was changed in settings
-        ThemeManager.applyTheme(sharedPreferences);
         
+        // ThemeManager.applyTheme(sharedPreferences); // Kept for now, as per plan.
+
         // Refresh settings in case they were changed
         initializeApis(); // Refreshes API keys etc.
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
