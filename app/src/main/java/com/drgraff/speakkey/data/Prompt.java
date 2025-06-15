@@ -9,20 +9,23 @@ public class Prompt {
     private String label;
     private String promptModeType;
     private long timestamp;
+    private String transcriptionHint; // New field
 
     // Default constructor for GSON
     public Prompt() {
         this.promptModeType = "two_step_transcription"; // Default for new prompts from UI if not specified
         this.timestamp = System.currentTimeMillis();
+        this.transcriptionHint = ""; // Initialize new field
     }
 
-    public Prompt(long id, String text, boolean isActive, String label, String promptModeType, long timestamp) {
+    public Prompt(long id, String text, boolean isActive, String label, String promptModeType, long timestamp, String transcriptionHint) { // Added transcriptionHint
         this.id = id;
         this.text = text;
         this.isActive = isActive;
         this.label = label;
         this.promptModeType = promptModeType;
         this.timestamp = (timestamp == 0) ? System.currentTimeMillis() : timestamp; // Ensure valid timestamp
+        this.transcriptionHint = transcriptionHint != null ? transcriptionHint : ""; // Initialize new field
     }
 
     public long getId() {
@@ -73,6 +76,15 @@ public class Prompt {
         this.timestamp = timestamp;
     }
 
+    // Getter and Setter for transcriptionHint
+    public String getTranscriptionHint() {
+        return transcriptionHint;
+    }
+
+    public void setTranscriptionHint(String transcriptionHint) {
+        this.transcriptionHint = transcriptionHint;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,12 +95,13 @@ public class Prompt {
                 timestamp == prompt.timestamp &&
                 Objects.equals(text, prompt.text) &&
                 Objects.equals(label, prompt.label) &&
-                Objects.equals(promptModeType, prompt.promptModeType);
+                Objects.equals(promptModeType, prompt.promptModeType) &&
+                Objects.equals(transcriptionHint, prompt.transcriptionHint); // Added transcriptionHint
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, text, isActive, label, promptModeType, timestamp);
+        return Objects.hash(id, text, isActive, label, promptModeType, timestamp, transcriptionHint); // Added transcriptionHint
     }
 
     @Override
@@ -100,6 +113,7 @@ public class Prompt {
                 ", label='" + label + '\'' +
                 ", promptModeType='" + promptModeType + '\'' +
                 ", timestamp=" + timestamp +
+                ", transcriptionHint='" + transcriptionHint + '\'' + // Added transcriptionHint
                 '}';
     }
 }

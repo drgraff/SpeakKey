@@ -26,6 +26,7 @@ public class PromptEditorActivity extends AppCompatActivity {
 
     private EditText editTextLabel;
     private EditText editTextText;
+    private EditText editTextTranscriptionHint; // Added
     private Button buttonSave;
 
     private PromptManager promptManager;
@@ -47,6 +48,7 @@ public class PromptEditorActivity extends AppCompatActivity {
 
         editTextLabel = findViewById(R.id.prompt_edit_label);
         editTextText = findViewById(R.id.prompt_edit_text);
+        editTextTranscriptionHint = findViewById(R.id.prompt_edit_transcription_hint); // Added
         buttonSave = findViewById(R.id.button_save_prompt);
 
         promptManager = new PromptManager(this);
@@ -69,6 +71,7 @@ public class PromptEditorActivity extends AppCompatActivity {
             if (currentPrompt != null) {
                 editTextLabel.setText(currentPrompt.getLabel());
                 editTextText.setText(currentPrompt.getText());
+                editTextTranscriptionHint.setText(currentPrompt.getTranscriptionHint() != null ? currentPrompt.getTranscriptionHint() : ""); // Added
             } else {
                 // Prompt with given ID not found, treat as error or new prompt
                 Toast.makeText(this, R.string.prompt_not_found_message, Toast.LENGTH_SHORT).show();
@@ -94,6 +97,7 @@ public class PromptEditorActivity extends AppCompatActivity {
     private void savePrompt() {
         String label = editTextLabel.getText().toString().trim();
         String text = editTextText.getText().toString(); // Text can be empty, or contain just spaces
+        String transcriptionHint = editTextTranscriptionHint.getText().toString().trim(); // Added
 
         if (label.isEmpty()) {
             editTextLabel.setError(getString(R.string.prompt_label_required_message)); // Also set error text from string
@@ -105,6 +109,7 @@ public class PromptEditorActivity extends AppCompatActivity {
             // Editing existing prompt
             currentPrompt.setLabel(label);
             currentPrompt.setText(text);
+            currentPrompt.setTranscriptionHint(transcriptionHint); // Added
             // isActive state is preserved from the original currentPrompt object
             if (currentPrompt.getPromptModeType() == null || currentPrompt.getPromptModeType().isEmpty()) {
                 currentPrompt.setPromptModeType("two_step_processing"); // Default for safety if missing
@@ -119,8 +124,8 @@ public class PromptEditorActivity extends AppCompatActivity {
                 modeTypeForNewPrompt = "two_step_processing"; // Fallback default
                 android.util.Log.w("PromptEditorActivity", "PROMPT_MODE_TYPE extra not found, defaulting to " + modeTypeForNewPrompt);
             }
-        // Corrected order for addPrompt(label, text, mode)
-        promptManager.addPrompt(label, text, modeTypeForNewPrompt);
+            // Updated to include transcriptionHint for addPrompt(label, text, hint, mode)
+            promptManager.addPrompt(label, text, transcriptionHint, modeTypeForNewPrompt);
             Toast.makeText(this, R.string.prompt_saved_message, Toast.LENGTH_SHORT).show();
         }
         setResult(Activity.RESULT_OK);

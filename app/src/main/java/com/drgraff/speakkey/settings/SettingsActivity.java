@@ -268,39 +268,53 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             ListPreference twoStepStep1ModelPref = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL);
-            // For this one, also populate with dynamic models if available, like chatGptModelPreference
-            if (twoStepStep1ModelPref != null && modelIdsSet != null && !modelIdsSet.isEmpty()) {
-                String[] modelIds = modelIdsSet.toArray(new String[0]);
-                String[] modelNames = modelIdsSet.toArray(new String[0]); // Assuming names are IDs
-                Arrays.sort(modelIds);
-                Arrays.sort(modelNames);
-                twoStepStep1ModelPref.setEntries(modelNames);
-                twoStepStep1ModelPref.setEntryValues(modelIds);
-                // Set value and summary based on current selection or default
-                String currentStep1Model = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "gpt-3.5-turbo");
-                boolean step1ModelFound = Arrays.asList(modelIds).contains(currentStep1Model);
-                if (step1ModelFound) {
-                    twoStepStep1ModelPref.setValue(currentStep1Model);
-                } else if (modelIds.length > 0) {
-                    twoStepStep1ModelPref.setValue(modelIds[0]);
-                    sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, modelIds[0]).apply();
-                }
-                if (twoStepStep1ModelPref.getEntry() != null) { // Re-check after setting value
-                     twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntry());
-                }
-            }
-            // Update summary for twoStepStep1ModelPref after potential population
             if (twoStepStep1ModelPref != null) {
+                String defaultTranscriptionModel = "whisper-1";
+                if (modelIdsSet != null && !modelIdsSet.isEmpty()) {
+                    String[] modelIds = modelIdsSet.toArray(new String[0]);
+                    // String[] modelNames = modelIdsSet.toArray(new String[0]); // Assuming IDs are used as names
+                    Arrays.sort(modelIds);
+                    // Arrays.sort(modelNames);
+
+                    twoStepStep1ModelPref.setEntries(modelIds); // Use sorted model IDs for entries
+                    twoStepStep1ModelPref.setEntryValues(modelIds); // Use sorted model IDs for values
+
+                    String currentStep1Model = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, defaultTranscriptionModel);
+                    boolean step1ModelFound = Arrays.asList(modelIds).contains(currentStep1Model);
+
+                    if (step1ModelFound) {
+                        twoStepStep1ModelPref.setValue(currentStep1Model);
+                    } else if (Arrays.asList(modelIds).contains(defaultTranscriptionModel)) {
+                        // If current selection not found but default is in the list
+                        twoStepStep1ModelPref.setValue(defaultTranscriptionModel);
+                        sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, defaultTranscriptionModel).apply();
+                    } else if (modelIds.length > 0) {
+                        // If current and default not found, use first available model
+                        twoStepStep1ModelPref.setValue(modelIds[0]);
+                        sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, modelIds[0]).apply();
+                    } else {
+                        // This case should ideally not be reached if modelIdsSet is not empty
+                        // but as a fallback, if modelIds becomes empty after all.
+                        twoStepStep1ModelPref.setEntries(new String[]{defaultTranscriptionModel});
+                        twoStepStep1ModelPref.setEntryValues(new String[]{defaultTranscriptionModel});
+                        twoStepStep1ModelPref.setValue(defaultTranscriptionModel);
+                        sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, defaultTranscriptionModel).apply();
+                    }
+                } else { // modelIdsSet is null or empty
+                    Log.w("SettingsFragment", "No models in modelIdsSet for PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL. Using default.");
+                    twoStepStep1ModelPref.setEntries(new String[]{defaultTranscriptionModel});
+                    twoStepStep1ModelPref.setEntryValues(new String[]{defaultTranscriptionModel});
+                    twoStepStep1ModelPref.setValue(defaultTranscriptionModel);
+                    // Ensure default is saved if not present
+                    if (sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, null) == null) {
+                        sharedPreferences.edit().putString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, defaultTranscriptionModel).apply();
+                    }
+                }
+                // Update summary
                 if (twoStepStep1ModelPref.getEntry() != null) {
                     twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntry());
                 } else {
-                    CharSequence value = twoStepStep1ModelPref.getValue();
-                    int index = twoStepStep1ModelPref.findIndexOfValue(value != null ? value.toString() : "");
-                    if (index >= 0) {
-                        twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getEntries()[index]);
-                    } else {
-                        twoStepStep1ModelPref.setSummary("Select Step 1 ChatGPT model");
-                    }
+                    twoStepStep1ModelPref.setSummary(twoStepStep1ModelPref.getValue()); // Fallback to value if entry is null
                 }
             }
 

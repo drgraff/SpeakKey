@@ -750,6 +750,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 if ("chatgpt".equals(step1Engine)) {
                     String step1ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "gpt-3.5-turbo");
+                    // Basic check if it's likely a chat model, otherwise fallback
+                    if (step1ModelName == null || !(step1ModelName.startsWith("gpt-") || step1ModelName.contains("-turbo") || step1ModelName.equals("gpt-4o") || step1ModelName.equals("gpt-4"))) {
+                        Log.w(TAG, "Two Step (Step 1 - ChatGPT): Invalid or non-chat model selected: '" + step1ModelName + "'. Falling back to gpt-3.5-turbo.");
+                        step1ModelName = "gpt-3.5-turbo"; // Fallback to a known good chat model
+                    }
                     Log.d(TAG, "Two Step Mode - Step 1 using ChatGPT Model: " + step1ModelName);
                     String converted = convertToMp3(new File(pcmFilePath));
                     if (converted != null) {
