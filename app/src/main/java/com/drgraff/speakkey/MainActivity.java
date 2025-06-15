@@ -152,18 +152,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Determine the theme value from preferences
         String themeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
 
-        // Set the specific Activity theme (OLED or base SpeakKey theme) FIRST
+        // Apply the global AppCompatDelegate night mode (e.g., MODE_NIGHT_YES/NO) first.
+        ThemeManager.applyTheme(sharedPreferences);
+
+        // ONLY if OLED is specifically chosen, explicitly set the AppTheme.OLED.
+        // Otherwise, the Activity will use its manifest theme (@style/Theme.SpeakKey),
+        // which is DayNight aware and will respect the mode set by ThemeManager.applyTheme().
         if (ThemeManager.THEME_OLED.equals(themeValue)) {
             setTheme(R.style.AppTheme_OLED);
-        } else {
-            // For "light", "dark", or "default", explicitly set Theme.SpeakKey.
-            // Theme.SpeakKey is DayNight aware and will respect the mode set by ThemeManager.applyTheme().
-            setTheme(R.style.Theme_SpeakKey);
         }
-
-        // Then, apply the global AppCompatDelegate night mode (e.g., MODE_NIGHT_YES/NO).
-        // The theme set above will use this mode to pick its final resources.
-        ThemeManager.applyTheme(sharedPreferences);
+        // NO 'else' block calling setTheme(R.style.Theme_SpeakKey)
         
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
