@@ -93,10 +93,12 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Theme application logic
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
-        String themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+        // Initialize MEMBER sharedPreferences ONCE at the top
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Theme application logic uses the MEMBER variable
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(this.sharedPreferences);
+        String themeValue = this.sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
         if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(themeValue)) {
             setTheme(R.style.AppTheme_OLED);
         }
@@ -112,8 +114,9 @@ public class PromptsActivity extends AppCompatActivity implements PromptsAdapter
             actionBar.setTitle(R.string.prompts_activity_title); // Assuming this string resource exists
         }
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String apiKey = sharedPreferences.getString("openai_api_key", "");
+        // Member sharedPreferences already initialized at the top.
+        // String apiKey = sharedPreferences.getString("openai_api_key", ""); // This would now use the member
+        String apiKey = this.sharedPreferences.getString("openai_api_key", ""); // Explicit this for clarity
         // Initialize chatGptApi without a default model for this screen, as each section has its own
         chatGptApi = new ChatGptApi(apiKey, ""); // Model will be set based on spinner/section
 
