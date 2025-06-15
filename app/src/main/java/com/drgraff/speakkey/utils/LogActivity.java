@@ -33,6 +33,9 @@ public class LogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
 
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         // Enable the Up button in the action bar
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
