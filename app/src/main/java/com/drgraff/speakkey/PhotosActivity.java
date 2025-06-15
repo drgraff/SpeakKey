@@ -480,11 +480,10 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         // UI update logic moved to showPhotoUploadProgressUI() and called by callers.
         AppLogManager.getInstance().addEntry("INFO", TAG + ": Queuing photo processing task.", "File: " + currentPhotoPath);
 
-        UploadTask uploadTask = new UploadTask(
+        UploadTask uploadTask = UploadTask.createPhotoVisionTask(
                 currentPhotoPath,
-                UploadTask.TYPE_PHOTO_VISION,
-                concatenatedPromptText, // Storing the full prompt text
-                selectedPhotoModel      // Storing the model name
+                concatenatedPromptText, // This is the visionPrompt
+                selectedPhotoModel      // This is the visionModelName
         );
 
         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
