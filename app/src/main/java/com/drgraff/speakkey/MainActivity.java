@@ -187,20 +187,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 chatGptText.setBackgroundColor(oledEditTextBackgroundColor);
             }
 
+            // Retrieve colors once
+            int primaryOledColor = sharedPreferences.getInt(
+                "pref_oled_color_primary",
+                DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
+            );
+            int onPrimaryOledColor = sharedPreferences.getInt(
+                "pref_oled_color_on_primary",
+                DynamicThemeApplicator.DEFAULT_OLED_ON_PRIMARY
+            );
+
             // Style btnStartRecording
             if (btnStartRecording != null) { // btnStartRecording is a field initialized in initializeUiElements()
-                int primaryOledColor = sharedPreferences.getInt(
-                    "pref_oled_color_primary",
-                    DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
-                );
-                int onPrimaryOledColor = sharedPreferences.getInt(
-                    "pref_oled_color_on_primary",
-                    DynamicThemeApplicator.DEFAULT_OLED_ON_PRIMARY
-                );
-
                 btnStartRecording.setBackgroundTintList(ColorStateList.valueOf(primaryOledColor));
                 btnStartRecording.setTextColor(onPrimaryOledColor);
                 Log.d(TAG, String.format("MainActivity: Styled btnStartRecording with BG=0x%08X, Text=0x%08X", primaryOledColor, onPrimaryOledColor));
+            }
+
+            // Style other buttons
+            Button[] buttonsToStyle = { // Changed to Button[]
+                btnPauseRecording, btnStopRecording, btnSendWhisper,
+                btnSendChatGpt, btnSendInputStick, btnSendWhisperToInputStick
+            };
+            String[] buttonNames = {
+                "btnPauseRecording", "btnStopRecording", "btnSendWhisper",
+                "btnSendChatGpt", "btnSendInputStick", "btnSendWhisperToInputStick"
+            };
+
+            for (int i = 0; i < buttonsToStyle.length; i++) {
+                Button button = buttonsToStyle[i];
+                String buttonName = buttonNames[i];
+                if (button != null) {
+                    button.setBackgroundTintList(ColorStateList.valueOf(primaryOledColor));
+                    button.setTextColor(onPrimaryOledColor);
+                    // If buttons have icons that need tinting:
+                    // button.setIconTint(android.content.res.ColorStateList.valueOf(onPrimaryOledColor));
+                    Log.d(TAG, String.format("MainActivity: Styled %s with BG=0x%08X, Text=0x%08X", buttonName, primaryOledColor, onPrimaryOledColor));
+                } else {
+                    Log.w(TAG, "MainActivity: Button " + buttonName + " is null, cannot style.");
+                }
             }
         }
 
