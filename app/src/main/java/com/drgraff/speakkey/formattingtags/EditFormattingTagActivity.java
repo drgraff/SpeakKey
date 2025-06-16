@@ -1,95 +1,111 @@
 package com.drgraff.speakkey.formattingtags;
 
 import android.app.Activity;
+import android.content.Intent; // Keep this for getIntent()
+import android.content.SharedPreferences; // Standard import
 import android.os.Bundle;
+import android.text.TextUtils; // Keep for TextUtils.isEmpty
+import android.util.Log; // Standard import
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView; // Added for Spinner error
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import java.util.ArrayList; // Added
-import java.util.Arrays; // Added
-import java.util.List; // Added
-import java.util.Map; // Added
-import java.util.LinkedHashMap; // Added To maintain insertion order for Spinner
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.preference.PreferenceManager; // Standard import
 
 import com.drgraff.speakkey.R;
+import com.drgraff.speakkey.data.Prompt; // Not used here, but keep if PromptManager might return it
+import com.drgraff.speakkey.data.FormattingTag; // Used
+import com.drgraff.speakkey.data.FormattingTagManager; // Used
+import com.drgraff.speakkey.utils.DynamicThemeApplicator;
+import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 
-public class EditFormattingTagActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+// import java.util.Map; // Not directly used in this class
+// import java.util.LinkedHashMap; // Not directly used in this class
+
+public class EditFormattingTagActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String EXTRA_TAG_ID = "com.drgraff.speakkey.EXTRA_TAG_ID";
     private static final long INVALID_TAG_ID = -1;
-    private static final String DEFAULT_DELAY_MS = "0"; // Default delay for new tags
+    private static final String DEFAULT_DELAY_MS = "0";
+    private static final String TAG = "EditFormatTagAct";
 
-    private TextInputEditText editTextName, editTextOpeningTag, editTextTagDelayMs; // editTextKeystrokeSequence removed, changed editTagDelayMs to editTextTagDelayMs
-    private CheckBox checkBoxCtrl, checkBoxAlt, checkBoxShift, checkBoxMeta; // Added
-    private Spinner spinnerMainKey; // Added
-    private List<KeystrokeDisplay> keySpinnerItems; // Added For Spinner data
+    private SharedPreferences sharedPreferences; // Class field
+    private TextInputEditText editTextName, editTextOpeningTag, editTextTagDelayMs;
+    private CheckBox checkBoxCtrl, checkBoxAlt, checkBoxShift, checkBoxMeta;
+    private Spinner spinnerMainKey;
+    private List<KeystrokeDisplay> keySpinnerItems;
     private Button buttonSave;
     private FormattingTagManager tagManager;
     private FormattingTag currentTag;
     private long currentTagId = INVALID_TAG_ID;
 
-    // Simple class to hold display name and actual key value for the Spinner
+    // Member variables for theme state tracking
+    private String mAppliedThemeMode = null;
+    private int mAppliedTopbarBackgroundColor = 0;
+    private int mAppliedTopbarTextIconColor = 0;
+    private int mAppliedMainBackgroundColor = 0;
+
     static class KeystrokeDisplay {
         public String displayName;
-        public String keyValue; // e.g., "KEY_A", "KEY_ENTER"
-
+        public String keyValue;
         public KeystrokeDisplay(String displayName, String keyValue) {
             this.displayName = displayName;
             this.keyValue = keyValue;
         }
-
-        @NonNull
-        @Override
-        public String toString() {
-            return displayName; // This is what will be shown in the Spinner
-        }
+        @NonNull @Override public String toString() { return displayName; }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Theme application logic
-        android.content.SharedPreferences sharedPreferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
-        String themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
-        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(themeValue)) {
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        ThemeManager.applyTheme(this.sharedPreferences);
+        String themeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+        if (ThemeManager.THEME_OLED.equals(themeValue)) {
             setTheme(R.style.AppTheme_OLED);
         }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_formatting_tag);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_edit_formatting_tag);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
+        ActionBar actionBar = getSupportActionBar();
+        if (getSupportActionBar() != null) { // Redundant check, actionBar will be null if getSupportActionBar is null
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            // Title will be set below based on add/edit mode
+        }
+
+        String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+        if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
+            DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
+            Log.d(TAG, "EditFormattingTagActivity: Applied dynamic OLED colors.");
         }
 
         editTextName = findViewById(R.id.edit_tag_name);
         editTextOpeningTag = findViewById(R.id.edit_tag_opening_text);
-        editTextTagDelayMs = findViewById(R.id.editTextTagDelayMs); // Changed ID and variable
-        // editTextKeystrokeSequence = findViewById(R.id.edit_tag_keystroke_sequence); // Removed
-
-        checkBoxCtrl = findViewById(R.id.checkbox_modifier_ctrl); // Added
-        checkBoxAlt = findViewById(R.id.checkbox_modifier_alt); // Added
-        checkBoxShift = findViewById(R.id.checkbox_modifier_shift); // Added
-        checkBoxMeta = findViewById(R.id.checkbox_modifier_meta); // Added
-        spinnerMainKey = findViewById(R.id.spinner_main_key); // Added
-
+        editTextTagDelayMs = findViewById(R.id.editTextTagDelayMs);
+        checkBoxCtrl = findViewById(R.id.checkbox_modifier_ctrl);
+        checkBoxAlt = findViewById(R.id.checkbox_modifier_alt);
+        checkBoxShift = findViewById(R.id.checkbox_modifier_shift);
+        checkBoxMeta = findViewById(R.id.checkbox_modifier_meta);
+        spinnerMainKey = findViewById(R.id.spinner_main_key);
         buttonSave = findViewById(R.id.button_save_formatting_tag);
 
-        populateMainKeySpinner(); // Added call
+        populateMainKeySpinner();
 
         tagManager = new FormattingTagManager(this);
         tagManager.open();
@@ -101,79 +117,72 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             if (currentTag != null) {
                 editTextName.setText(currentTag.getName());
                 editTextOpeningTag.setText(currentTag.getOpeningTagText());
-                editTextTagDelayMs.setText(String.valueOf(currentTag.getDelayMs())); // Load delay, changed variable
-                // editTextKeystrokeSequence.setText(currentTag.getKeystrokeSequence()); // Removed
-                parseAndSetKeystrokeUI(currentTag.getKeystrokeSequence()); // Added call
-                // Ensure Activity title is also set for editing here
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle(R.string.edit_formatting_tag_title);
-                }
+                editTextTagDelayMs.setText(String.valueOf(currentTag.getDelayMs()));
+                parseAndSetKeystrokeUI(currentTag.getKeystrokeSequence());
+                if (actionBar != null) actionBar.setTitle(R.string.edit_formatting_tag_title);
             } else {
-                // Handle case where tag with ID is not found (current logic seems to Toast and set title to Add)
-                // This part of the existing logic can remain.
                 Toast.makeText(this, "Formatting Tag not found, creating a new one.", Toast.LENGTH_SHORT).show();
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle(R.string.add_new_formatting_tag_title);
-                }
-                editTextTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag after error, changed variable
-                currentTagId = INVALID_TAG_ID; // Reset to ensure it behaves as 'add new'
+                if (actionBar != null) actionBar.setTitle(R.string.add_new_formatting_tag_title);
+                editTextTagDelayMs.setText(DEFAULT_DELAY_MS);
+                currentTagId = INVALID_TAG_ID;
             }
         } else {
-            // This is a new tag
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(R.string.add_new_formatting_tag_title);
-            }
-            editTextTagDelayMs.setText(DEFAULT_DELAY_MS); // Default delay for new tag, changed variable
+            if (actionBar != null) actionBar.setTitle(R.string.add_new_formatting_tag_title);
+            editTextTagDelayMs.setText(DEFAULT_DELAY_MS);
         }
 
         buttonSave.setOnClickListener(v -> saveFormattingTag());
+
+        // Store applied theme state
+        this.mAppliedThemeMode = currentActivityThemeValue;
+        if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
+            this.mAppliedTopbarBackgroundColor = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+            this.mAppliedTopbarTextIconColor = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+            this.mAppliedMainBackgroundColor = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+            Log.d(TAG, "EditFormattingTagActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode +
+                         ", TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) +
+                         ", TopbarTextIcon=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) +
+                         ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor));
+        } else {
+            this.mAppliedTopbarBackgroundColor = 0;
+            this.mAppliedTopbarTextIconColor = 0;
+            this.mAppliedMainBackgroundColor = 0;
+            Log.d(TAG, "EditFormattingTagActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.");
+        }
     }
 
     private void saveFormattingTag() {
         String name = editTextName.getText().toString().trim();
         String openingText = editTextOpeningTag.getText().toString().trim();
-        String delayString = editTextTagDelayMs.getText().toString().trim(); // Changed variable
-        int delayMs = 0; // Default to 0 if parsing fails or field is empty after validation
+        String delayString = editTextTagDelayMs.getText().toString().trim();
+        int delayMs = 0;
 
-        // Validate and parse delayMs
         if (delayString.isEmpty()) {
-            editTextTagDelayMs.setError("Delay cannot be empty. Enter 0 if no delay is needed."); // Changed variable
-            editTextTagDelayMs.requestFocus(); // Changed variable
+            editTextTagDelayMs.setError("Delay cannot be empty. Enter 0 if no delay is needed.");
+            editTextTagDelayMs.requestFocus();
             Toast.makeText(this, "Delay cannot be empty. Enter 0 if no delay is needed.", Toast.LENGTH_SHORT).show();
             return;
         }
-
         try {
             delayMs = Integer.parseInt(delayString);
             if (delayMs < 0) {
-                editTextTagDelayMs.setError("Delay must be a non-negative number."); // Changed variable
-                editTextTagDelayMs.requestFocus(); // Changed variable
+                editTextTagDelayMs.setError("Delay must be a non-negative number.");
+                editTextTagDelayMs.requestFocus();
                 Toast.makeText(this, "Delay must be a non-negative number.", Toast.LENGTH_SHORT).show();
                 return;
             }
         } catch (NumberFormatException e) {
-            editTextTagDelayMs.setError("Invalid number format for delay."); // Changed variable
-            editTextTagDelayMs.requestFocus(); // Changed variable
+            editTextTagDelayMs.setError("Invalid number format for delay.");
+            editTextTagDelayMs.requestFocus();
             Toast.makeText(this, "Invalid number format for delay.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // String keystrokes = editTextKeystrokeSequence.getText().toString().trim(); // Removed
-
-        // Construct Keystroke String from New UI
         StringBuilder keystrokesBuilder = new StringBuilder();
-        if (checkBoxCtrl.isChecked()) {
-            keystrokesBuilder.append("CTRL_LEFT+");
-        }
-        if (checkBoxAlt.isChecked()) {
-            keystrokesBuilder.append("ALT_LEFT+");
-        }
-        if (checkBoxShift.isChecked()) {
-            keystrokesBuilder.append("SHIFT_LEFT+");
-        }
-        if (checkBoxMeta.isChecked()) {
-            keystrokesBuilder.append("GUI_LEFT+");
-        }
+        if (checkBoxCtrl.isChecked()) keystrokesBuilder.append("CTRL_LEFT+");
+        if (checkBoxAlt.isChecked()) keystrokesBuilder.append("ALT_LEFT+");
+        if (checkBoxShift.isChecked()) keystrokesBuilder.append("SHIFT_LEFT+");
+        if (checkBoxMeta.isChecked()) keystrokesBuilder.append("GUI_LEFT+");
 
         KeystrokeDisplay selectedKeyItem = (KeystrokeDisplay) spinnerMainKey.getSelectedItem();
         String mainKeyValue = "";
@@ -181,22 +190,16 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             mainKeyValue = selectedKeyItem.keyValue;
             keystrokesBuilder.append(mainKeyValue);
         } else if (keystrokesBuilder.length() > 0) {
-            // Modifiers selected but no main key: remove trailing '+'
              keystrokesBuilder.setLength(keystrokesBuilder.length() - 1);
         }
-
         String keystrokes = keystrokesBuilder.toString();
-        // New Validation for keystrokes (main key must be selected)
         if (mainKeyValue.isEmpty()) {
             Toast.makeText(this, "Main key must be selected.", Toast.LENGTH_SHORT).show();
-            // Optionally, set an error on the spinner (not straightforward) or a general Toast.
-            // ((TextView)spinnerMainKey.getSelectedView()).setError("Main key required"); // This might not work well or look good
             if (spinnerMainKey.getSelectedView() instanceof TextView) {
                  ((TextView)spinnerMainKey.getSelectedView()).setError("Main key required");
             }
             return;
         }
-        // End of new keystroke construction and validation
 
         if (name.isEmpty()) {
             editTextName.setError(getString(R.string.tag_name_required_message));
@@ -204,7 +207,6 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.tag_name_required_message), Toast.LENGTH_SHORT).show();
             return;
         }
-
         if (openingText.isEmpty()) {
             editTextOpeningTag.setError(getString(R.string.opening_tag_text_required_message));
             editTextOpeningTag.requestFocus();
@@ -212,24 +214,16 @@ public class EditFormattingTagActivity extends AppCompatActivity {
             return;
         }
 
-        // Old keystrokes.isEmpty() validation removed
-
         if (currentTagId != INVALID_TAG_ID && currentTag != null) {
-            // Editing existing tag
             currentTag.setName(name);
             currentTag.setOpeningTagText(openingText);
-            currentTag.setDelayMs(delayMs); // Set delay
-            // currentTag.setClosingTagText(closingText); // Removed
+            currentTag.setDelayMs(delayMs);
             currentTag.setKeystrokeSequence(keystrokes);
-            // currentTag.setActive(true); // Assuming active, or add a switch
             tagManager.updateTag(currentTag);
         } else {
-            // Adding new tag
-            // ID 0 is fine as SQLite will auto-increment. isActive defaults to true in DB.
-            FormattingTag newTag = new FormattingTag(0, name, openingText, keystrokes, true, delayMs); // Removed closingText, Added delayMs
+            FormattingTag newTag = new FormattingTag(0, name, openingText, keystrokes, true, delayMs);
             tagManager.addTag(newTag);
         }
-
         Toast.makeText(this, getString(R.string.formatting_tag_saved_message), Toast.LENGTH_SHORT).show();
         setResult(Activity.RESULT_OK);
         finish();
@@ -254,11 +248,7 @@ public class EditFormattingTagActivity extends AppCompatActivity {
 
     private void populateMainKeySpinner() {
         keySpinnerItems = new ArrayList<>();
-        // Add a "None" or "Select Key..." option as the first item
-        keySpinnerItems.add(new KeystrokeDisplay(getString(R.string.prompt_select_key), "")); // Empty value for no key
-
-        // --- Populate with actual keys (This list should be comprehensive) ---
-        // Example:
+        keySpinnerItems.add(new KeystrokeDisplay(getString(R.string.prompt_select_key), ""));
         keySpinnerItems.add(new KeystrokeDisplay("Enter", "KEY_ENTER"));
         keySpinnerItems.add(new KeystrokeDisplay("Tab", "KEY_TAB"));
         keySpinnerItems.add(new KeystrokeDisplay("Space", "KEY_SPACEBAR"));
@@ -274,17 +264,9 @@ public class EditFormattingTagActivity extends AppCompatActivity {
         keySpinnerItems.add(new KeystrokeDisplay("Down Arrow", "KEY_ARROW_DOWN"));
         keySpinnerItems.add(new KeystrokeDisplay("Left Arrow", "KEY_ARROW_LEFT"));
         keySpinnerItems.add(new KeystrokeDisplay("Right Arrow", "KEY_ARROW_RIGHT"));
-
-        for (char c = 'A'; c <= 'Z'; c++) {
-            keySpinnerItems.add(new KeystrokeDisplay(String.valueOf(c), "KEY_" + c));
-        }
-        for (char c = '0'; c <= '9'; c++) {
-            keySpinnerItems.add(new KeystrokeDisplay(String.valueOf(c), "KEY_" + c));
-        }
-        for (int i = 1; i <= 12; i++) {
-            keySpinnerItems.add(new KeystrokeDisplay("F" + i, "KEY_F" + i));
-        }
-        // Add other keys as defined in TextTagFormatter.getHidKeyCode's switch cases
+        for (char c = 'A'; c <= 'Z'; c++) keySpinnerItems.add(new KeystrokeDisplay(String.valueOf(c), "KEY_" + c));
+        for (char c = '0'; c <= '9'; c++) keySpinnerItems.add(new KeystrokeDisplay(String.valueOf(c), "KEY_" + c));
+        for (int i = 1; i <= 12; i++) keySpinnerItems.add(new KeystrokeDisplay("F" + i, "KEY_F" + i));
         keySpinnerItems.add(new KeystrokeDisplay("- (Minus)", "KEY_MINUS"));
         keySpinnerItems.add(new KeystrokeDisplay("= (Equals)", "KEY_EQUALS"));
         keySpinnerItems.add(new KeystrokeDisplay("[ (Left Bracket)", "KEY_LEFT_BRACKET"));
@@ -299,60 +281,113 @@ public class EditFormattingTagActivity extends AppCompatActivity {
         keySpinnerItems.add(new KeystrokeDisplay("Caps Lock", "KEY_CAPS_LOCK"));
         keySpinnerItems.add(new KeystrokeDisplay("Print Screen", "KEY_PRINT_SCREEN"));
         keySpinnerItems.add(new KeystrokeDisplay("Scroll Lock", "KEY_SCROLL_LOCK"));
-        keySpinnerItems.add(new KeystrokeDisplay("Pause", "KEY_PAUSE")); // Or KEY_PASUE if that's the actual constant
+        keySpinnerItems.add(new KeystrokeDisplay("Pause", "KEY_PAUSE"));
         keySpinnerItems.add(new KeystrokeDisplay("Application", "KEY_APPLICATION"));
-        // Numpad keys
         keySpinnerItems.add(new KeystrokeDisplay("Num Lock", "KEY_NUM_LOCK"));
         keySpinnerItems.add(new KeystrokeDisplay("Num /", "KEY_NUM_SLASH"));
         keySpinnerItems.add(new KeystrokeDisplay("Num *", "KEY_NUM_STAR"));
         keySpinnerItems.add(new KeystrokeDisplay("Num -", "KEY_NUM_MINUS"));
         keySpinnerItems.add(new KeystrokeDisplay("Num +", "KEY_NUM_PLUS"));
         keySpinnerItems.add(new KeystrokeDisplay("Num Enter", "KEY_NUM_ENTER"));
-        for (int i = 0; i <= 9; i++) {
-             keySpinnerItems.add(new KeystrokeDisplay("Num " + i, "KEY_NUM_" + i));
-        }
+        for (int i = 0; i <= 9; i++) keySpinnerItems.add(new KeystrokeDisplay("Num " + i, "KEY_NUM_" + i));
         keySpinnerItems.add(new KeystrokeDisplay("Num . (Dot)", "KEY_NUM_DOT"));
-
-
         ArrayAdapter<KeystrokeDisplay> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, keySpinnerItems);
         spinnerMainKey.setAdapter(adapter);
     }
 
     private void parseAndSetKeystrokeUI(String keystrokeSequence) {
-        if (keystrokeSequence == null || keystrokeSequence.isEmpty()) {
-            return;
-        }
-        // Reset UI elements first
+        if (keystrokeSequence == null || keystrokeSequence.isEmpty()) return;
         checkBoxCtrl.setChecked(false);
         checkBoxAlt.setChecked(false);
         checkBoxShift.setChecked(false);
         checkBoxMeta.setChecked(false);
-        spinnerMainKey.setSelection(0); // Default to "Select Key..."
-
-        String[] parts = keystrokeSequence.split("\\+"); // Use "\\+" to split by literal '+'
+        spinnerMainKey.setSelection(0);
+        String[] parts = keystrokeSequence.split("\\+");
         String mainKeyPart = null;
-
         for (String part : parts) {
-            part = part.trim().toUpperCase(); // Match TextTagFormatter.getHidKeyCode logic
-            if (part.equals("CTRL_LEFT") || part.equals("CTRL_RIGHT") || part.equals("CTRL")) {
-                checkBoxCtrl.setChecked(true);
-            } else if (part.equals("ALT_LEFT") || part.equals("ALT_RIGHT") || part.equals("ALT")) {
-                checkBoxAlt.setChecked(true);
-            } else if (part.equals("SHIFT_LEFT") || part.equals("SHIFT_RIGHT") || part.equals("SHIFT")) {
-                checkBoxShift.setChecked(true);
-            } else if (part.equals("GUI_LEFT") || part.equals("GUI_RIGHT") || part.equals("META")) {
-                checkBoxMeta.setChecked(true);
-            } else {
-                mainKeyPart = part; 
-            }
+            part = part.trim().toUpperCase();
+            if (part.equals("CTRL_LEFT") || part.equals("CTRL_RIGHT") || part.equals("CTRL")) checkBoxCtrl.setChecked(true);
+            else if (part.equals("ALT_LEFT") || part.equals("ALT_RIGHT") || part.equals("ALT")) checkBoxAlt.setChecked(true);
+            else if (part.equals("SHIFT_LEFT") || part.equals("SHIFT_RIGHT") || part.equals("SHIFT")) checkBoxShift.setChecked(true);
+            else if (part.equals("GUI_LEFT") || part.equals("GUI_RIGHT") || part.equals("META")) checkBoxMeta.setChecked(true);
+            else mainKeyPart = part;
         }
-
         if (mainKeyPart != null) {
             for (int i = 0; i < keySpinnerItems.size(); i++) {
                 if (keySpinnerItems.get(i).keyValue.equalsIgnoreCase(mainKeyPart)) {
                     spinnerMainKey.setSelection(i);
                     break;
                 }
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mAppliedThemeMode != null && this.sharedPreferences != null) {
+            boolean needsRecreate = false;
+            String currentThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+            if (!mAppliedThemeMode.equals(currentThemeValue)) {
+                needsRecreate = true;
+                Log.d(TAG, "onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue);
+            } else if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
+                int currentTopbarBG = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+                if (mAppliedTopbarBackgroundColor != currentTopbarBG) needsRecreate = true;
+                int currentTopbarTextIcon = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+                if (mAppliedTopbarTextIconColor != currentTopbarTextIcon) needsRecreate = true;
+                int currentMainBG = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+                if (mAppliedMainBackgroundColor != currentMainBG) needsRecreate = true;
+                if (needsRecreate) {
+                     Log.d(TAG, "onResume: OLED color(s) changed for EditFormattingTagActivity.");
+                }
+            }
+            if (needsRecreate) {
+                Log.d(TAG, "onResume: Detected configuration change. Recreating EditFormattingTagActivity.");
+                recreate();
+                return;
+            }
+        }
+        if (this.sharedPreferences != null) {
+            this.sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (this.sharedPreferences != null) {
+            this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(TAG, "onSharedPreferenceChanged triggered for key: " + key);
+        if (key == null) return;
+        final String[] oledColorKeys = {
+            "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
+            "pref_oled_main_background", "pref_oled_surface_background",
+            "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+            "pref_oled_button_background", "pref_oled_button_text_icon",
+            "pref_oled_textbox_background", "pref_oled_textbox_accent",
+            "pref_oled_accent_general"
+        };
+        boolean isOledColorKey = false;
+        for (String oledKey : oledColorKeys) {
+            if (oledKey.equals(key)) {
+                isOledColorKey = true;
+                break;
+            }
+        }
+        if (ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
+            Log.d(TAG, "Main theme preference changed. Recreating EditFormattingTagActivity.");
+            recreate();
+        } else if (isOledColorKey) {
+            String currentTheme = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+            if (ThemeManager.THEME_OLED.equals(currentTheme)) {
+                Log.d(TAG, "OLED color preference changed: " + key + ". Recreating EditFormattingTagActivity.");
+                recreate();
             }
         }
     }
