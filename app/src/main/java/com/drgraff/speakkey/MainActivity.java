@@ -85,7 +85,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private String mAppliedThemeMode = null;
-    private int mAppliedOledPrimaryColor = 0;
+    private int mAppliedOledButtonBackgroundColor = 0;
+    private int mAppliedTopbarBackgroundColor = 0;
+    private int mAppliedTopbarTextIconColor = 0;
+    private int mAppliedMainBackgroundColor = 0;
+    private int mAppliedTextboxBackgroundColor = 0;
+    private int mAppliedOledButtonTextIconColor = 0;
     public static final String TRANSCRIPTION_QUEUED_PLACEHOLDER = "[Transcription queued... Tap to refresh]"; // Added
 
     // UI elements
@@ -230,17 +235,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // For safety, let's assume it's needed by logic further down in onCreate.
         String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
 
-        // Store the currently applied theme mode and OLED primary color
-        this.mAppliedThemeMode = themeValue; // themeValue is already defined in onCreate
+        // Store the currently applied theme mode and all relevant OLED colors
+        this.mAppliedThemeMode = themeValue; // themeValue is from earlier in onCreate
+
         if (ThemeManager.THEME_OLED.equals(themeValue)) {
-            this.mAppliedOledPrimaryColor = sharedPreferences.getInt(
-                "pref_oled_color_primary",
-                DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
-            );
+            this.mAppliedTopbarBackgroundColor = sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+            this.mAppliedTopbarTextIconColor = sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+            this.mAppliedMainBackgroundColor = sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+            this.mAppliedTextboxBackgroundColor = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND);
+            this.mAppliedOledButtonBackgroundColor = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
+            this.mAppliedOledButtonTextIconColor = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON);
+            // Also log all these values
+            Log.d(TAG, "onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode +
+                         ", TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) +
+                         ", TopbarTextIcon=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) +
+                         ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor) +
+                         ", TextboxBG=0x" + Integer.toHexString(mAppliedTextboxBackgroundColor) +
+                         ", ButtonBG=0x" + Integer.toHexString(mAppliedOledButtonBackgroundColor) +
+                         ", ButtonTextIcon=0x" + Integer.toHexString(mAppliedOledButtonTextIconColor));
         } else {
-            this.mAppliedOledPrimaryColor = 0; // Reset if not in OLED mode
+            // Reset all applied OLED color trackers if not in OLED mode
+            this.mAppliedTopbarBackgroundColor = 0;
+            this.mAppliedTopbarTextIconColor = 0;
+            this.mAppliedMainBackgroundColor = 0;
+            this.mAppliedTextboxBackgroundColor = 0;
+            this.mAppliedOledButtonBackgroundColor = 0;
+            this.mAppliedOledButtonTextIconColor = 0;
+            Log.d(TAG, "onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.");
         }
-        Log.d(TAG, "onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ", mAppliedOledPrimaryColor=0x" + Integer.toHexString(mAppliedOledPrimaryColor));
 
         macroExecutor = new MacroExecutor(this); // Initialize MacroExecutor
         macroExecutorService = Executors.newSingleThreadExecutor(); // Initialize ExecutorService
@@ -1445,41 +1467,68 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
 
         if (mAppliedThemeMode != null && sharedPreferences != null) {
+            boolean needsRecreate = false;
             String currentThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
-            int currentOledPrimaryColor = 0;
-            if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
-                currentOledPrimaryColor = sharedPreferences.getInt(
-                    "pref_oled_color_primary",
-                    DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
-                );
+
+            if (!mAppliedThemeMode.equals(currentThemeValue)) {
+                needsRecreate = true;
+                Log.d(TAG, "onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue);
+            } else if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
+                // Theme mode is still OLED, check individual OLED colors
+                int currentTopbarBG = sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+                if (mAppliedTopbarBackgroundColor != currentTopbarBG) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Topbar BG changed. Old=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) + ", New=0x" + Integer.toHexString(currentTopbarBG));
+                }
+
+                int currentTopbarTextIcon = sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+                if (mAppliedTopbarTextIconColor != currentTopbarTextIcon) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Topbar Text/Icon changed. Old=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) + ", New=0x" + Integer.toHexString(currentTopbarTextIcon));
+                }
+
+                int currentMainBG = sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+                if (mAppliedMainBackgroundColor != currentMainBG) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Main BG changed. Old=0x" + Integer.toHexString(mAppliedMainBackgroundColor) + ", New=0x" + Integer.toHexString(currentMainBG));
+                }
+
+                int currentTextboxBG = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND);
+                if (mAppliedTextboxBackgroundColor != currentTextboxBG) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Textbox BG changed. Old=0x" + Integer.toHexString(mAppliedTextboxBackgroundColor) + ", New=0x" + Integer.toHexString(currentTextboxBG));
+                }
+
+                int currentButtonBG = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
+                if (mAppliedOledButtonBackgroundColor != currentButtonBG) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Button BG changed. Old=0x" + Integer.toHexString(mAppliedOledButtonBackgroundColor) + ", New=0x" + Integer.toHexString(currentButtonBG));
+                }
+
+                int currentButtonTextIcon = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON);
+                if (mAppliedOledButtonTextIconColor != currentButtonTextIcon) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Button Text/Icon changed. Old=0x" + Integer.toHexString(mAppliedOledButtonTextIconColor) + ", New=0x" + Integer.toHexString(currentButtonTextIcon));
+                }
             }
 
-            boolean themeModeChanged = !mAppliedThemeMode.equals(currentThemeValue);
-            boolean oledPrimaryColorChanged = false;
-            if (ThemeManager.THEME_OLED.equals(currentThemeValue) && ThemeManager.THEME_OLED.equals(mAppliedThemeMode)) {
-                oledPrimaryColorChanged = (mAppliedOledPrimaryColor != currentOledPrimaryColor);
-            }
-
-            if (themeModeChanged || oledPrimaryColorChanged) {
-                 Log.d(TAG, "onResume: Detected theme/color change. Recreating MainActivity." +
-                           " OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue +
-                           " OldPrimaryOLED=" + Integer.toHexString(mAppliedOledPrimaryColor) +
-                           ", NewPrimaryOLED=" + Integer.toHexString(currentOledPrimaryColor));
+            if (needsRecreate) {
+                Log.d(TAG, "onResume: Detected configuration change. Recreating MainActivity.");
                 recreate();
                 return;
             }
         }
-        // If not recreated, proceed with normal onResume
 
-        if (sharedPreferences != null) { // Good practice to check
+        // If not recreated, proceed with normal onResume
+        ThemeManager.applyTheme(sharedPreferences);
+
+        if (sharedPreferences != null) {
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         }
-        IntentFilter filter = new IntentFilter(UploadService.ACTION_TRANSCRIPTION_COMPLETE); // TODO: Ensure filter is correctly defined/scoped if it was local
+        IntentFilter filter = new IntentFilter(UploadService.ACTION_TRANSCRIPTION_COMPLETE);
         LocalBroadcastManager.getInstance(this).registerReceiver(transcriptionReceiver, filter);
         Log.d(TAG, "TranscriptionBroadcastReceiver registered.");
         
-        // ThemeManager.applyTheme(sharedPreferences); // Kept for now, as per plan.
-
         // Refresh settings in case they were changed
         initializeApis(); // Refreshes API keys etc.
         chkAutoSendWhisper.setChecked(sharedPreferences.getBoolean("auto_send_whisper", true));
