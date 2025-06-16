@@ -13,7 +13,7 @@
     app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_formatting_tags"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
     android:background="@color/custom_toolbar_background"
