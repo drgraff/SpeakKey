@@ -38,6 +38,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import com.drgraff.speakkey.utils.ThemeManager; // Added for ThemeManager
+import com.drgraff.speakkey.utils.DynamicThemeApplicator; // Added for DynamicThemeApplicator
 import androidx.core.content.FileProvider;
 
 import java.io.ByteArrayOutputStream; // Added
@@ -65,9 +67,16 @@ import com.drgraff.speakkey.settings.SettingsActivity; // Added import
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // Added
 
-public class PhotosActivity extends AppCompatActivity implements FullScreenEditTextDialogFragment.OnSaveListener { // Added interface
+public class PhotosActivity extends AppCompatActivity implements FullScreenEditTextDialogFragment.OnSaveListener, SharedPreferences.OnSharedPreferenceChangeListener { // Added interface
 
     private static final String TAG = "PhotosActivity";
+    // private SharedPreferences sharedPreferences; // Already exists
+    private String mAppliedThemeMode = null;
+    private int mAppliedTopbarBackgroundColor = 0;
+    private int mAppliedTopbarTextIconColor = 0;
+    private int mAppliedMainBackgroundColor = 0;
+    // Add others if DynamicThemeApplicator applies more that are visually distinct in PhotosActivity
+
     private static final int REQUEST_CAMERA_PERMISSION = 101;
     private static final int REQUEST_IMAGE_CAPTURE = 102;
     private static final String KEY_PHOTO_PATH = "currentPhotoPath";
@@ -118,13 +127,21 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photos);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_photos);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle(getString(R.string.photos_title_toolbar));
+        }
+
+        // Apply custom OLED colors if OLED theme is active
+        String currentThemeValue = this.sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(currentThemeValue)) {
+            com.drgraff.speakkey.utils.DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
+            // Log that colors are being applied for PhotosActivity
+            Log.d(TAG, "PhotosActivity: Applied dynamic OLED colors.");
         }
 
         imageViewPhoto = findViewById(R.id.image_view_photo);
@@ -260,6 +277,25 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 setPic();
             }
         }
+
+        // Store the currently applied theme mode and relevant OLED colors
+        String currentAppliedThemeValue = this.sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+        this.mAppliedThemeMode = currentAppliedThemeValue;
+
+        if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(currentAppliedThemeValue)) {
+            this.mAppliedTopbarBackgroundColor = this.sharedPreferences.getInt("pref_oled_topbar_background", com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+            this.mAppliedTopbarTextIconColor = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+            this.mAppliedMainBackgroundColor = this.sharedPreferences.getInt("pref_oled_main_background", com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+            Log.d(TAG, "PhotosActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode +
+                         ", TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) +
+                         ", TopbarTextIcon=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) +
+                         ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor));
+        } else {
+            this.mAppliedTopbarBackgroundColor = 0;
+            this.mAppliedTopbarTextIconColor = 0;
+            this.mAppliedMainBackgroundColor = 0;
+            Log.d(TAG, "PhotosActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.");
+        }
     }
 
     private void updateActivePhotoPromptsDisplay() { // Added method
@@ -282,7 +318,45 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(UploadService.ACTION_PHOTO_VISION_COMPLETE);
+
+        // Perform check for theme/color changes
+        if (mAppliedThemeMode != null && this.sharedPreferences != null) {
+            boolean needsRecreate = false;
+            String currentThemeValue = this.sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+
+            if (!mAppliedThemeMode.equals(currentThemeValue)) {
+                needsRecreate = true;
+                Log.d(TAG, "PhotosActivity onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue);
+            } else if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(currentThemeValue)) {
+                // Check specific OLED colors relevant to PhotosActivity's appearance via DynamicThemeApplicator
+                int currentTopbarBG = this.sharedPreferences.getInt("pref_oled_topbar_background", com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+                if (mAppliedTopbarBackgroundColor != currentTopbarBG) needsRecreate = true;
+
+                int currentTopbarTextIcon = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+                if (mAppliedTopbarTextIconColor != currentTopbarTextIcon) needsRecreate = true;
+
+                int currentMainBG = this.sharedPreferences.getInt("pref_oled_main_background", com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+                if (mAppliedMainBackgroundColor != currentMainBG) needsRecreate = true;
+
+                if (needsRecreate) { // Log only if a specific color changed
+                     Log.d(TAG, "PhotosActivity onResume: OLED color(s) changed.");
+                }
+            }
+
+            if (needsRecreate) {
+                Log.d(TAG, "PhotosActivity onResume: Detected configuration change. Recreating activity.");
+                recreate();
+                return;
+            }
+        }
+
+        // Register SharedPreferences listener
+        if (this.sharedPreferences != null) {
+            this.sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        }
+
+        // Existing onResume content
+        IntentFilter filter = new IntentFilter(UploadService.ACTION_PHOTO_VISION_COMPLETE); // Keep this
         LocalBroadcastManager.getInstance(this).registerReceiver(photoVisionReceiver, filter);
         Log.d(TAG, "PhotoVisionBroadcastReceiver registered.");
         updateActivePhotoPromptsDisplay();
@@ -312,6 +386,13 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     @Override
     protected void onPause() {
         super.onPause();
+
+        // Unregister SharedPreferences listener
+        if (this.sharedPreferences != null) {
+            this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        // Existing onPause content
         LocalBroadcastManager.getInstance(this).unregisterReceiver(photoVisionReceiver);
         Log.d(TAG, "PhotoVisionBroadcastReceiver unregistered.");
     }
@@ -810,6 +891,39 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 } else {
                     Log.d(TAG, "Received vision result for a different/unknown file path. Current: " + PhotosActivity.this.currentPhotoPath + ", Received: " + receivedFilePath + ". No UI update for this activity instance.");
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(TAG, "PhotosActivity onSharedPreferenceChanged triggered for key: " + key);
+        if (key == null) return;
+
+        final String[] oledColorKeys = {
+            "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
+            "pref_oled_main_background", "pref_oled_surface_background",
+            "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+            "pref_oled_button_background", "pref_oled_button_text_icon",
+            "pref_oled_textbox_background", "pref_oled_textbox_accent",
+            "pref_oled_accent_general"
+        };
+        boolean isOledColorKey = false;
+        for (String oledKey : oledColorKeys) {
+            if (oledKey.equals(key)) {
+                isOledColorKey = true;
+                break;
+            }
+        }
+
+        if (com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
+            Log.d(TAG, "PhotosActivity: Main theme preference changed (dark_mode). Recreating.");
+            recreate();
+        } else if (isOledColorKey) {
+            String currentTheme = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
+            if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(currentTheme)) {
+                Log.d(TAG, "PhotosActivity: OLED color preference changed: " + key + ". Recreating.");
+                recreate();
             }
         }
     }

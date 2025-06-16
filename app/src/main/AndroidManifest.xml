@@ -106,7 +106,7 @@
             android:name=".PhotosActivity"
             android:label="Photos"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+            android:theme="@style/Theme.SpeakKey" />
 
         <activity
             android:name=".PhotoPromptsActivity"
