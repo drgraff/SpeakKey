@@ -1648,6 +1648,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void displayActiveMacros() {
         Log.d(TAG, "displayActiveMacros: Called");
+
+        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // Already a class field
+        String themeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+        boolean isOledMode = ThemeManager.THEME_OLED.equals(themeValue);
+
+        int buttonBackgroundColor = 0;
+        int buttonTextIconColor = 0;
+
+        if (isOledMode) {
+            buttonBackgroundColor = sharedPreferences.getInt(
+                "pref_oled_button_background",
+                DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
+            );
+            buttonTextIconColor = sharedPreferences.getInt(
+                "pref_oled_button_text_icon",
+                DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
+            );
+        }
+
         if (macroRepository == null) {
             Log.e(TAG, "MacroRepository not initialized in displayActiveMacros");
             return;
@@ -1704,6 +1723,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             );
             params.setMargins(marginHorizontalPx, 0, marginHorizontalPx, 0);
             button.setLayoutParams(params);
+
+            if (isOledMode) {
+                button.setBackgroundTintList(ColorStateList.valueOf(buttonBackgroundColor));
+                button.setTextColor(buttonTextIconColor);
+                Log.d(TAG, String.format("Styled macro button '%s' with BG=0x%08X, Text=0x%08X", macro.getName(), buttonBackgroundColor, buttonTextIconColor));
+            }
 
             button.setOnClickListener(v -> {
                 if (!sharedPreferences.getBoolean("inputstick_enabled", true)) {
