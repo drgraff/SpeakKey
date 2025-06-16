@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat;
 import com.drgraff.speakkey.utils.ThemeManager; // Added for ThemeManager
 import com.drgraff.speakkey.utils.DynamicThemeApplicator; // Added for DynamicThemeApplicator
 import androidx.core.content.FileProvider;
+import android.content.res.ColorStateList; // Added for ColorStateList
 
 import java.io.ByteArrayOutputStream; // Added
 import java.io.File;
@@ -140,8 +141,37 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         String currentThemeValue = this.sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
         if (com.drgraff.speakkey.utils.ThemeManager.THEME_OLED.equals(currentThemeValue)) {
             com.drgraff.speakkey.utils.DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
-            // Log that colors are being applied for PhotosActivity
-            Log.d(TAG, "PhotosActivity: Applied dynamic OLED colors.");
+            Log.d(TAG, "PhotosActivity: Applied dynamic OLED colors for window/toolbar.");
+
+            // Now, style specific buttons in PhotosActivity
+            int buttonBackgroundColor = this.sharedPreferences.getInt(
+                "pref_oled_button_background",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
+            );
+            int buttonTextIconColor = this.sharedPreferences.getInt(
+                "pref_oled_button_text_icon",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
+            );
+
+            Button[] buttonsToStyle = {
+                btnClearPhoto, btnPhotoPrompts, btnSendToChatGptPhoto, btnSendToInputStickPhoto
+            };
+            String[] buttonNames = { // For logging
+                "btnClearPhoto", "btnPhotoPrompts", "btnSendToChatGptPhoto", "btnSendToInputStickPhoto"
+            };
+
+            for (int i = 0; i < buttonsToStyle.length; i++) {
+                Button button = buttonsToStyle[i];
+                String buttonName = buttonNames[i];
+                if (button != null) {
+                    button.setBackgroundTintList(ColorStateList.valueOf(buttonBackgroundColor));
+                    button.setTextColor(buttonTextIconColor);
+                    // Assuming these buttons do not have icons that need separate tinting for now
+                    Log.d(TAG, String.format("PhotosActivity: Styled %s with BG=0x%08X, Text=0x%08X", buttonName, buttonBackgroundColor, buttonTextIconColor));
+                } else {
+                    Log.w(TAG, "PhotosActivity: Button " + buttonName + " is null, cannot style.");
+                }
+            }
         }
 
         imageViewPhoto = findViewById(R.id.image_view_photo);

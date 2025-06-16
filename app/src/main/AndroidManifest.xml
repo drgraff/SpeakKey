@@ -70,7 +70,7 @@
         <activity
             android:name=".data.PromptsActivity"
             android:label="Manage Prompts"
-            android:theme="@style/Theme.SpeakKey.NoActionBar"
+            android:theme="@style/Theme.SpeakKey"
             android:parentActivityName=".MainActivity">
         </activity>
         <activity
