@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import android.content.res.ColorStateList; // Added for ColorStateList
 
 public class PhotoPromptsActivity extends AppCompatActivity
     implements PhotoPromptsAdapter.OnPhotoPromptInteractionListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -99,7 +100,39 @@ public class PhotoPromptsActivity extends AppCompatActivity
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
-            Log.d(TAG, "PhotoPromptsActivity: Applied dynamic OLED colors.");
+            Log.d(TAG, "PhotoPromptsActivity: Applied dynamic OLED colors for window/toolbar.");
+
+            // Retrieve common button/accent colors
+            int buttonBackgroundColor = this.sharedPreferences.getInt(
+                "pref_oled_button_background",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
+            );
+            int buttonTextIconColor = this.sharedPreferences.getInt(
+                "pref_oled_button_text_icon",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
+            );
+            int accentGeneralColor = this.sharedPreferences.getInt(
+                "pref_oled_accent_general",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL
+            );
+
+            // Style btnCheckPhotoModels
+            if (btnCheckPhotoModels != null) {
+                btnCheckPhotoModels.setBackgroundTintList(ColorStateList.valueOf(buttonBackgroundColor));
+                btnCheckPhotoModels.setTextColor(buttonTextIconColor);
+                Log.d(TAG, String.format("PhotoPromptsActivity: Styled btnCheckPhotoModels with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor));
+            } else {
+                Log.w(TAG, "PhotoPromptsActivity: btnCheckPhotoModels is null, cannot style.");
+            }
+
+            // Style FloatingActionButton fabAddPhotoPrompt
+            if (fabAddPhotoPrompt != null) {
+                fabAddPhotoPrompt.setBackgroundTintList(ColorStateList.valueOf(accentGeneralColor));
+                fabAddPhotoPrompt.setImageTintList(ColorStateList.valueOf(buttonTextIconColor));
+                Log.d(TAG, String.format("PhotoPromptsActivity: Styled fabAddPhotoPrompt with BG=0x%08X, IconTint=0x%08X", accentGeneralColor, buttonTextIconColor));
+            } else {
+                Log.w(TAG, "PhotoPromptsActivity: fabAddPhotoPrompt is null, cannot style.");
+            }
         }
 
         String apiKey = this.sharedPreferences.getString("openai_api_key", "");
