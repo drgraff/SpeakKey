@@ -77,7 +77,7 @@
             android:name="com.drgraff.speakkey.ui.prompts.PromptEditorActivity"
             android:exported="false"
             android:label="Edit Prompt"
-            android:theme="@style/Theme.SpeakKey.NoActionBar"
+            android:theme="@style/Theme.SpeakKey"
             android:parentActivityName=".data.PromptsActivity" />
 
         <activity
@@ -120,7 +120,7 @@
             android:exported="false"
             android:label="@string/photo_prompt_editor_title_add"
             android:parentActivityName=".PhotoPromptsActivity"
-            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+            android:theme="@style/Theme.SpeakKey" />
 
         <service
             android:name=".service.UploadService"
