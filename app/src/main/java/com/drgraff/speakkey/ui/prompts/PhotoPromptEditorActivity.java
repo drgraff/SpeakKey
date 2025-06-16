@@ -68,7 +68,44 @@ public class PhotoPromptEditorActivity extends AppCompatActivity implements Shar
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
-            Log.d(TAG, "PhotoPromptEditorActivity: Applied dynamic OLED colors.");
+            Log.d(TAG, "PhotoPromptEditorActivity: Applied dynamic OLED colors for window/toolbar.");
+
+            // Style Save Button
+            if (btnSavePhotoPrompt != null) {
+                int buttonBackgroundColor = this.sharedPreferences.getInt(
+                    "pref_oled_button_background",
+                    com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
+                );
+                int buttonTextIconColor = this.sharedPreferences.getInt(
+                    "pref_oled_button_text_icon",
+                    com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
+                );
+                btnSavePhotoPrompt.setBackgroundTintList(android.content.res.ColorStateList.valueOf(buttonBackgroundColor));
+                btnSavePhotoPrompt.setTextColor(buttonTextIconColor);
+                Log.d(TAG, String.format("PhotoPromptEditorActivity: Styled btnSavePhotoPrompt with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor));
+            } else {
+                Log.w(TAG, "PhotoPromptEditorActivity: btnSavePhotoPrompt is null, cannot style.");
+            }
+
+            // Style EditText backgrounds
+            int textboxBackgroundColor = this.sharedPreferences.getInt(
+                "pref_oled_textbox_background",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND
+            );
+
+            EditText[] editTextsToStyle = { editTextPhotoPromptLabel, editTextPhotoPromptText };
+            String[] editTextNames = { "editTextPhotoPromptLabel", "editTextPhotoPromptText" };
+
+            for (int i = 0; i < editTextsToStyle.length; i++) {
+                EditText et = editTextsToStyle[i];
+                String etName = editTextNames[i];
+                if (et != null) {
+                    et.setBackgroundColor(textboxBackgroundColor); // Using setBackgroundColor for EditTexts
+                    Log.d(TAG, String.format("PhotoPromptEditorActivity: Styled %s BG: 0x%08X", etName, textboxBackgroundColor));
+                } else {
+                    Log.w(TAG, "PhotoPromptEditorActivity: EditText " + etName + " is null, cannot style.");
+                }
+            }
         }
 
         editTextPhotoPromptLabel = findViewById(R.id.edittext_photo_prompt_label);
