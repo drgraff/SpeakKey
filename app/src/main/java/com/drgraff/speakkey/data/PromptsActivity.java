@@ -80,6 +80,7 @@ public class PromptsActivity extends AppCompatActivity
     private static final String TAG = "PromptsActivity"; // Added TAG
     public static final String EXTRA_FILTER_MODE_TYPE = "com.drgraff.speakkey.FILTER_MODE_TYPE";
     private static final int ADD_PROMPT_REQUEST = 1;
+    private static final int REQUEST_ADD_PROMPT = ADD_PROMPT_REQUEST;
     private static final int REQUEST_EDIT_PROMPT = 2;
 
     // Member variables for theme state tracking
