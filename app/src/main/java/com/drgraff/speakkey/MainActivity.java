@@ -176,41 +176,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (ThemeManager.THEME_OLED.equals(themeValue)) {
             DynamicThemeApplicator.applyOledColors(this, sharedPreferences); // Applies to Toolbar, Window
 
-            int oledEditTextBackgroundColor = sharedPreferences.getInt(
-                "pref_oled_edit_text_background",
-                DynamicThemeApplicator.DEFAULT_OLED_EDIT_TEXT_BACKGROUND
+            // Style EditText backgrounds
+            int textboxBackgroundColor = sharedPreferences.getInt(
+                "pref_oled_textbox_background",
+                DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND
             );
             if (whisperText != null) {
-                whisperText.setBackgroundColor(oledEditTextBackgroundColor);
+                whisperText.setBackgroundColor(textboxBackgroundColor);
+                Log.d(TAG, String.format("MainActivity: Styled whisperText BG: 0x%08X", textboxBackgroundColor));
             }
             if (chatGptText != null) {
-                chatGptText.setBackgroundColor(oledEditTextBackgroundColor);
+                chatGptText.setBackgroundColor(textboxBackgroundColor);
+                Log.d(TAG, String.format("MainActivity: Styled chatGptText BG: 0x%08X", textboxBackgroundColor));
             }
 
-            // Retrieve colors once
-            int primaryOledColor = sharedPreferences.getInt(
-                "pref_oled_color_primary",
-                DynamicThemeApplicator.DEFAULT_OLED_PRIMARY
+            // Style Action Buttons
+            int buttonBackgroundColor = sharedPreferences.getInt(
+                "pref_oled_button_background",
+                DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
             );
-            int onPrimaryOledColor = sharedPreferences.getInt(
-                "pref_oled_color_on_primary",
-                DynamicThemeApplicator.DEFAULT_OLED_ON_PRIMARY
+            int buttonTextIconColor = sharedPreferences.getInt(
+                "pref_oled_button_text_icon",
+                DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
             );
 
-            // Style btnStartRecording
-            if (btnStartRecording != null) { // btnStartRecording is a field initialized in initializeUiElements()
-                btnStartRecording.setBackgroundTintList(ColorStateList.valueOf(primaryOledColor));
-                btnStartRecording.setTextColor(onPrimaryOledColor);
-                Log.d(TAG, String.format("MainActivity: Styled btnStartRecording with BG=0x%08X, Text=0x%08X", primaryOledColor, onPrimaryOledColor));
-            }
-
-            // Style other buttons
-            Button[] buttonsToStyle = { // Changed to Button[]
-                btnPauseRecording, btnStopRecording, btnSendWhisper,
+            Button[] buttonsToStyle = {
+                btnStartRecording, btnPauseRecording, btnStopRecording, btnSendWhisper,
                 btnSendChatGpt, btnSendInputStick, btnSendWhisperToInputStick
             };
             String[] buttonNames = {
-                "btnPauseRecording", "btnStopRecording", "btnSendWhisper",
+                "btnStartRecording", "btnPauseRecording", "btnStopRecording", "btnSendWhisper",
                 "btnSendChatGpt", "btnSendInputStick", "btnSendWhisperToInputStick"
             };
 
@@ -218,11 +213,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Button button = buttonsToStyle[i];
                 String buttonName = buttonNames[i];
                 if (button != null) {
-                    button.setBackgroundTintList(ColorStateList.valueOf(primaryOledColor));
-                    button.setTextColor(onPrimaryOledColor);
-                    // If buttons have icons that need tinting:
-                    // button.setIconTint(android.content.res.ColorStateList.valueOf(onPrimaryOledColor));
-                    Log.d(TAG, String.format("MainActivity: Styled %s with BG=0x%08X, Text=0x%08X", buttonName, primaryOledColor, onPrimaryOledColor));
+                    button.setBackgroundTintList(ColorStateList.valueOf(buttonBackgroundColor));
+                    button.setTextColor(buttonTextIconColor);
+                    // If buttons have icons that need tinting (assuming MaterialButton or AppCompatButton):
+                    // if (button instanceof com.google.android.material.button.MaterialButton) {
+                    //    ((com.google.android.material.button.MaterialButton) button).setIconTint(ColorStateList.valueOf(buttonTextIconColor));
+                    // }
+                    Log.d(TAG, String.format("MainActivity: Styled %s with BG=0x%08X, Text=0x%08X", buttonName, buttonBackgroundColor, buttonTextIconColor));
                 } else {
                     Log.w(TAG, "MainActivity: Button " + buttonName + " is null, cannot style.");
                 }
@@ -1512,15 +1509,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         final String[] oledColorKeys = {
-            "pref_oled_color_primary",
-            "pref_oled_color_on_primary", // New key added
-            "pref_oled_color_secondary",
-            "pref_oled_color_background",
-            "pref_oled_color_surface",
-            "pref_oled_color_text_primary",
-            "pref_oled_color_text_secondary",
-            "pref_oled_color_icon_tint",
-            "pref_oled_color_edit_text_background"
+            "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
+            "pref_oled_main_background", "pref_oled_surface_background",
+            "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+            "pref_oled_button_background", "pref_oled_button_text_icon",
+            "pref_oled_textbox_background", "pref_oled_textbox_accent",
+            "pref_oled_accent_general"
         };
         boolean isOledColorKey = false;
         for (String oledKey : oledColorKeys) {

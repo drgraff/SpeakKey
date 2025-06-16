@@ -13,15 +13,18 @@ import com.drgraff.speakkey.R;
 public class DynamicThemeApplicator {
     private static final String TAG = "DynamicThemeApplicator";
 
-    // Default color values (ARGB integers)
-    public static final int DEFAULT_OLED_PRIMARY = Color.parseColor("#03DAC6");
-    public static final int DEFAULT_OLED_SECONDARY = Color.parseColor("#03DAC6");
-    public static final int DEFAULT_OLED_BACKGROUND = Color.parseColor("#000000");
-    public static final int DEFAULT_OLED_SURFACE = Color.parseColor("#0D0D0D");
-    public static final int DEFAULT_OLED_TEXT_PRIMARY = Color.parseColor("#FFFFFF");
-    public static final int DEFAULT_OLED_ON_PRIMARY = Color.parseColor("#000000"); // Black - Corrected: defined once
-    public static final int DEFAULT_OLED_ICON_TINT = Color.parseColor("#FFFFFF");
-    public static final int DEFAULT_OLED_EDIT_TEXT_BACKGROUND = Color.parseColor("#1A1A1A");
+    // New Default color values (ARGB integers)
+    public static final int DEFAULT_OLED_TOPBAR_BACKGROUND = Color.parseColor("#03DAC6"); // Cyan
+    public static final int DEFAULT_OLED_TOPBAR_TEXT_ICON = Color.parseColor("#000000");  // Black
+    public static final int DEFAULT_OLED_MAIN_BACKGROUND = Color.parseColor("#000000");   // Black
+    public static final int DEFAULT_OLED_SURFACE_BACKGROUND = Color.parseColor("#0D0D0D"); // Dark Grey
+    public static final int DEFAULT_OLED_GENERAL_TEXT_PRIMARY = Color.parseColor("#FFFFFF"); // White
+    public static final int DEFAULT_OLED_GENERAL_TEXT_SECONDARY = Color.parseColor("#AAAAAA"); // Light Grey
+    public static final int DEFAULT_OLED_BUTTON_BACKGROUND = Color.parseColor("#03DAC6");  // Cyan
+    public static final int DEFAULT_OLED_BUTTON_TEXT_ICON = Color.parseColor("#000000");   // Black
+    public static final int DEFAULT_OLED_TEXTBOX_BACKGROUND = Color.parseColor("#1A1A1A"); // Darker Grey
+    public static final int DEFAULT_OLED_TEXTBOX_ACCENT = Color.parseColor("#03DAC6");    // Cyan
+    public static final int DEFAULT_OLED_ACCENT_GENERAL = Color.parseColor("#03DAC6");      // Cyan
 
     public static void applyOledColors(Activity activity, SharedPreferences prefs) {
         if (activity == null || prefs == null) {
@@ -29,51 +32,60 @@ public class DynamicThemeApplicator {
             return;
         }
 
-        Log.d(TAG, "Applying custom OLED colors...");
+        Log.d(TAG, "Applying custom OLED colors using new grouped keys...");
 
-        int oledBackgroundColor = prefs.getInt("pref_oled_color_background", DEFAULT_OLED_BACKGROUND);
-        Log.d(TAG, String.format("pref_oled_color_background: Value=0x%08X, Default=0x%08X", oledBackgroundColor, DEFAULT_OLED_BACKGROUND));
+        // Retrieve all new grouped preference values
+        int topbarBackgroundColor = prefs.getInt("pref_oled_topbar_background", DEFAULT_OLED_TOPBAR_BACKGROUND);
+        Log.d(TAG, String.format("pref_oled_topbar_background: Value=0x%08X, Default=0x%08X", topbarBackgroundColor, DEFAULT_OLED_TOPBAR_BACKGROUND));
 
-        int oledSurfaceColor = prefs.getInt("pref_oled_color_surface", DEFAULT_OLED_SURFACE);
-        Log.d(TAG, String.format("pref_oled_color_surface: Value=0x%08X, Default=0x%08X", oledSurfaceColor, DEFAULT_OLED_SURFACE));
+        int topbarTextIconColor = prefs.getInt("pref_oled_topbar_text_icon", DEFAULT_OLED_TOPBAR_TEXT_ICON);
+        Log.d(TAG, String.format("pref_oled_topbar_text_icon: Value=0x%08X, Default=0x%08X", topbarTextIconColor, DEFAULT_OLED_TOPBAR_TEXT_ICON));
 
-        int oledTextColorPrimary = prefs.getInt("pref_oled_color_text_primary", DEFAULT_OLED_TEXT_PRIMARY);
-        Log.d(TAG, String.format("pref_oled_color_text_primary: Value=0x%08X, Default=0x%08X", oledTextColorPrimary, DEFAULT_OLED_TEXT_PRIMARY));
+        int mainBackgroundColor = prefs.getInt("pref_oled_main_background", DEFAULT_OLED_MAIN_BACKGROUND);
+        Log.d(TAG, String.format("pref_oled_main_background: Value=0x%08X, Default=0x%08X", mainBackgroundColor, DEFAULT_OLED_MAIN_BACKGROUND));
 
-        // Logging for on_primary
-        int oledOnPrimaryColor = prefs.getInt("pref_oled_color_on_primary", DEFAULT_OLED_ON_PRIMARY);
-        Log.d(TAG, String.format("pref_oled_color_on_primary: Value=0x%08X, Default=0x%08X", oledOnPrimaryColor, DEFAULT_OLED_ON_PRIMARY));
+        int surfaceBackgroundColor = prefs.getInt("pref_oled_surface_background", DEFAULT_OLED_SURFACE_BACKGROUND);
+        Log.d(TAG, String.format("pref_oled_surface_background: Value=0x%08X, Default=0x%08X", surfaceBackgroundColor, DEFAULT_OLED_SURFACE_BACKGROUND));
 
-        int oledIconTintColor = prefs.getInt("pref_oled_color_icon_tint", DEFAULT_OLED_ICON_TINT);
-        Log.d(TAG, String.format("pref_oled_color_icon_tint: Value=0x%08X, Default=0x%08X", oledIconTintColor, DEFAULT_OLED_ICON_TINT));
+        int generalTextPrimaryColor = prefs.getInt("pref_oled_general_text_primary", DEFAULT_OLED_GENERAL_TEXT_PRIMARY);
+        Log.d(TAG, String.format("pref_oled_general_text_primary: Value=0x%08X, Default=0x%08X", generalTextPrimaryColor, DEFAULT_OLED_GENERAL_TEXT_PRIMARY));
 
-        int primaryOledColor = prefs.getInt("pref_oled_color_primary", DEFAULT_OLED_PRIMARY);
-        Log.d(TAG, String.format("pref_oled_color_primary: Value=0x%08X, Default=0x%08X", primaryOledColor, DEFAULT_OLED_PRIMARY));
+        int generalTextSecondaryColor = prefs.getInt("pref_oled_general_text_secondary", DEFAULT_OLED_GENERAL_TEXT_SECONDARY);
+        Log.d(TAG, String.format("pref_oled_general_text_secondary: Value=0x%08X, Default=0x%08X", generalTextSecondaryColor, DEFAULT_OLED_GENERAL_TEXT_SECONDARY));
 
-        int secondaryOledColor = prefs.getInt("pref_oled_color_secondary", DEFAULT_OLED_SECONDARY);
-        Log.d(TAG, String.format("pref_oled_color_secondary: Value=0x%08X, Default=0x%08X", secondaryOledColor, DEFAULT_OLED_SECONDARY));
+        int buttonBackgroundColor = prefs.getInt("pref_oled_button_background", DEFAULT_OLED_BUTTON_BACKGROUND);
+        Log.d(TAG, String.format("pref_oled_button_background: Value=0x%08X, Default=0x%08X", buttonBackgroundColor, DEFAULT_OLED_BUTTON_BACKGROUND));
 
-        int oledEditTextBackgroundColor = prefs.getInt("pref_oled_edit_text_background", DEFAULT_OLED_EDIT_TEXT_BACKGROUND);
-        Log.d(TAG, String.format("pref_oled_edit_text_background: Value=0x%08X, Default=0x%08X", oledEditTextBackgroundColor, DEFAULT_OLED_EDIT_TEXT_BACKGROUND));
+        int buttonTextIconColor = prefs.getInt("pref_oled_button_text_icon", DEFAULT_OLED_BUTTON_TEXT_ICON);
+        Log.d(TAG, String.format("pref_oled_button_text_icon: Value=0x%08X, Default=0x%08X", buttonTextIconColor, DEFAULT_OLED_BUTTON_TEXT_ICON));
 
-        activity.getWindow().setStatusBarColor(oledBackgroundColor);
-        activity.getWindow().setNavigationBarColor(oledBackgroundColor);
-        activity.getWindow().getDecorView().setBackgroundColor(oledBackgroundColor);
+        int textboxBackgroundColor = prefs.getInt("pref_oled_textbox_background", DEFAULT_OLED_TEXTBOX_BACKGROUND);
+        Log.d(TAG, String.format("pref_oled_textbox_background: Value=0x%08X, Default=0x%08X", textboxBackgroundColor, DEFAULT_OLED_TEXTBOX_BACKGROUND));
 
+        int textboxAccentColor = prefs.getInt("pref_oled_textbox_accent", DEFAULT_OLED_TEXTBOX_ACCENT);
+        Log.d(TAG, String.format("pref_oled_textbox_accent: Value=0x%08X, Default=0x%08X", textboxAccentColor, DEFAULT_OLED_TEXTBOX_ACCENT));
+
+        int accentGeneralColor = prefs.getInt("pref_oled_accent_general", DEFAULT_OLED_ACCENT_GENERAL);
+        Log.d(TAG, String.format("pref_oled_accent_general: Value=0x%08X, Default=0x%08X", accentGeneralColor, DEFAULT_OLED_ACCENT_GENERAL));
+
+        // Apply colors to Window elements
+        activity.getWindow().setStatusBarColor(mainBackgroundColor);
+        activity.getWindow().setNavigationBarColor(mainBackgroundColor);
+        activity.getWindow().getDecorView().setBackgroundColor(mainBackgroundColor);
+
+        // Apply colors to Toolbar
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
         if (toolbar != null) {
-            Log.d(TAG, "Toolbar found, applying colors.");
-            toolbar.setBackgroundColor(primaryOledColor);
-            toolbar.setTitleTextColor(oledTextColorPrimary);
-            // Potentially set subtitle text color if used: toolbar.setSubtitleTextColor(oledOnPrimaryColor);
-            // Potentially set menu item icon tints if needed, though this is complex here.
+            Log.d(TAG, "Toolbar found, applying new grouped colors.");
+            toolbar.setBackgroundColor(topbarBackgroundColor);
+            toolbar.setTitleTextColor(topbarTextIconColor);
             if (toolbar.getNavigationIcon() != null) {
-                toolbar.getNavigationIcon().setColorFilter(oledOnPrimaryColor, PorterDuff.Mode.SRC_ATOP); // Use onPrimary for nav icon
+                toolbar.getNavigationIcon().setColorFilter(topbarTextIconColor, PorterDuff.Mode.SRC_ATOP);
             }
-            Log.d(TAG, String.format("Toolbar colors applied. New Toolbar BG color: 0x%08X", primaryOledColor));
+            Log.d(TAG, String.format("Toolbar colors applied. BG: 0x%08X, Text/Icon: 0x%08X", topbarBackgroundColor, topbarTextIconColor));
         } else {
             Log.w(TAG, "Toolbar not found (R.id.toolbar). Cannot apply toolbar specific colors.");
         }
-        Log.d(TAG, "Finished applying custom OLED colors.");
+        Log.d(TAG, "Finished applying custom OLED colors via DynamicThemeApplicator.");
     }
 }

@@ -134,28 +134,26 @@ public class SettingsActivity extends AppCompatActivity {
 
             // Set default colors for OLED ColorPickerPreferences
             final String[] oledColorKeys = {
-                "pref_oled_color_primary",
-                "pref_oled_color_on_primary", // New
-                "pref_oled_color_secondary",
-                "pref_oled_color_background",
-                "pref_oled_color_surface",
-                "pref_oled_color_text_primary",
-                "pref_oled_color_text_secondary",
-                "pref_oled_color_icon_tint",
-                "pref_oled_color_edit_text_background"
+                "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
+                "pref_oled_main_background", "pref_oled_surface_background",
+                "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+                "pref_oled_button_background", "pref_oled_button_text_icon",
+                "pref_oled_textbox_background", "pref_oled_textbox_accent",
+                "pref_oled_accent_general"
             };
 
-            // Corresponding default hex values
             final String[] oledDefaultColorsHex = {
-                "#03DAC6", // primary (Cyan)
-                "#000000", // on_primary (Black) - NEW
-                "#03DAC6", // secondary (Cyan)
-                "#000000", // background (Black)
-                "#0D0D0D", // surface (Dark Grey)
-                "#FFFFFF", // text_primary (White)
-                "#AAAAAA", // text_secondary (Light Grey)
-                "#FFFFFF", // icon_tint (White)
-                "#1A1A1A"  // edit_text_background (Darker Grey)
+                "#03DAC6", // topbar_background (Cyan)
+                "#000000", // topbar_text_icon (Black)
+                "#000000", // main_background (Black)
+                "#0D0D0D", // surface_background (Dark Grey)
+                "#FFFFFF", // general_text_primary (White)
+                "#AAAAAA", // general_text_secondary (Light Grey)
+                "#03DAC6", // button_background (Cyan)
+                "#000000", // button_text_icon (Black)
+                "#1A1A1A", // textbox_background (Darker Grey)
+                "#03DAC6", // textbox_accent (Cyan)
+                "#03DAC6"  // accent_general (Cyan)
             };
 
             for (int i = 0; i < oledColorKeys.length; i++) {
@@ -473,10 +471,12 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             final String[] oledColorKeys = {
-                "pref_oled_color_primary", "pref_oled_color_secondary",
-                "pref_oled_color_background", "pref_oled_color_surface",
-                "pref_oled_color_text_primary", "pref_oled_color_text_secondary",
-                "pref_oled_color_icon_tint", "pref_oled_color_edit_text_background"
+                "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
+                "pref_oled_main_background", "pref_oled_surface_background",
+                "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+                "pref_oled_button_background", "pref_oled_button_text_icon",
+                "pref_oled_textbox_background", "pref_oled_textbox_accent",
+                "pref_oled_accent_general"
             };
             boolean isOledColorKey = false;
             for (String oledKey : oledColorKeys) {
