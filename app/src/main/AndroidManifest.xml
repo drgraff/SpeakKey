@@ -60,7 +60,7 @@
             android:name=".ui.AboutActivity"
             android:label="@string/about_activity_title"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+            android:theme="@style/Theme.SpeakKey" />
         <activity
             android:name=".utils.LogActivity"
             android:label="Application Logs"
@@ -113,7 +113,7 @@
             android:exported="false"
             android:label="@string/photo_prompts_title"
             android:parentActivityName=".PhotosActivity"
-            android:theme="@style/Theme.SpeakKey.NoActionBar" />
+            android:theme="@style/Theme.SpeakKey" />
 
         <activity
             android:name=".ui.prompts.PhotoPromptEditorActivity"

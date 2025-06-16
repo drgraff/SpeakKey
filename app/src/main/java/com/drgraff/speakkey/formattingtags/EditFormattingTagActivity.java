@@ -23,11 +23,13 @@ import androidx.preference.PreferenceManager; // Standard import
 
 import com.drgraff.speakkey.R;
 import com.drgraff.speakkey.data.Prompt; // Not used here, but keep if PromptManager might return it
-import com.drgraff.speakkey.data.FormattingTag; // Used
-import com.drgraff.speakkey.data.FormattingTagManager; // Used
+import com.drgraff.speakkey.formattingtags.FormattingTag; // Corrected
+import com.drgraff.speakkey.formattingtags.FormattingTagManager; // Corrected
 import com.drgraff.speakkey.utils.DynamicThemeApplicator;
 import com.drgraff.speakkey.utils.ThemeManager;
 import com.google.android.material.textfield.TextInputEditText;
+import android.content.res.ColorStateList; // Added for ColorStateList
+import androidx.core.widget.CompoundButtonCompat; // Added for CheckBox tinting
 
 
 import java.util.ArrayList;
@@ -92,7 +94,65 @@ public class EditFormattingTagActivity extends AppCompatActivity implements Shar
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
-            Log.d(TAG, "EditFormattingTagActivity: Applied dynamic OLED colors.");
+            Log.d(TAG, "EditFormattingTagActivity: Applied dynamic OLED colors for window/toolbar.");
+
+            // Retrieve common colors
+            int buttonBackgroundColor = this.sharedPreferences.getInt(
+                "pref_oled_button_background",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
+            );
+            int buttonTextIconColor = this.sharedPreferences.getInt(
+                "pref_oled_button_text_icon",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
+            );
+            int textboxBackgroundColor = this.sharedPreferences.getInt(
+                "pref_oled_textbox_background",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND
+            );
+            int accentGeneralColor = this.sharedPreferences.getInt(
+                "pref_oled_accent_general",
+                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL
+            );
+
+            // Style Save Button
+            if (buttonSave != null) {
+                buttonSave.setBackgroundTintList(ColorStateList.valueOf(buttonBackgroundColor));
+                buttonSave.setTextColor(buttonTextIconColor);
+                Log.d(TAG, String.format("EditFormattingTagActivity: Styled buttonSave with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor));
+            } else {
+                Log.w(TAG, "EditFormattingTagActivity: buttonSave is null, cannot style.");
+            }
+
+            // Style EditText backgrounds
+            TextInputEditText[] editTextsToStyle = { editTextName, editTextOpeningTag, editTextTagDelayMs };
+            String[] editTextNames = { "editTextName", "editTextOpeningTag", "editTextTagDelayMs" };
+
+            for (int i = 0; i < editTextsToStyle.length; i++) {
+                TextInputEditText et = editTextsToStyle[i];
+                String etName = editTextNames[i];
+                if (et != null) {
+                    et.setBackgroundColor(textboxBackgroundColor);
+                    Log.d(TAG, String.format("EditFormattingTagActivity: Styled %s BG: 0x%08X", etName, textboxBackgroundColor));
+                } else {
+                    Log.w(TAG, "EditFormattingTagActivity: EditText " + etName + " is null, cannot style.");
+                }
+            }
+
+            // Style CheckBoxes
+            CheckBox[] checkBoxesToStyle = { checkBoxCtrl, checkBoxAlt, checkBoxShift, checkBoxMeta };
+            String[] checkBoxNames = { "checkBoxCtrl", "checkBoxAlt", "checkBoxShift", "checkBoxMeta" };
+            ColorStateList accentColorStateList = ColorStateList.valueOf(accentGeneralColor);
+
+            for (int i = 0; i < checkBoxesToStyle.length; i++) {
+                CheckBox cb = checkBoxesToStyle[i];
+                String cbName = checkBoxNames[i];
+                if (cb != null) {
+                    CompoundButtonCompat.setButtonTintList(cb, accentColorStateList);
+                    Log.d(TAG, String.format("EditFormattingTagActivity: Styled %s Tint: 0x%08X", cbName, accentGeneralColor));
+                } else {
+                    Log.w(TAG, "EditFormattingTagActivity: CheckBox " + cbName + " is null, cannot style.");
+                }
+            }
         }
 
         editTextName = findViewById(R.id.edit_tag_name);
