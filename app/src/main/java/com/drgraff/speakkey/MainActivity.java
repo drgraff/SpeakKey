@@ -65,6 +65,7 @@ import com.drgraff.speakkey.utils.ThemeManager;
 import com.drgraff.speakkey.utils.DynamicThemeApplicator; // Added for DynamicThemeApplicator
 import com.google.android.material.navigation.NavigationView;
 import android.content.res.ColorStateList; // Added for ColorStateList
+import androidx.core.widget.CompoundButtonCompat; // Added for CheckBox tinting
 
 import com.hualee.lame.LameControl;
 
@@ -228,6 +229,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } else {
                     Log.w(TAG, "MainActivity: Button " + buttonName + " is null, cannot style.");
                 }
+            }
+
+            // Apply OLED theme to CheckBoxes
+            int oledAccentGeneral = sharedPreferences.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL);
+            int oledGeneralTextSecondary = sharedPreferences.getInt("pref_oled_general_text_secondary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_SECONDARY);
+
+            ColorStateList checkBoxOledTintList = new ColorStateList(
+                new int[][]{
+                    new int[]{android.R.attr.state_checked}, // checked
+                    new int[]{-android.R.attr.state_checked}  // unchecked
+                },
+                new int[]{
+                    oledAccentGeneral,        // Color for checked state
+                    oledGeneralTextSecondary  // Color for unchecked state
+                }
+            );
+
+            if (chkAutoSendWhisper != null) {
+                CompoundButtonCompat.setButtonTintList(chkAutoSendWhisper, checkBoxOledTintList);
+            }
+            if (chkAutoSendToChatGpt != null) {
+                CompoundButtonCompat.setButtonTintList(chkAutoSendToChatGpt, checkBoxOledTintList);
+            }
+            if (chk_auto_send_whisper_to_inputstick != null) {
+                CompoundButtonCompat.setButtonTintList(chk_auto_send_whisper_to_inputstick, checkBoxOledTintList);
+            }
+            if (chkAutoSendInputStick != null) {
+                CompoundButtonCompat.setButtonTintList(chkAutoSendInputStick, checkBoxOledTintList);
             }
         }
 
