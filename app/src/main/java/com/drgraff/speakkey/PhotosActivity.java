@@ -147,7 +147,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         chkAutoSendInputStickPhoto = findViewById(R.id.chk_auto_send_inputstick_photo);
         progressBarPhotoProcessing = findViewById(R.id.progressBarPhotoProcessing);
         textViewPhotoStatus = findViewById(R.id.textViewPhotoStatus);
-        // fabAddPhotoPrompt is not in PhotosActivity layout, it's in PhotoPromptsActivity
+        // Note: PhotoPromptsActivity has a FAB, PhotosActivity does not in its current layout (activity_photos.xml)
 
         // Initialize other components
         promptManager = new PromptManager(this);
@@ -165,11 +165,13 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         progressDialog.setMessage(getString(R.string.photos_progress_sending_to_chatgpt_message));
         progressDialog.setCancelable(false);
 
-        // Now apply dynamic colors
+        // Apply dynamic OLED colors if OLED theme is active
+        // themeValue is from pre-super.onCreate block
         if (ThemeManager.THEME_OLED.equals(themeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
             Log.d(TAG, "PhotosActivity: Applied dynamic OLED colors for window/toolbar.");
 
+            // Button Styling (MOVED HERE)
             int buttonBackgroundColor = this.sharedPreferences.getInt(
                 "pref_oled_button_background",
                 DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
@@ -200,7 +202,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         }
 
         // Setup listeners and other logic
-        if (chkAutoSendChatGptPhoto != null) { // Null check before use
+        if (chkAutoSendChatGptPhoto != null) {
             chkAutoSendChatGptPhoto.setChecked(this.sharedPreferences.getBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, false));
             chkAutoSendChatGptPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 this.sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, isChecked).apply();
@@ -211,7 +213,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
         });
 
-        if (chkAutoSendInputStickPhoto != null) { // Null check
+        if (chkAutoSendInputStickPhoto != null) {
             chkAutoSendInputStickPhoto.setChecked(this.sharedPreferences.getBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, false));
             chkAutoSendInputStickPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 this.sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, isChecked).apply();
@@ -317,8 +319,16 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 if (mAppliedTopbarTextIconColor != currentTopbarTextIcon) needsRecreate = true;
                 int currentMainBG = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
                 if (mAppliedMainBackgroundColor != currentMainBG) needsRecreate = true;
+
+                // Check button colors as they are styled directly in onCreate
+                int currentButtonBG = this.sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
+                // We didn't store mAppliedButtonBackgroundColor, so this check can't be as precise
+                // For now, any OLED color change in onSharedPreferenceChanged handles this.
+                // A more robust onResume would track all directly applied colors.
+                // For this iteration, if any of the main structure colors change, we recreate.
+
                 if (needsRecreate) {
-                     Log.d(TAG, "PhotosActivity onResume: OLED color(s) changed.");
+                     Log.d(TAG, "PhotosActivity onResume: OLED structural color(s) changed.");
                 }
             }
             if (needsRecreate) {
@@ -356,7 +366,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         if (this.sharedPreferences != null) {
             this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         }
-        if (photoVisionReceiver != null) { // Null check before unregistering
+        if (photoVisionReceiver != null) {
              LocalBroadcastManager.getInstance(this).unregisterReceiver(photoVisionReceiver);
              Log.d(TAG, "PhotoVisionBroadcastReceiver unregistered.");
         }
@@ -614,7 +624,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 if (photoFile.exists() && photoFile.length() == 0) photoFile.delete();
             }
         } else if ((requestCode == REQUEST_ADD_PHOTO_PROMPT || requestCode == REQUEST_EDIT_PHOTO_PROMPT) && resultCode == Activity.RESULT_OK) {
-             if (photoPromptsAdapter != null) loadPhotoPrompts(); // Ensure adapter exists before calling
+             if (photoPromptsAdapter != null) loadPhotoPrompts();
         }
     }
 
@@ -773,4 +783,3 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         }
     }
 }
-[end of app/src/main/java/com/drgraff/speakkey/PhotosActivity.java]
