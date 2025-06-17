@@ -598,7 +598,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 if (photoFile.exists() && photoFile.length() == 0) photoFile.delete();
             }
         } else if ((requestCode == REQUEST_ADD_PHOTO_PROMPT || requestCode == REQUEST_EDIT_PHOTO_PROMPT) && resultCode == Activity.RESULT_OK) {
-             if (photoPromptsAdapter != null) loadPhotoPrompts();
+             if (photoPromptsAdapter != null) updateActivePhotoPromptsDisplay();
         }
     }
 
