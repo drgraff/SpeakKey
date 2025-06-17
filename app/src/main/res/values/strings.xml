@@ -238,4 +238,6 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
     <string name="empty_prompts_two_step_text">No Two Step prompts. Click \'+\' to add.</string>
     <string name="empty_prompts_photo_text">No Photo prompts. Click \'+\' to add.</string>
 
+    <string name="no_macros_message">No macros found. Tap the \'+\' button to create one.</string>
+    <string name="add_macro_content_description">Add new macro</string>
 </resources>
