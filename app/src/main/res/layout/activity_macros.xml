@@ -9,39 +9,38 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="?attr/actionBarTheme">
+        android:theme="@style/Theme.SpeakKey.AppBarOverlay"
+        app:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="?attr/actionBarPopupTheme" />
+            app:titleTextColor="?attr/colorOnPrimary"
+            app:navigationIconTint="?attr/colorOnPrimary"
+            app:popupTheme="@style/Theme.SpeakKey.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <FrameLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/macros_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/macros_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false"
-            tools:listitem="@layout/list_item_macro"/>
-
-        <TextView
-            android:id="@+id/empty_macros_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/no_macros_message"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:visibility="gone" />
-    </FrameLayout>
+    <TextView
+        android:id="@+id/empty_macros_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_macros_message"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:layout_gravity="top|center_horizontal"
+        tools:visibility="visible"
+        android:layout_marginTop="56dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_macro"

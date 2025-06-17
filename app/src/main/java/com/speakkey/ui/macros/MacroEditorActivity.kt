@@ -2,11 +2,12 @@ package com.speakkey.ui.macros
 
 import android.app.Activity
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem // Added for onOptionsItemSelected
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -16,23 +17,21 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.widget.CompoundButtonCompat
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.drgraff.speakkey.R // Ensure this is the correct R
+import com.drgraff.speakkey.R
+import com.drgraff.speakkey.utils.DynamicThemeApplicator
+import com.drgraff.speakkey.utils.ThemeManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.speakkey.data.ActionType
 import com.speakkey.data.Macro
 import com.speakkey.data.MacroAction
 import com.speakkey.data.MacroRepository
-import com.drgraff.speakkey.utils.DynamicThemeApplicator
-import com.drgraff.speakkey.utils.ThemeManager
-import com.google.android.material.textfield.TextInputEditText
-import android.content.res.ColorStateList // Added for ColorStateList
-import androidx.core.widget.CompoundButtonCompat // For potential future checkbox styling
-import com.google.android.material.button.MaterialButton // For casting if needed
-
-
 import java.util.Collections
 import java.util.UUID
 
@@ -57,103 +56,30 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
     private lateinit var sharedPreferences: SharedPreferences
     private val TAG = "MacroEditorActivity"
 
-    // Member variables for theme state tracking
     private var mAppliedThemeMode: String? = null
     private var mAppliedTopbarBackgroundColor: Int = 0
     private var mAppliedTopbarTextIconColor: Int = 0
     private var mAppliedMainBackgroundColor: Int = 0
+    private var mAppliedButtonBackgroundColor: Int = 0
+    private var mAppliedButtonTextIconColor: Int = 0
+    private var mAppliedTextboxBackgroundColor: Int = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        ThemeManager.applyTheme(this.sharedPreferences)
-        val themeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        ThemeManager.applyTheme(sharedPreferences)
+        val themeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
         if (ThemeManager.THEME_OLED == themeValue) {
             setTheme(R.style.AppTheme_OLED)
         }
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_macro) // Ensure this layout uses R.id.toolbar
+        setContentView(R.layout.activity_edit_macro)
 
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar) // Standardized ID
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        // Title is set later
-
-        // Apply custom OLED colors if OLED theme is active
-        val currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
-        if (ThemeManager.THEME_OLED == currentActivityThemeValue) {
-            DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences)
-            Log.d(TAG, "MacroEditorActivity: Applied dynamic OLED colors for window/toolbar.")
-
-            // Retrieve common colors
-            val buttonBackgroundColor = this.sharedPreferences.getInt(
-                "pref_oled_button_background",
-                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
-            )
-            val buttonTextIconColor = this.sharedPreferences.getInt(
-                "pref_oled_button_text_icon",
-                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
-            )
-            val textboxBackgroundColor = this.sharedPreferences.getInt(
-                "pref_oled_textbox_background",
-                com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND
-            )
-            // val accentGeneralColor = this.sharedPreferences.getInt( // Not used for these specific elements yet
-            //     "pref_oled_accent_general",
-            //     com.drgraff.speakkey.utils.DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL
-            // )
-
-            // Style Macro Name EditText
-            if (::editMacroName.isInitialized && editMacroName != null) {
-                editMacroName.setBackgroundColor(textboxBackgroundColor)
-                Log.d(TAG, String.format("MacroEditorActivity: Styled editMacroName BG: 0x%08X", textboxBackgroundColor))
-            }
-
-            // Style Save Button (MaterialButton)
-            if (::btnSaveMacro.isInitialized && btnSaveMacro != null) {
-                btnSaveMacro.backgroundTintList = ColorStateList.valueOf(buttonBackgroundColor)
-                btnSaveMacro.setTextColor(buttonTextIconColor)
-                Log.d(TAG, String.format("MacroEditorActivity: Styled btnSaveMacro with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor))
-            }
-
-            // Style Cancel Button (Material TextButton)
-            if (::btnCancelMacro.isInitialized && btnCancelMacro != null) {
-                btnCancelMacro.setTextColor(buttonBackgroundColor)
-                Log.d(TAG, String.format("MacroEditorActivity: Styled btnCancelMacro TextColor: 0x%08X", buttonBackgroundColor))
-            }
-
-            // Style "Add Action" Buttons (Outlined Buttons)
-            val addActionButtons = arrayOf(
-                findViewById<Button>(R.id.btn_add_text_action),
-                findViewById<Button>(R.id.btn_add_special_key_action),
-                findViewById<Button>(R.id.btn_add_tab_action),
-                findViewById<Button>(R.id.btn_add_enter_action),
-                findViewById<Button>(R.id.btn_add_delay_action),
-                findViewById<Button>(R.id.btn_add_pause_action)
-            )
-            val addActionButtonNames = arrayOf(
-                "btn_add_text_action", "btn_add_special_key_action", "btn_add_tab_action",
-                "btn_add_enter_action", "btn_add_delay_action", "btn_add_pause_action"
-            )
-
-            for (i in addActionButtons.indices) {
-                val button = addActionButtons[i]
-                val buttonName = addActionButtonNames[i]
-                if (button != null) {
-                    if (button is MaterialButton) {
-                        button.setTextColor(buttonBackgroundColor)
-                        button.strokeColor = ColorStateList.valueOf(buttonBackgroundColor)
-                        Log.d(TAG, String.format("MacroEditorActivity: Styled %s (MaterialOutlined) with Text/Stroke=0x%08X", buttonName, buttonBackgroundColor))
-                    } else {
-                        button.setTextColor(buttonBackgroundColor)
-                        Log.d(TAG, String.format("MacroEditorActivity: Styled %s (Button) with Text=0x%08X", buttonName, buttonBackgroundColor))
-                    }
-                } else {
-                    Log.w(TAG, "MacroEditorActivity: Add Action button " + buttonName + " is null, cannot style.")
-                }
-            }
-        }
 
         macroRepository = MacroRepository(applicationContext)
 
@@ -162,6 +88,49 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         emptyActionsTextView = findViewById(R.id.empty_actions_text_view)
         btnSaveMacro = findViewById(R.id.btn_save_macro)
         btnCancelMacro = findViewById(R.id.btn_cancel_macro_edit)
+
+        val currentActivityThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
+        if (ThemeManager.THEME_OLED == currentActivityThemeValue) {
+            DynamicThemeApplicator.applyOledColors(this, sharedPreferences)
+            Log.d(TAG, "MacroEditorActivity: Applied dynamic OLED colors for window/toolbar.")
+
+            val buttonBackgroundColor = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND)
+            val buttonTextIconColor = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON)
+            val textboxBackgroundColor = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND)
+            // val accentGeneralColor = sharedPreferences.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL) // Not used here yet
+
+            if (::editMacroName.isInitialized && editMacroName != null) {
+                editMacroName.setBackgroundColor(textboxBackgroundColor)
+                Log.d(TAG, String.format("MacroEditorActivity: Styled editMacroName BG: 0x%08X", textboxBackgroundColor))
+            }
+
+            if (::btnSaveMacro.isInitialized && btnSaveMacro != null) {
+                btnSaveMacro.backgroundTintList = ColorStateList.valueOf(buttonBackgroundColor)
+                btnSaveMacro.setTextColor(buttonTextIconColor)
+                Log.d(TAG, String.format("MacroEditorActivity: Styled btnSaveMacro with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor))
+            }
+
+            if (::btnCancelMacro.isInitialized && btnCancelMacro != null) {
+                btnCancelMacro.setTextColor(buttonBackgroundColor)
+                Log.d(TAG, String.format("MacroEditorActivity: Styled btnCancelMacro TextColor: 0x%08X", buttonBackgroundColor))
+            }
+
+            val addActionButtons = arrayOf(
+                findViewById<Button>(R.id.btn_add_text_action), findViewById<Button>(R.id.btn_add_special_key_action),
+                findViewById<Button>(R.id.btn_add_tab_action), findViewById<Button>(R.id.btn_add_enter_action),
+                findViewById<Button>(R.id.btn_add_delay_action), findViewById<Button>(R.id.btn_add_pause_action)
+            )
+            addActionButtons.forEach { button ->
+                if (button is MaterialButton) {
+                    button.setTextColor(buttonBackgroundColor)
+                    button.strokeColor = ColorStateList.valueOf(buttonBackgroundColor)
+                    Log.d(TAG, String.format("Styled MaterialOutlinedButton %s with Text/Stroke=0x%08X", resources.getResourceEntryName(button.id), buttonBackgroundColor))
+                } else if (button != null) {
+                     button.setTextColor(buttonBackgroundColor)
+                     Log.d(TAG, String.format("Styled Button %s with Text=0x%08X", resources.getResourceEntryName(button.id), buttonBackgroundColor))
+                }
+            }
+        }
 
         setupActionButtons()
         setupRecyclerView()
@@ -182,80 +151,69 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         btnSaveMacro.setOnClickListener { saveMacro() }
         btnCancelMacro.setOnClickListener { finish() }
 
-        // Store applied theme state
         this.mAppliedThemeMode = currentActivityThemeValue
         if (ThemeManager.THEME_OLED == currentActivityThemeValue) {
             this.mAppliedTopbarBackgroundColor = sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)
             this.mAppliedTopbarTextIconColor = sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)
             this.mAppliedMainBackgroundColor = sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)
-            Log.d(TAG, "MacroEditorActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode +
-                         ", TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) +
-                         ", TopbarTextIcon=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) +
-                         ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor))
+            this.mAppliedButtonBackgroundColor = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND)
+            this.mAppliedButtonTextIconColor = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON)
+            this.mAppliedTextboxBackgroundColor = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND)
+            Log.d(TAG, "onCreate: Stored mApplied states for OLED mode.")
         } else {
-            this.mAppliedTopbarBackgroundColor = 0
-            this.mAppliedTopbarTextIconColor = 0
-            this.mAppliedMainBackgroundColor = 0
-            Log.d(TAG, "MacroEditorActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.")
+            this.mAppliedTopbarBackgroundColor = 0; this.mAppliedTopbarTextIconColor = 0; this.mAppliedMainBackgroundColor = 0;
+            this.mAppliedButtonBackgroundColor = 0; this.mAppliedButtonTextIconColor = 0; this.mAppliedTextboxBackgroundColor = 0;
+            Log.d(TAG, "onCreate: Stored mAppliedThemeMode=$mAppliedThemeMode. Not OLED mode.")
         }
     }
 
-    private fun setupRecyclerView() {
-        actionsAdapter = MacroActionsAdapter(
-            actions = currentActions,
-            onDeleteClick = { action ->
-                val index = currentActions.indexOf(action)
-                if (index != -1) {
-                    val removedActionName = currentActions[index].getDisplayName()
-                    currentActions.removeAt(index)
-                    actionsAdapter.notifyItemRemoved(index)
-                    actionsAdapter.notifyItemRangeChanged(index, currentActions.size - index)
-                    updateActionsEmptyState()
-                    Toast.makeText(this@MacroEditorActivity, "Action removed: $removedActionName", Toast.LENGTH_SHORT).show()
-                }
-            },
-            onMoveUp = { position ->
-                if (position > 0) {
-                    Collections.swap(currentActions, position, position - 1)
-                    actionsAdapter.notifyItemMoved(position, position - 1)
-                    Toast.makeText(this@MacroEditorActivity, "Action moved up", Toast.LENGTH_SHORT).show()
-                }
-            },
-            onMoveDown = { position ->
-                if (position < currentActions.size - 1) {
-                    Collections.swap(currentActions, position, position + 1)
-                    actionsAdapter.notifyItemMoved(position, position + 1)
-                    Toast.makeText(this@MacroEditorActivity, "Action moved down", Toast.LENGTH_SHORT).show()
-                }
+    override fun onResume() {
+        super.onResume()
+        if (mAppliedThemeMode != null) {
+            var needsRecreate = false
+            val currentThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
+            if (mAppliedThemeMode != currentThemeValue) {
+                needsRecreate = true
+            } else if (ThemeManager.THEME_OLED == currentThemeValue) {
+                if (mAppliedTopbarBackgroundColor != sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)) needsRecreate = true
+                if (mAppliedTopbarTextIconColor != sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)) needsRecreate = true
+                if (mAppliedMainBackgroundColor != sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)) needsRecreate = true
+                if (mAppliedButtonBackgroundColor != sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND)) needsRecreate = true
+                if (mAppliedButtonTextIconColor != sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON)) needsRecreate = true
+                if (mAppliedTextboxBackgroundColor != sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND)) needsRecreate = true
             }
-        )
-        actionsRecyclerView.layoutManager = LinearLayoutManager(this)
-        actionsRecyclerView.adapter = actionsAdapter
-        actionsAdapter.submitList(currentActions)
-
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                val fromPosition = viewHolder.adapterPosition
-                val toPosition = target.adapterPosition
-                if (fromPosition != RecyclerView.NO_POSITION && toPosition != RecyclerView.NO_POSITION) {
-                    if (fromPosition != toPosition) {
-                        Collections.swap(currentActions, fromPosition, toPosition)
-                        actionsAdapter.notifyItemMoved(fromPosition, toPosition)
-                        Toast.makeText(this@MacroEditorActivity, "Action reordered", Toast.LENGTH_SHORT).show()
-                    }
-                    return true
-                }
-                return false
+            if (needsRecreate) {
+                Log.d(TAG, "onResume: Detected configuration change. Recreating.")
+                recreate()
+                return
             }
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
         }
-        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(actionsRecyclerView)
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        Log.d(TAG, "onSharedPreferenceChanged triggered for key: $key")
+        if (key == null) return
+        val oledColorKeys = arrayOf(
+            "pref_oled_topbar_background", "pref_oled_topbar_text_icon", "pref_oled_main_background",
+            "pref_oled_surface_background", "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+            "pref_oled_button_background", "pref_oled_button_text_icon", "pref_oled_textbox_background",
+            "pref_oled_textbox_accent", "pref_oled_accent_general"
+        )
+        if (ThemeManager.PREF_KEY_DARK_MODE == key || (oledColorKeys.contains(key) && ThemeManager.THEME_OLED == sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT))) {
+            Log.d(TAG, "Relevant preference changed ($key). Recreating.")
+            recreate()
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
 
     private fun setupActionButtons() {
@@ -291,7 +249,6 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         updateActionsEmptyState()
         Toast.makeText(this@MacroEditorActivity, "Action added: ${action.getDisplayName()}", Toast.LENGTH_SHORT).show()
     }
-
     private fun updateActionsEmptyState() {
         if (currentActions.isEmpty()) {
             actionsRecyclerView.visibility = View.GONE
@@ -301,7 +258,6 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
             emptyActionsTextView.visibility = View.GONE
         }
     }
-
     private fun showInputDialog(title: String, message: String, inputType: Int = InputType.TYPE_CLASS_TEXT, onConfirm: (String) -> Unit) {
         val editText = EditText(this).apply { this.inputType = inputType }
         AlertDialog.Builder(this)
@@ -314,26 +270,15 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun saveMacro() {
         val name = editMacroName.text.toString().trim()
         if (name.isEmpty()) {
-            editMacroName.error = "Macro name cannot be empty"
-            return
+            editMacroName.error = "Macro name cannot be empty"; return
         }
         if (currentActions.isEmpty()) {
-            Toast.makeText(this@MacroEditorActivity, "Macro must have at least one action", Toast.LENGTH_SHORT).show()
-            return
+            Toast.makeText(this@MacroEditorActivity, "Macro must have at least one action", Toast.LENGTH_SHORT).show(); return
         }
-        val macroToSave = currentMacro?.copy(
-            name = name,
-            actions = currentActions.toList()
-        ) ?: Macro(
-            id = UUID.randomUUID().toString(),
-            name = name,
-            isActive = false,
-            actions = currentActions.toList()
-        )
+        val macroToSave = currentMacro?.copy(name = name, actions = currentActions.toList()) ?: Macro(id = UUID.randomUUID().toString(), name = name, isActive = false, actions = currentActions.toList())
         if (currentMacro == null) {
             macroRepository.addMacro(macroToSave)
             Toast.makeText(this@MacroEditorActivity, "Macro saved: ${macroToSave.name}", Toast.LENGTH_SHORT).show()
@@ -341,73 +286,7 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
             macroRepository.updateMacro(macroToSave)
             Toast.makeText(this@MacroEditorActivity, "Macro updated: ${macroToSave.name}", Toast.LENGTH_SHORT).show()
         }
-        setResult(Activity.RESULT_OK)
-        finish()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (mAppliedThemeMode != null) {
-            var needsRecreate = false
-            val currentThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
-            if (mAppliedThemeMode != currentThemeValue) {
-                needsRecreate = true
-                Log.d(TAG, "onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue)
-            } else if (ThemeManager.THEME_OLED == currentThemeValue) {
-                if (mAppliedTopbarBackgroundColor != sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)) needsRecreate = true
-                if (mAppliedTopbarTextIconColor != sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)) needsRecreate = true
-                if (mAppliedMainBackgroundColor != sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)) needsRecreate = true
-                if (needsRecreate) {
-                     Log.d(TAG, "onResume: OLED color(s) changed for MacroEditorActivity.")
-                }
-            }
-            if (needsRecreate) {
-                Log.d(TAG, "onResume: Detected configuration change. Recreating MacroEditorActivity.")
-                recreate()
-                return
-            }
-        }
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
-        Log.d(TAG, "onSharedPreferenceChanged triggered for key: " + key)
-        if (key == null) return
-        val oledColorKeys = arrayOf(
-            "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
-            "pref_oled_main_background", "pref_oled_surface_background",
-            "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
-            "pref_oled_button_background", "pref_oled_button_text_icon",
-            "pref_oled_textbox_background", "pref_oled_textbox_accent",
-            "pref_oled_accent_general"
-        )
-        var isOledColorKey = false
-        for (oledKey in oledColorKeys) {
-            if (oledKey == key) {
-                isOledColorKey = true
-                break
-            }
-        }
-        if (ThemeManager.PREF_KEY_DARK_MODE == key) {
-            Log.d(TAG, "Main theme preference changed. Recreating MacroEditorActivity.")
-            recreate()
-        } else if (isOledColorKey) {
-            val currentTheme = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
-            if (ThemeManager.THEME_OLED == currentTheme) {
-                Log.d(TAG, "OLED color preference changed: " + key + ". Recreating MacroEditorActivity.")
-                recreate()
-            }
-        }
-    }
-
-    override fun onSupportNavigateUp(): Boolean { // Added for back navigation
-        onBackPressedDispatcher.onBackPressed()
-        return true
+        setResult(Activity.RESULT_OK); finish()
     }
 
     inner class MacroActionsAdapter(
@@ -417,13 +296,10 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         private val onMoveDown: (Int) -> Unit
     ) : RecyclerView.Adapter<MacroActionsAdapter.ActionViewHolder>() {
         fun submitList(newActions: List<MacroAction>) {
-            actions.clear()
-            actions.addAll(newActions)
-            notifyDataSetChanged()
+            actions.clear(); actions.addAll(newActions); notifyDataSetChanged()
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActionViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_item_macro_action, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_macro_action, parent, false)
             return ActionViewHolder(view)
         }
         override fun onBindViewHolder(holder: ActionViewHolder, position: Int) {

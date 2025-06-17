@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.macros.MacroEditorActivity">
+    tools:context="com.speakkey.ui.macros.MacroEditorActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -62,7 +62,7 @@
                     android:id="@+id/macro_actions_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"/> <!-- Important for ScrollView -->
+                    android:nestedScrollingEnabled="false"/>
 
                 <TextView
                     android:id="@+id/empty_actions_text_view"
