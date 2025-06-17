@@ -43,6 +43,7 @@ import com.drgraff.speakkey.utils.ThemeManager;
 import com.drgraff.speakkey.utils.DynamicThemeApplicator;
 import androidx.core.content.FileProvider;
 import android.content.res.ColorStateList;
+import androidx.core.widget.CompoundButtonCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -193,6 +194,25 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 } else {
                     Log.w(TAG, "PhotosActivity: Button " + buttonName + " is null, cannot style.");
                 }
+            }
+
+            // Apply OLED theme to CheckBoxes
+            ColorStateList checkBoxTintList = new ColorStateList(
+                new int[][]{
+                    new int[]{android.R.attr.state_checked}, // checked
+                    new int[]{-android.R.attr.state_checked}  // unchecked
+                },
+                new int[]{
+                    this.sharedPreferences.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL), // Color for checked state
+                    this.sharedPreferences.getInt("pref_oled_general_text_secondary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_SECONDARY)  // Color for unchecked state
+                }
+            );
+
+            if (chkAutoSendChatGptPhoto != null) {
+                CompoundButtonCompat.setButtonTintList(chkAutoSendChatGptPhoto, checkBoxTintList);
+            }
+            if (chkAutoSendInputStickPhoto != null) {
+                CompoundButtonCompat.setButtonTintList(chkAutoSendInputStickPhoto, checkBoxTintList);
             }
         }
 

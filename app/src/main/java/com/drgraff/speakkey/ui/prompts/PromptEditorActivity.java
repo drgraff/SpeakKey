@@ -60,6 +60,12 @@ public class PromptEditorActivity extends AppCompatActivity implements SharedPre
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_prompt);
 
+        // Initialize UI elements FIRST
+        editTextLabel = findViewById(R.id.prompt_edit_label);
+        editTextText = findViewById(R.id.prompt_edit_text);
+        editTextTranscriptionHint = findViewById(R.id.prompt_edit_transcription_hint);
+        buttonSave = findViewById(R.id.button_save_prompt);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -110,11 +116,6 @@ public class PromptEditorActivity extends AppCompatActivity implements SharedPre
                 }
             }
         }
-
-        editTextLabel = findViewById(R.id.prompt_edit_label);
-        editTextText = findViewById(R.id.prompt_edit_text);
-        editTextTranscriptionHint = findViewById(R.id.prompt_edit_transcription_hint);
-        buttonSave = findViewById(R.id.button_save_prompt);
 
         promptManager = new PromptManager(this);
         currentPromptId = getIntent().getLongExtra(EXTRA_PROMPT_ID, INVALID_PROMPT_ID);

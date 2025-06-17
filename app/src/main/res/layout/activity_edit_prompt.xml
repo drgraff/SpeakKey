@@ -77,8 +77,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="16dp"
-            android:text="@string/save_button_text"
-            android:textColor="@android:color/white"/> <!-- Assuming a dark theme for button text or use style -->
+            android:text="@string/save_button_text"/> <!-- Assuming a dark theme for button text or use style -->
 
     </LinearLayout>
 

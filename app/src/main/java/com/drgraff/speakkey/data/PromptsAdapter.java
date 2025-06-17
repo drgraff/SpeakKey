@@ -8,6 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import androidx.core.graphics.ColorUtils;
+import androidx.preference.PreferenceManager;
+import com.drgraff.speakkey.utils.DynamicThemeApplicator;
+import com.drgraff.speakkey.utils.ThemeManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
@@ -59,6 +65,41 @@ public class PromptsAdapter extends RecyclerView.Adapter<PromptsAdapter.PromptVi
             holder.promptLabelTextView.setText(context.getString(R.string.untitled_prompt_label));
         } else {
             holder.promptLabelTextView.setText(label);
+        }
+
+        // OLED Theming for SwitchCompat
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String currentTheme = prefs.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+
+        if (ThemeManager.THEME_OLED.equals(currentTheme)) {
+            int accentColor = prefs.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL);
+            int secondaryTextColor = prefs.getInt("pref_oled_general_text_secondary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_SECONDARY);
+            int primaryTextColor = prefs.getInt("pref_oled_general_text_primary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_PRIMARY); // For unchecked thumb
+
+            ColorStateList thumbTintList = new ColorStateList(
+                new int[][]{
+                    new int[]{android.R.attr.state_checked},
+                    new int[]{-android.R.attr.state_checked}
+                },
+                new int[]{
+                    accentColor,        // Checked
+                    primaryTextColor    // Unchecked
+                }
+            );
+
+            ColorStateList trackTintList = new ColorStateList(
+                new int[][]{
+                    new int[]{android.R.attr.state_checked},
+                    new int[]{-android.R.attr.state_checked}
+                },
+                new int[]{
+                    ColorUtils.setAlphaComponent(accentColor, 128),        // Checked (50% alpha)
+                    ColorUtils.setAlphaComponent(secondaryTextColor, 128) // Unchecked (50% alpha)
+                }
+            );
+
+            holder.promptActiveSwitch.setThumbTintList(thumbTintList);
+            holder.promptActiveSwitch.setTrackTintList(trackTintList);
         }
 
         holder.promptActiveSwitch.setChecked(currentPrompt.isActive());

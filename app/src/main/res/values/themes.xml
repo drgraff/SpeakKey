@@ -67,6 +67,10 @@
         <!-- NavigationView Styling -->
         <item name="android:navigationBarColor">@color/oled_background</item> <!-- System navigation bar -->
         <item name="navigationViewStyle">@style/Widget.App.NavigationView.OLED</item>
+
+        <!-- Control colors for widgets like CheckBox, Switch, RadioButton -->
+        <item name="colorControlActivated">@color/oled_secondary</item>
+        <item name="colorControlNormal">@color/oled_text_secondary</item>
     </style>
 
     <style name="Widget.App.NavigationView.OLED" parent="Widget.Design.NavigationView">
