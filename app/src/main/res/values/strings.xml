@@ -240,4 +240,11 @@ SpeakKey streamlines data entry, coding, writing, and any task involving text in
 
     <string name="no_macros_message">No macros found. Tap the \'+\' button to create one.</string>
     <string name="add_macro_content_description">Add new macro</string>
+
+    <string name="title_edit_macro">Edit Macro</string>
+    <string name="title_create_macro">Create New Macro</string>
+    <string name="title_activity_macro_list">Manage Macros</string>
+    <string name="delete_macro_confirmation_title">Delete Macro</string>
+    <string name="delete_macro_confirmation_message">Are you sure you want to delete this macro?</string>
+    <string name="delete_action">Delete</string>
 </resources>
