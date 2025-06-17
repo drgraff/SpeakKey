@@ -4,43 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.macros.MacroListActivity">
+    tools:context="com.speakkey.ui.macros.MacroListActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-    android:theme="@style/Theme.SpeakKey.AppBarOverlay"
-    app:elevation="0dp">
+        android:theme="?attr/actionBarTheme">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_macros"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-    android:background="@color/custom_toolbar_background"
-    app:titleTextColor="@color/textPrimary"
-    app:navigationIconTint="@color/custom_toolbar_icon_tint"
-            app:popupTheme="@style/Theme.SpeakKey.PopupOverlay" />
+            android:background="?attr/colorPrimary"
+            app:popupTheme="?attr/actionBarPopupTheme" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/macros_recycler_view"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:padding="8dp"
-        android:clipToPadding="false"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <TextView
-        android:id="@+id/empty_macros_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No macros found. Tap the '+' button to create one."
-        android:textSize="16sp"
-        android:visibility="gone"
-        android:layout_gravity="top|center_horizontal"
-        tools:visibility="visible"
-        android:layout_marginTop="56dp"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/macros_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:clipToPadding="false"
+            tools:listitem="@layout/list_item_macro"/>
+
+        <TextView
+            android:id="@+id/empty_macros_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/no_macros_message"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_macro"
@@ -48,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:contentDescription="Add new macro"
+        android:contentDescription="@string/add_macro_content_description"
         app:srcCompat="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
