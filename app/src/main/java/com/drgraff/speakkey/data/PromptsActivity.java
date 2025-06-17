@@ -112,6 +112,21 @@ public class PromptsActivity extends AppCompatActivity
             actionBar.setTitle(R.string.prompts_activity_title);
         }
 
+        // Initialize UI elements FIRST
+        spinnerOneStepModel = findViewById(R.id.spinnerOneStepModel);
+        btnCheckOneStepModels = findViewById(R.id.btnCheckOneStepModels);
+        recyclerViewOneStepPrompts = findViewById(R.id.recyclerViewOneStepPrompts);
+        spinnerTwoStepProcessingModel = findViewById(R.id.spinnerTwoStepProcessingModel);
+        btnCheckTwoStepModels = findViewById(R.id.btnCheckTwoStepModels);
+        recyclerViewTwoStepPrompts = findViewById(R.id.recyclerViewTwoStepPrompts);
+        spinnerPhotoVisionModel = findViewById(R.id.spinnerPhotoVisionModel);
+        btnCheckPhotoModels = findViewById(R.id.btnCheckPhotoModels);
+        recyclerViewPhotoPrompts = findViewById(R.id.recyclerViewPhotoPrompts);
+        tvEmptyOneStepPrompts = findViewById(R.id.tvEmptyOneStepPrompts);
+        tvEmptyTwoStepPrompts = findViewById(R.id.tvEmptyTwoStepPrompts);
+        tvEmptyPhotoPrompts = findViewById(R.id.tvEmptyPhotoPrompts);
+        fabAddPrompt = findViewById(R.id.fabAddPrompt);
+
         // Apply dynamic OLED colors if OLED theme is active
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
@@ -164,20 +179,6 @@ public class PromptsActivity extends AppCompatActivity
         String apiKey = this.sharedPreferences.getString("openai_api_key", "");
         chatGptApi = new ChatGptApi(apiKey, "");
         promptManager = new PromptManager(this);
-
-        spinnerOneStepModel = findViewById(R.id.spinnerOneStepModel);
-        btnCheckOneStepModels = findViewById(R.id.btnCheckOneStepModels);
-        recyclerViewOneStepPrompts = findViewById(R.id.recyclerViewOneStepPrompts);
-        spinnerTwoStepProcessingModel = findViewById(R.id.spinnerTwoStepProcessingModel);
-        btnCheckTwoStepModels = findViewById(R.id.btnCheckTwoStepModels);
-        recyclerViewTwoStepPrompts = findViewById(R.id.recyclerViewTwoStepPrompts);
-        spinnerPhotoVisionModel = findViewById(R.id.spinnerPhotoVisionModel);
-        btnCheckPhotoModels = findViewById(R.id.btnCheckPhotoModels);
-        recyclerViewPhotoPrompts = findViewById(R.id.recyclerViewPhotoPrompts);
-        tvEmptyOneStepPrompts = findViewById(R.id.tvEmptyOneStepPrompts);
-        tvEmptyTwoStepPrompts = findViewById(R.id.tvEmptyTwoStepPrompts);
-        tvEmptyPhotoPrompts = findViewById(R.id.tvEmptyPhotoPrompts);
-        fabAddPrompt = findViewById(R.id.fabAddPrompt);
 
         oneStepModelAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>());
         oneStepModelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
