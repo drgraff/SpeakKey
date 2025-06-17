@@ -105,15 +105,15 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
             this.mAppliedTopbarBackgroundColor = sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)
             this.mAppliedTopbarTextIconColor = sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)
             this.mAppliedMainBackgroundColor = sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)
-            // mAppliedAccentGeneralColor and mAppliedButtonTextIconColor are already set above
-            Log.d(TAG, "MacroListActivity onCreate: Stored mAppliedThemeMode=$mAppliedThemeMode, TopbarBG=0x${Integer.toHexString(mAppliedTopbarBackgroundColor)}, AccentGeneral=0x${Integer.toHexString(mAppliedAccentGeneralColor)}")
+            // mAppliedAccentGeneralColor and mAppliedButtonTextIconColor are already set above if in OLED mode
+            Log.d(TAG, "onCreate: Stored mAppliedThemeMode=$mAppliedThemeMode, TopbarBG=0x${Integer.toHexString(mAppliedTopbarBackgroundColor)}, AccentGeneral=0x${Integer.toHexString(mAppliedAccentGeneralColor)}")
         } else {
             this.mAppliedTopbarBackgroundColor = 0
             this.mAppliedTopbarTextIconColor = 0
             this.mAppliedMainBackgroundColor = 0
             this.mAppliedAccentGeneralColor = 0
             this.mAppliedButtonTextIconColor = 0
-            Log.d(TAG, "MacroListActivity onCreate: Stored mAppliedThemeMode=$mAppliedThemeMode. Not OLED mode.")
+            Log.d(TAG, "onCreate: Stored mAppliedThemeMode=$mAppliedThemeMode. Not OLED mode.")
         }
     }
 
@@ -192,16 +192,15 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
             },
             onActiveChanged = { macro, isActive ->
                 val updatedMacro = macro.copy(isActive = isActive)
-                macroRepository.updateMacro(updatedMacro) // Using MacroRepository directly
+                macroRepository.updateMacro(updatedMacro)
             }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = macrosAdapter
-        // Drag and drop is not in this version, can be added back if ItemTouchHelperCallback is defined
     }
 
     private fun loadMacros() {
-        val macros = macroRepository.getAllMacros() // Using MacroRepository directly
+        val macros = macroRepository.getAllMacros()
         macrosAdapter.submitList(macros)
         updateMacrosEmptyState(macros.isEmpty())
     }
@@ -221,7 +220,7 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
             .setTitle(getString(R.string.delete_macro_confirmation_title))
             .setMessage(getString(R.string.delete_macro_confirmation_message, macro.name))
             .setPositiveButton(getString(R.string.delete_action)) { dialog, _ ->
-                macroRepository.deleteMacro(macro.id) // Using MacroRepository directly
+                macroRepository.deleteMacro(macro.id)
                 loadMacros()
                 Toast.makeText(this@MacroListActivity, "Macro '${macro.name}' deleted", Toast.LENGTH_SHORT).show()
                 dialog.dismiss()
@@ -240,7 +239,7 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
         private var macros: List<Macro> = emptyList()
         fun submitList(newMacros: List<Macro>) {
             macros = newMacros
-            notifyDataSetChanged() // Consider DiffUtil for better performance
+            notifyDataSetChanged()
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MacroViewHolder {
             val view = LayoutInflater.from(parent.context)
@@ -248,7 +247,8 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
             return MacroViewHolder(view)
         }
         override fun onBindViewHolder(holder: MacroViewHolder, position: Int) {
-            holder.bind(macros[position])
+            val macro = macros[position]
+            holder.bind(macro)
         }
         override fun getItemCount(): Int = macros.size
         inner class MacroViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -259,9 +259,8 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
             fun bind(macro: Macro) {
                 nameTextView.text = macro.name
                 activeSwitch.isChecked = macro.isActive
-                activeSwitch.setOnCheckedChangeListener(null) // Avoid triggering listener during bind
+                activeSwitch.setOnCheckedChangeListener(null)
                 activeSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-                    // Ensure listener is only triggered by user interaction
                     if (buttonView.isPressed) {
                          onActiveChanged(macro, isChecked)
                     }

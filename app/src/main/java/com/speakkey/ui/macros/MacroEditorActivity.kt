@@ -92,28 +92,21 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         val currentActivityThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
         if (ThemeManager.THEME_OLED == currentActivityThemeValue) {
             DynamicThemeApplicator.applyOledColors(this, sharedPreferences)
-            Log.d(TAG, "MacroEditorActivity: Applied dynamic OLED colors for window/toolbar.")
+            Log.d(TAG, "Applied dynamic OLED colors for window/toolbar.")
 
             val buttonBackgroundColor = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND)
             val buttonTextIconColor = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON)
             val textboxBackgroundColor = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND)
-            // val accentGeneralColor = sharedPreferences.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL) // Not used here yet
 
-            if (::editMacroName.isInitialized && editMacroName != null) {
-                editMacroName.setBackgroundColor(textboxBackgroundColor)
-                Log.d(TAG, String.format("MacroEditorActivity: Styled editMacroName BG: 0x%08X", textboxBackgroundColor))
-            }
+            editMacroName.setBackgroundColor(textboxBackgroundColor)
+            Log.d(TAG, String.format("Styled editMacroName BG: 0x%08X", textboxBackgroundColor))
 
-            if (::btnSaveMacro.isInitialized && btnSaveMacro != null) {
-                btnSaveMacro.backgroundTintList = ColorStateList.valueOf(buttonBackgroundColor)
-                btnSaveMacro.setTextColor(buttonTextIconColor)
-                Log.d(TAG, String.format("MacroEditorActivity: Styled btnSaveMacro with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor))
-            }
+            btnSaveMacro.backgroundTintList = ColorStateList.valueOf(buttonBackgroundColor)
+            btnSaveMacro.setTextColor(buttonTextIconColor)
+            Log.d(TAG, String.format("Styled btnSaveMacro with BG=0x%08X, Text=0x%08X", buttonBackgroundColor, buttonTextIconColor))
 
-            if (::btnCancelMacro.isInitialized && btnCancelMacro != null) {
-                btnCancelMacro.setTextColor(buttonBackgroundColor)
-                Log.d(TAG, String.format("MacroEditorActivity: Styled btnCancelMacro TextColor: 0x%08X", buttonBackgroundColor))
-            }
+            btnCancelMacro.setTextColor(buttonBackgroundColor)
+            Log.d(TAG, String.format("Styled btnCancelMacro TextColor: 0x%08X", buttonBackgroundColor))
 
             val addActionButtons = arrayOf(
                 findViewById<Button>(R.id.btn_add_text_action), findViewById<Button>(R.id.btn_add_special_key_action),
@@ -216,6 +209,64 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         return true
     }
 
+    private fun setupRecyclerView() {
+        actionsAdapter = MacroActionsAdapter(
+            actions = currentActions,
+            onDeleteClick = { action ->
+                val index = currentActions.indexOf(action)
+                if (index != -1) {
+                    val removedActionName = currentActions[index].getDisplayName()
+                    currentActions.removeAt(index)
+                    actionsAdapter.notifyItemRemoved(index)
+                    actionsAdapter.notifyItemRangeChanged(index, currentActions.size - index)
+                    updateActionsEmptyState()
+                    Toast.makeText(this@MacroEditorActivity, "Action removed: $removedActionName", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onMoveUp = { position ->
+                if (position > 0) {
+                    Collections.swap(currentActions, position, position - 1)
+                    actionsAdapter.notifyItemMoved(position, position - 1)
+                    Toast.makeText(this@MacroEditorActivity, "Action moved up", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onMoveDown = { position ->
+                if (position < currentActions.size - 1) {
+                    Collections.swap(currentActions, position, position + 1)
+                    actionsAdapter.notifyItemMoved(position, position + 1)
+                    Toast.makeText(this@MacroEditorActivity, "Action moved down", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+        actionsRecyclerView.layoutManager = LinearLayoutManager(this)
+        actionsRecyclerView.adapter = actionsAdapter
+        actionsAdapter.submitList(currentActions)
+
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+                if (fromPosition != RecyclerView.NO_POSITION && toPosition != RecyclerView.NO_POSITION) {
+                    if (fromPosition != toPosition) {
+                        Collections.swap(currentActions, fromPosition, toPosition)
+                        actionsAdapter.notifyItemMoved(fromPosition, toPosition)
+                        Toast.makeText(this@MacroEditorActivity, "Action reordered", Toast.LENGTH_SHORT).show()
+                    }
+                    return true
+                }
+                return false
+            }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) { /* Not used */ }
+        }
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(actionsRecyclerView)
+    }
+
     private fun setupActionButtons() {
         findViewById<Button>(R.id.btn_add_text_action).setOnClickListener {
             showInputDialog("Add Text Action", "Enter text to type:") { value ->
@@ -249,6 +300,7 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
         updateActionsEmptyState()
         Toast.makeText(this@MacroEditorActivity, "Action added: ${action.getDisplayName()}", Toast.LENGTH_SHORT).show()
     }
+
     private fun updateActionsEmptyState() {
         if (currentActions.isEmpty()) {
             actionsRecyclerView.visibility = View.GONE
@@ -258,6 +310,7 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
             emptyActionsTextView.visibility = View.GONE
         }
     }
+
     private fun showInputDialog(title: String, message: String, inputType: Int = InputType.TYPE_CLASS_TEXT, onConfirm: (String) -> Unit) {
         val editText = EditText(this).apply { this.inputType = inputType }
         AlertDialog.Builder(this)
@@ -270,6 +323,7 @@ class MacroEditorActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefe
             .setNegativeButton("Cancel", null)
             .show()
     }
+
     private fun saveMacro() {
         val name = editMacroName.text.toString().trim()
         if (name.isEmpty()) {
