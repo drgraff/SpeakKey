@@ -1,6 +1,7 @@
 package com.drgraff.speakkey;
 
 import android.Manifest;
+import android.app.Activity; // Import for Activity.RESULT_OK
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -20,7 +21,7 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceManager; // Standard import
 import android.util.Base64;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -60,6 +61,7 @@ import com.drgraff.speakkey.api.ChatGptApi;
 import com.drgraff.speakkey.data.AppDatabase;
 import com.drgraff.speakkey.data.Prompt;
 import com.drgraff.speakkey.data.PromptManager;
+import com.drgraff.speakkey.data.PhotoPromptsAdapter; // Assuming this is the correct adapter
 import com.drgraff.speakkey.data.UploadTask;
 import com.drgraff.speakkey.inputstick.InputStickBroadcast;
 import com.drgraff.speakkey.service.UploadService;
@@ -84,12 +86,16 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     private static final String PREF_AUTO_SEND_INPUTSTICK_PHOTO = "auto_send_inputstick_photo_enabled";
     public static final String PHOTO_PROCESSING_QUEUED_PLACEHOLDER = "[Photo processing queued... Tap to refresh]";
 
+    private static final int REQUEST_ADD_PHOTO_PROMPT = 3;
+    private static final int REQUEST_EDIT_PHOTO_PROMPT = 4;
+
     private ImageView imageViewPhoto;
     private ImageButton btnTakePhotoArea;
     private Button btnClearPhoto;
     private Button btnPhotoPrompts;
     private TextView textActivePhotoPromptsDisplay;
     private PromptManager promptManager;
+    private PhotoPromptsAdapter photoPromptsAdapter;
 
     private Button btnSendToChatGptPhoto;
     private EditText editTextChatGptResponsePhoto;
@@ -106,6 +112,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
 
     private String currentPhotoPath;
     private PhotoVisionBroadcastReceiver photoVisionReceiver;
+    private IntentFilter photoVisionReceiverFilter;
 
     private ProgressBar progressBarPhotoProcessing;
     private TextView textViewPhotoStatus;
@@ -147,14 +154,15 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         chkAutoSendInputStickPhoto = findViewById(R.id.chk_auto_send_inputstick_photo);
         progressBarPhotoProcessing = findViewById(R.id.progressBarPhotoProcessing);
         textViewPhotoStatus = findViewById(R.id.textViewPhotoStatus);
-        // Note: PhotoPromptsActivity has a FAB, PhotosActivity does not in its current layout (activity_photos.xml)
+        // fabAddPhotoPrompt is not in PhotosActivity layout
 
         // Initialize other components
         promptManager = new PromptManager(this);
         inputStickManager = new InputStickManager(this);
         photoVisionReceiver = new PhotoVisionBroadcastReceiver();
+        photoVisionReceiverFilter = new IntentFilter(UploadService.ACTION_PHOTO_VISION_COMPLETE);
 
-        String apiKey = this.sharedPreferences.getString("openai_api_key", "");
+        String apiKey = sharedPreferences.getString("openai_api_key", "");
         if (apiKey.isEmpty()) {
             Toast.makeText(this, getString(R.string.photos_toast_api_key_not_set_chatgpt), Toast.LENGTH_LONG).show();
             if(btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(false);
@@ -165,28 +173,15 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         progressDialog.setMessage(getString(R.string.photos_progress_sending_to_chatgpt_message));
         progressDialog.setCancelable(false);
 
-        // Apply dynamic OLED colors if OLED theme is active
-        // themeValue is from pre-super.onCreate block
         if (ThemeManager.THEME_OLED.equals(themeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
             Log.d(TAG, "PhotosActivity: Applied dynamic OLED colors for window/toolbar.");
 
-            // Button Styling (MOVED HERE)
-            int buttonBackgroundColor = this.sharedPreferences.getInt(
-                "pref_oled_button_background",
-                DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND
-            );
-            int buttonTextIconColor = this.sharedPreferences.getInt(
-                "pref_oled_button_text_icon",
-                DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON
-            );
+            int buttonBackgroundColor = this.sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
+            int buttonTextIconColor = this.sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON);
 
-            Button[] buttonsToStyle = {
-                btnClearPhoto, btnPhotoPrompts, btnSendToChatGptPhoto, btnSendToInputStickPhoto
-            };
-            String[] buttonNames = {
-                "btnClearPhoto", "btnPhotoPrompts", "btnSendToChatGptPhoto", "btnSendToInputStickPhoto"
-            };
+            Button[] buttonsToStyle = { btnClearPhoto, btnPhotoPrompts, btnSendToChatGptPhoto, btnSendToInputStickPhoto };
+            String[] buttonNames = { "btnClearPhoto", "btnPhotoPrompts", "btnSendToChatGptPhoto", "btnSendToInputStickPhoto" };
 
             for (int i = 0; i < buttonsToStyle.length; i++) {
                 Button button = buttonsToStyle[i];
@@ -201,29 +196,25 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             }
         }
 
-        // Setup listeners and other logic
         if (chkAutoSendChatGptPhoto != null) {
             chkAutoSendChatGptPhoto.setChecked(this.sharedPreferences.getBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, false));
             chkAutoSendChatGptPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 this.sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_CHATGPT_PHOTO, isChecked).apply();
             });
         }
-
         if (btnClearChatGptResponsePhoto != null) btnClearChatGptResponsePhoto.setOnClickListener(v -> {
             if (editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
         });
-
         if (chkAutoSendInputStickPhoto != null) {
             chkAutoSendInputStickPhoto.setChecked(this.sharedPreferences.getBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, false));
             chkAutoSendInputStickPhoto.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 this.sharedPreferences.edit().putBoolean(PREF_AUTO_SEND_INPUTSTICK_PHOTO, isChecked).apply();
             });
         }
-
         if (btnSendToInputStickPhoto != null) btnSendToInputStickPhoto.setOnClickListener(v -> sendTextToInputStick());
         if (btnTakePhotoArea != null) btnTakePhotoArea.setOnClickListener(v -> checkCameraPermissionAndDispatch());
         if (imageViewPhoto != null) imageViewPhoto.setOnClickListener(v -> {
-            if (currentPhotoPath != null) {
+             if (currentPhotoPath != null) {
                 File oldFile = new File(currentPhotoPath);
                 if (oldFile.exists()) {
                     if (oldFile.delete()) Log.d(TAG, "Old photo deleted: " + currentPhotoPath);
@@ -296,10 +287,8 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                          ", TopbarTextIcon=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) +
                          ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor));
         } else {
-            this.mAppliedTopbarBackgroundColor = 0;
-            this.mAppliedTopbarTextIconColor = 0;
-            this.mAppliedMainBackgroundColor = 0;
-            Log.d(TAG, "PhotosActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.");
+            this.mAppliedTopbarBackgroundColor = 0; this.mAppliedTopbarTextIconColor = 0; this.mAppliedMainBackgroundColor = 0;
+            Log.d(TAG, "PhotosActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode.");
         }
     }
 
@@ -313,22 +302,11 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                 needsRecreate = true;
                 Log.d(TAG, "PhotosActivity onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue);
             } else if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
-                int currentTopbarBG = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
-                if (mAppliedTopbarBackgroundColor != currentTopbarBG) needsRecreate = true;
-                int currentTopbarTextIcon = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
-                if (mAppliedTopbarTextIconColor != currentTopbarTextIcon) needsRecreate = true;
-                int currentMainBG = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
-                if (mAppliedMainBackgroundColor != currentMainBG) needsRecreate = true;
-
-                // Check button colors as they are styled directly in onCreate
-                int currentButtonBG = this.sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
-                // We didn't store mAppliedButtonBackgroundColor, so this check can't be as precise
-                // For now, any OLED color change in onSharedPreferenceChanged handles this.
-                // A more robust onResume would track all directly applied colors.
-                // For this iteration, if any of the main structure colors change, we recreate.
-
+                if (mAppliedTopbarBackgroundColor != this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)) needsRecreate = true;
+                if (mAppliedTopbarTextIconColor != this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)) needsRecreate = true;
+                if (mAppliedMainBackgroundColor != this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)) needsRecreate = true;
                 if (needsRecreate) {
-                     Log.d(TAG, "PhotosActivity onResume: OLED structural color(s) changed.");
+                     Log.d(TAG, "PhotosActivity onResume: OLED color(s) changed.");
                 }
             }
             if (needsRecreate) {
@@ -340,9 +318,10 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         if (this.sharedPreferences != null) {
             this.sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         }
-        IntentFilter filter = new IntentFilter(UploadService.ACTION_PHOTO_VISION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).registerReceiver(photoVisionReceiver, filter);
-        Log.d(TAG, "PhotoVisionBroadcastReceiver registered.");
+        if (photoVisionReceiver != null && photoVisionReceiverFilter != null) {
+             LocalBroadcastManager.getInstance(this).registerReceiver(photoVisionReceiver, photoVisionReceiverFilter);
+             Log.d(TAG, "PhotoVisionBroadcastReceiver registered.");
+        }
         updateActivePhotoPromptsDisplay();
         if (isNewPhotoTaskJustQueued) {
             Log.d(TAG, "onResume: isNewPhotoTaskJustQueued is true, attempting to show 'Queued...' UI synchronously.");
@@ -367,8 +346,8 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         }
         if (photoVisionReceiver != null) {
-             LocalBroadcastManager.getInstance(this).unregisterReceiver(photoVisionReceiver);
-             Log.d(TAG, "PhotoVisionBroadcastReceiver unregistered.");
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(photoVisionReceiver);
+            Log.d(TAG, "PhotoVisionBroadcastReceiver unregistered.");
         }
     }
 
@@ -377,22 +356,17 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         Log.d(TAG, "PhotosActivity onSharedPreferenceChanged triggered for key: " + key);
         if (key == null) return;
         final String[] oledColorKeys = {
-            "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
-            "pref_oled_main_background", "pref_oled_surface_background",
-            "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
-            "pref_oled_button_background", "pref_oled_button_text_icon",
-            "pref_oled_textbox_background", "pref_oled_textbox_accent",
-            "pref_oled_accent_general"
+            "pref_oled_topbar_background", "pref_oled_topbar_text_icon", "pref_oled_main_background",
+            "pref_oled_surface_background", "pref_oled_general_text_primary", "pref_oled_general_text_secondary",
+            "pref_oled_button_background", "pref_oled_button_text_icon", "pref_oled_textbox_background",
+            "pref_oled_textbox_accent", "pref_oled_accent_general"
         };
         boolean isOledColorKey = false;
         for (String oledKey : oledColorKeys) {
-            if (oledKey.equals(key)) {
-                isOledColorKey = true;
-                break;
-            }
+            if (oledKey.equals(key)) { isOledColorKey = true; break; }
         }
         if (ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
-            Log.d(TAG, "PhotosActivity: Main theme preference changed (dark_mode). Recreating.");
+            Log.d(TAG, "PhotosActivity: Main theme preference changed. Recreating.");
             recreate();
         } else if (isOledColorKey) {
             String currentTheme = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
@@ -612,7 +586,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             setPic();
             if (chkAutoSendChatGptPhoto != null && chkAutoSendChatGptPhoto.isChecked() && currentPhotoPath != null && !currentPhotoPath.isEmpty()) {
                 showPhotoUploadProgressUI();
@@ -773,7 +747,7 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
                         if(textViewPhotoStatus != null) { textViewPhotoStatus.setText(errorMessage); textViewPhotoStatus.setVisibility(View.VISIBLE); }
                         if(progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
                         if(btnSendToChatGptPhoto != null) btnSendToChatGptPhoto.setEnabled(true);
-                        editTextChatGptResponsePhoto.setText("");
+                        if(editTextChatGptResponsePhoto != null) editTextChatGptResponsePhoto.setText("");
                     }
                     isNewPhotoTaskJustQueued = false;
                 } else {
