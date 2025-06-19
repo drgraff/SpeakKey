@@ -64,6 +64,11 @@ public class FormattingTagsActivity extends AppCompatActivity implements SharedP
             getSupportActionBar().setTitle(getString(R.string.formatting_tags_activity_title));
         }
 
+        // Initialize UI elements FIRST
+        recyclerView = findViewById(R.id.formatting_tags_recycler_view);
+        emptyView = findViewById(R.id.empty_formatting_tags_text_view);
+        fabAddTag = findViewById(R.id.fab_add_formatting_tag);
+
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
@@ -88,10 +93,6 @@ public class FormattingTagsActivity extends AppCompatActivity implements SharedP
                 Log.w(TAG, "FormattingTagsActivity: fabAddTag is null, cannot style.");
             }
         }
-
-        recyclerView = findViewById(R.id.formatting_tags_recycler_view);
-        emptyView = findViewById(R.id.empty_formatting_tags_text_view);
-        fabAddTag = findViewById(R.id.fab_add_formatting_tag);
 
         tagManager = new FormattingTagManager(this);
 
