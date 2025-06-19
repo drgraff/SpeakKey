@@ -57,6 +57,14 @@
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity" />
         <activity
+            android:name="com.drgraff.speakkey.settings.OledThemeSettingsActivity"
+            android:label="OLED Theme Settings"
+            android:parentActivityName="com.drgraff.speakkey.settings.SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.drgraff.speakkey.settings.SettingsActivity" />
+        </activity>
+        <activity
             android:name=".ui.AboutActivity"
             android:label="@string/about_activity_title"
             android:parentActivityName=".MainActivity"

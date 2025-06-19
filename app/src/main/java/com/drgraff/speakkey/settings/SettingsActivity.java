@@ -1,8 +1,9 @@
 package com.drgraff.speakkey.settings;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.app.ProgressDialog;
-import android.content.SharedPreferences;
+// import android.content.SharedPreferences; // Duplicate
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -177,6 +178,17 @@ public class SettingsActivity extends AppCompatActivity {
             ListPreference twoStepStep1EnginePrefOnCreate = findPreference(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE);
             if (twoStepStep1EnginePrefOnCreate != null) {
                 updateTwoStepStep1ModelVisibility(twoStepStep1EnginePrefOnCreate.getValue());
+            }
+
+            Preference oledSettingsScreenPreference = findPreference("pref_oled_theme_settings_screen");
+            if (oledSettingsScreenPreference != null) {
+                oledSettingsScreenPreference.setOnPreferenceClickListener(preference -> {
+                    if (getActivity() != null) {
+                        Intent intent = new Intent(getActivity(), OledThemeSettingsActivity.class);
+                        startActivity(intent);
+                    }
+                    return true; // Indicates the click was handled
+                });
             }
         }
 
