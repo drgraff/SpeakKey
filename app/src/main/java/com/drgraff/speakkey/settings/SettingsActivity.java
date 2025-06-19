@@ -38,7 +38,7 @@ import java.util.concurrent.Executors; // Added
 import java.util.function.Consumer; // Added for API 24+ or with desugaring
 // android.util.Log will be imported by the FQN in the code block
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String PREF_KEY_TRANSCRIPTION_MODE = "transcription_mode"; // Existing key, good to have a constant
     public static final String PREF_KEY_ONESTEP_PROCESSING_MODEL = "pref_onestep_processing_model"; // New key for old "chatgpt_model"
@@ -50,12 +50,19 @@ public class SettingsActivity extends AppCompatActivity {
     // The old key "chatgpt_model" will be replaced by PREF_KEY_ONESTEP_PROCESSING_MODEL in root_preferences.xml next.
     // The old key "pref_key_selected_photo_model" from PhotoPromptsActivity will be superseded by PREF_KEY_PHOTOVISION_PROCESSING_MODEL.
 
+    private SharedPreferences sharedPreferences;
+    private String mAppliedThemeMode = null;
+    private int mAppliedTopbarBackgroundColor = 0;
+    private int mAppliedTopbarTextIconColor = 0;
+    private int mAppliedMainBackgroundColor = 0;
+    private static final String TAG_ACTIVITY = "SettingsActivity"; // For logging
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); // Initialize as field
 
         // Apply AppCompatDelegate default night mode FIRST
-        com.drgraff.speakkey.utils.ThemeManager.applyTheme(sharedPreferences);
+        com.drgraff.speakkey.utils.ThemeManager.applyTheme(this.sharedPreferences);
 
         // Then, if OLED is specifically chosen, override with the specific OLED theme
         String themeValue = sharedPreferences.getString(com.drgraff.speakkey.utils.ThemeManager.PREF_KEY_DARK_MODE, com.drgraff.speakkey.utils.ThemeManager.THEME_DEFAULT);
@@ -84,10 +91,94 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         // Apply custom OLED colors if OLED theme is active
-        // Re-check themeValue as it's local to the original block
-        String currentActivityThemeValue = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+        String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
-            DynamicThemeApplicator.applyOledColors(this, sharedPreferences);
+            DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
+            this.mAppliedThemeMode = currentActivityThemeValue; // Store the theme mode applied
+            this.mAppliedTopbarBackgroundColor = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+            this.mAppliedTopbarTextIconColor = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+            this.mAppliedMainBackgroundColor = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+            Log.d(TAG_ACTIVITY, "onCreate: Stored mApplied OLED colors for activity frame.");
+        } else { // If not OLED theme
+            this.mAppliedThemeMode = currentActivityThemeValue; // Store the non-OLED theme mode
+            this.mAppliedTopbarBackgroundColor = 0; // Reset
+            this.mAppliedTopbarTextIconColor = 0;   // Reset
+            this.mAppliedMainBackgroundColor = 0;   // Reset
+            Log.d(TAG_ACTIVITY, "onCreate: Not OLED mode, mApplied colors reset.");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (this.sharedPreferences == null) { // Ensure sharedPreferences is available
+            this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        }
+        this.sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        if (mAppliedThemeMode != null) {
+            boolean needsRecreate = false;
+            String currentThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+
+            if (!mAppliedThemeMode.equals(currentThemeValue)) {
+                needsRecreate = true;
+                Log.d(TAG_ACTIVITY, "onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue);
+            } else if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
+                if (mAppliedTopbarBackgroundColor != this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)) {
+                    needsRecreate = true;
+                    Log.d(TAG_ACTIVITY, "onResume: OLED Topbar Background Color changed.");
+                }
+                if (mAppliedTopbarTextIconColor != this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)) {
+                    needsRecreate = true;
+                    Log.d(TAG_ACTIVITY, "onResume: OLED Topbar Text/Icon Color changed.");
+                }
+                if (mAppliedMainBackgroundColor != this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)) {
+                    needsRecreate = true;
+                    Log.d(TAG_ACTIVITY, "onResume: OLED Main Background Color changed.");
+                }
+            }
+
+            if (needsRecreate) {
+                Log.d(TAG_ACTIVITY, "onResume: Detected configuration change. Recreating SettingsActivity.");
+                recreate();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (this.sharedPreferences != null) {
+            this.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d(TAG_ACTIVITY, "onSharedPreferenceChanged triggered for key: " + key);
+        if (key == null) return;
+
+        final String[] oledColorKeysForActivityFrame = { // Only keys relevant to SettingsActivity frame
+            "pref_oled_topbar_background", "pref_oled_topbar_text_icon",
+            "pref_oled_main_background"
+        };
+        boolean isRelevantOledColorKey = false;
+        for (String oledKey : oledColorKeysForActivityFrame) {
+            if (oledKey.equals(key)) {
+                isRelevantOledColorKey = true;
+                break;
+            }
+        }
+
+        if (ThemeManager.PREF_KEY_DARK_MODE.equals(key)) {
+            Log.d(TAG_ACTIVITY, "Main theme preference changed. Recreating SettingsActivity.");
+            recreate();
+        } else if (isRelevantOledColorKey) {
+            String currentTheme = sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
+            if (ThemeManager.THEME_OLED.equals(currentTheme)) {
+                Log.d(TAG_ACTIVITY, "Relevant OLED color preference changed: " + key + ". Recreating SettingsActivity.");
+                recreate();
+            }
         }
     }
 
