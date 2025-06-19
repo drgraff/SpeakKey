@@ -46,6 +46,9 @@ public class PhotoPromptEditorActivity extends AppCompatActivity implements Shar
     private int mAppliedTopbarBackgroundColor = 0;
     private int mAppliedTopbarTextIconColor = 0;
     private int mAppliedMainBackgroundColor = 0;
+    private int mAppliedOledButtonBackgroundColor = 0;
+    private int mAppliedOledButtonTextIconColor = 0;
+    private int mAppliedOledTextboxBackgroundColor = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,11 @@ public class PhotoPromptEditorActivity extends AppCompatActivity implements Shar
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
+
+        // Initialize other UI elements that need styling BEFORE the theme block
+        editTextPhotoPromptLabel = findViewById(R.id.edittext_photo_prompt_label);
+        editTextPhotoPromptText = findViewById(R.id.edittext_photo_prompt_text);
+        btnSavePhotoPrompt = findViewById(R.id.btn_save_photo_prompt);
 
         // This was part of the previous step, ensure it's correctly placed
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
@@ -108,10 +116,6 @@ public class PhotoPromptEditorActivity extends AppCompatActivity implements Shar
             }
         }
 
-        editTextPhotoPromptLabel = findViewById(R.id.edittext_photo_prompt_label);
-        editTextPhotoPromptText = findViewById(R.id.edittext_photo_prompt_text);
-        btnSavePhotoPrompt = findViewById(R.id.btn_save_photo_prompt);
-
         promptManager = new PromptManager(this);
 
         Intent intent = getIntent();
@@ -154,14 +158,21 @@ public class PhotoPromptEditorActivity extends AppCompatActivity implements Shar
             this.mAppliedTopbarBackgroundColor = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
             this.mAppliedTopbarTextIconColor = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
             this.mAppliedMainBackgroundColor = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+            this.mAppliedOledButtonBackgroundColor = this.sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
+            this.mAppliedOledButtonTextIconColor = this.sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON);
+            this.mAppliedOledTextboxBackgroundColor = this.sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND);
             Log.d(TAG, "PhotoPromptEditorActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode +
                          ", TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) +
                          ", TopbarTextIcon=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) +
                          ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor));
+            Log.d(TAG, "PhotoPromptEditorActivity onCreate: Stored specific OLED colors: ButtonBG=0x" + Integer.toHexString(mAppliedOledButtonBackgroundColor) + ", ButtonTextIcon=0x" + Integer.toHexString(mAppliedOledButtonTextIconColor) + ", TextboxBG=0x" + Integer.toHexString(mAppliedOledTextboxBackgroundColor));
         } else {
             this.mAppliedTopbarBackgroundColor = 0;
             this.mAppliedTopbarTextIconColor = 0;
             this.mAppliedMainBackgroundColor = 0;
+            this.mAppliedOledButtonBackgroundColor = 0;
+            this.mAppliedOledButtonTextIconColor = 0;
+            this.mAppliedOledTextboxBackgroundColor = 0;
             Log.d(TAG, "PhotoPromptEditorActivity onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.");
         }
     }
@@ -218,6 +229,25 @@ public class PhotoPromptEditorActivity extends AppCompatActivity implements Shar
                 if (mAppliedTopbarTextIconColor != currentTopbarTextIcon) needsRecreate = true;
                 int currentMainBG = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
                 if (mAppliedMainBackgroundColor != currentMainBG) needsRecreate = true;
+
+                int currentOledButtonBg = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
+                if (mAppliedOledButtonBackgroundColor != currentOledButtonBg) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Button Background Color changed. Old=0x" + Integer.toHexString(mAppliedOledButtonBackgroundColor) + ", New=0x" + Integer.toHexString(currentOledButtonBg));
+                }
+
+                int currentOledButtonTextIcon = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON);
+                if (mAppliedOledButtonTextIconColor != currentOledButtonTextIcon) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Button Text/Icon Color changed. Old=0x" + Integer.toHexString(mAppliedOledButtonTextIconColor) + ", New=0x" + Integer.toHexString(currentOledButtonTextIcon));
+                }
+
+                int currentOledTextboxBg = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND);
+                if (mAppliedOledTextboxBackgroundColor != currentOledTextboxBg) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Textbox Background Color changed. Old=0x" + Integer.toHexString(mAppliedOledTextboxBackgroundColor) + ", New=0x" + Integer.toHexString(currentOledTextboxBg));
+                }
+
                 if (needsRecreate) {
                      Log.d(TAG, "onResume: OLED color(s) changed for PhotoPromptEditorActivity.");
                 }
