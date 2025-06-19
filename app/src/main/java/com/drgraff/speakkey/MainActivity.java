@@ -92,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mAppliedMainBackgroundColor = 0;
     private int mAppliedTextboxBackgroundColor = 0;
     private int mAppliedOledButtonTextIconColor = 0;
+    private int mAppliedOledAccentGeneralColor = 0;
+    private int mAppliedOledGeneralTextSecondaryColor = 0;
     public static final String TRANSCRIPTION_QUEUED_PLACEHOLDER = "[Transcription queued... Tap to refresh]"; // Added
 
     // UI elements
@@ -274,6 +276,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.mAppliedTextboxBackgroundColor = sharedPreferences.getInt("pref_oled_textbox_background", DynamicThemeApplicator.DEFAULT_OLED_TEXTBOX_BACKGROUND);
             this.mAppliedOledButtonBackgroundColor = sharedPreferences.getInt("pref_oled_button_background", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_BACKGROUND);
             this.mAppliedOledButtonTextIconColor = sharedPreferences.getInt("pref_oled_button_text_icon", DynamicThemeApplicator.DEFAULT_OLED_BUTTON_TEXT_ICON);
+            this.mAppliedOledAccentGeneralColor = sharedPreferences.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL);
+            this.mAppliedOledGeneralTextSecondaryColor = sharedPreferences.getInt("pref_oled_general_text_secondary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_SECONDARY);
             // Also log all these values
             Log.d(TAG, "onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode +
                          ", TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) +
@@ -282,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                          ", TextboxBG=0x" + Integer.toHexString(mAppliedTextboxBackgroundColor) +
                          ", ButtonBG=0x" + Integer.toHexString(mAppliedOledButtonBackgroundColor) +
                          ", ButtonTextIcon=0x" + Integer.toHexString(mAppliedOledButtonTextIconColor));
+            Log.d(TAG, "onCreate: Stored additional OLED colors: AccentGeneral=0x" + Integer.toHexString(mAppliedOledAccentGeneralColor) + ", GeneralTextSecondary=0x" + Integer.toHexString(mAppliedOledGeneralTextSecondaryColor));
         } else {
             // Reset all applied OLED color trackers if not in OLED mode
             this.mAppliedTopbarBackgroundColor = 0;
@@ -290,6 +295,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.mAppliedTextboxBackgroundColor = 0;
             this.mAppliedOledButtonBackgroundColor = 0;
             this.mAppliedOledButtonTextIconColor = 0;
+            this.mAppliedOledAccentGeneralColor = 0;
+            this.mAppliedOledGeneralTextSecondaryColor = 0;
             Log.d(TAG, "onCreate: Stored mAppliedThemeMode=" + mAppliedThemeMode + ". Not OLED mode, OLED colors reset.");
         }
 
@@ -1538,6 +1545,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (mAppliedOledButtonTextIconColor != currentButtonTextIcon) {
                     needsRecreate = true;
                     Log.d(TAG, "onResume: OLED Button Text/Icon changed. Old=0x" + Integer.toHexString(mAppliedOledButtonTextIconColor) + ", New=0x" + Integer.toHexString(currentButtonTextIcon));
+                }
+
+                int currentOledAccentGeneral = sharedPreferences.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL);
+                if (mAppliedOledAccentGeneralColor != currentOledAccentGeneral) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED Accent General Color changed. Old=0x" + Integer.toHexString(mAppliedOledAccentGeneralColor) + ", New=0x" + Integer.toHexString(currentOledAccentGeneral));
+                }
+
+                int currentOledGeneralTextSecondary = sharedPreferences.getInt("pref_oled_general_text_secondary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_SECONDARY);
+                if (mAppliedOledGeneralTextSecondaryColor != currentOledGeneralTextSecondary) {
+                    needsRecreate = true;
+                    Log.d(TAG, "onResume: OLED General Text Secondary Color changed. Old=0x" + Integer.toHexString(mAppliedOledGeneralTextSecondaryColor) + ", New=0x" + Integer.toHexString(currentOledGeneralTextSecondary));
                 }
             }
 
