@@ -91,6 +91,17 @@ public class EditFormattingTagActivity extends AppCompatActivity implements Shar
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        // Initialize UI elements FIRST
+        editTextName = findViewById(R.id.edit_tag_name);
+        editTextOpeningTag = findViewById(R.id.edit_tag_opening_text);
+        editTextTagDelayMs = findViewById(R.id.editTextTagDelayMs);
+        checkBoxCtrl = findViewById(R.id.checkbox_modifier_ctrl);
+        checkBoxAlt = findViewById(R.id.checkbox_modifier_alt);
+        checkBoxShift = findViewById(R.id.checkbox_modifier_shift);
+        checkBoxMeta = findViewById(R.id.checkbox_modifier_meta);
+        spinnerMainKey = findViewById(R.id.spinner_main_key);
+        buttonSave = findViewById(R.id.button_save_formatting_tag);
+
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
@@ -154,16 +165,6 @@ public class EditFormattingTagActivity extends AppCompatActivity implements Shar
                 }
             }
         }
-
-        editTextName = findViewById(R.id.edit_tag_name);
-        editTextOpeningTag = findViewById(R.id.edit_tag_opening_text);
-        editTextTagDelayMs = findViewById(R.id.editTextTagDelayMs);
-        checkBoxCtrl = findViewById(R.id.checkbox_modifier_ctrl);
-        checkBoxAlt = findViewById(R.id.checkbox_modifier_alt);
-        checkBoxShift = findViewById(R.id.checkbox_modifier_shift);
-        checkBoxMeta = findViewById(R.id.checkbox_modifier_meta);
-        spinnerMainKey = findViewById(R.id.spinner_main_key);
-        buttonSave = findViewById(R.id.button_save_formatting_tag);
 
         populateMainKeySpinner();
 
