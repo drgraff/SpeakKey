@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff // Keep for original toolbar tint if needed, though DynamicThemeApplicator handles it
 import android.os.Bundle
+import androidx.core.graphics.ColorUtils
 import androidx.core.content.ContextCompat
 import android.util.Log
 import android.view.LayoutInflater
@@ -258,10 +259,45 @@ class MacroListActivity : AppCompatActivity(), SharedPreferences.OnSharedPrefere
             private val deleteButton: ImageButton = itemView.findViewById(R.id.macro_delete_button)
             fun bind(macro: Macro) {
                 nameTextView.text = macro.name
-                activeSwitch.isChecked = macro.isActive
+
+                // OLED Theming for SwitchCompat
+                val prefs = PreferenceManager.getDefaultSharedPreferences(itemView.context)
+                val currentTheme = prefs.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT)
+
+                if (ThemeManager.THEME_OLED == currentTheme) {
+                    val accentColor = prefs.getInt("pref_oled_accent_general", DynamicThemeApplicator.DEFAULT_OLED_ACCENT_GENERAL)
+                    val secondaryTextColor = prefs.getInt("pref_oled_general_text_secondary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_SECONDARY)
+                    val primaryTextColor = prefs.getInt("pref_oled_general_text_primary", DynamicThemeApplicator.DEFAULT_OLED_GENERAL_TEXT_PRIMARY)
+
+                    val thumbTintList = ColorStateList(
+                        arrayOf(
+                            intArrayOf(android.R.attr.state_checked),
+                            intArrayOf(-android.R.attr.state_checked)
+                        ),
+                        intArrayOf(
+                            accentColor,        // Checked
+                            primaryTextColor    // Unchecked
+                        )
+                    )
+
+                    val trackTintList = ColorStateList(
+                        arrayOf(
+                            intArrayOf(android.R.attr.state_checked),
+                            intArrayOf(-android.R.attr.state_checked)
+                        ),
+                        intArrayOf(
+                            ColorUtils.setAlphaComponent(accentColor, 128),        // Checked (50% alpha)
+                            ColorUtils.setAlphaComponent(secondaryTextColor, 128) // Unchecked (50% alpha)
+                        )
+                    )
+                    activeSwitch.thumbTintList = thumbTintList
+                    activeSwitch.trackTintList = trackTintList
+                }
+
                 activeSwitch.setOnCheckedChangeListener(null)
+                activeSwitch.isChecked = macro.isActive
                 activeSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-                    if (buttonView.isPressed) {
+                    if (buttonView.isPressed) { // Only trigger if user interacts
                          onActiveChanged(macro, isChecked)
                     }
                 }
