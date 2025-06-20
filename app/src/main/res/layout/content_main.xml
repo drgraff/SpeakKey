@@ -179,24 +179,27 @@
             android:layout_marginTop="0dp"
             android:layout_marginBottom="2dp">
 
-            <EditText
-                android:id="@+id/whisper_text"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="180dp"
                 android:layout_weight="1"
-                android:background="@color/edit_text_background"
-                android:hint="Transcribed text will appear here"
-                android:padding="8dp"
-                android:gravity="top|start"
-                android:inputType="textMultiLine"
-                android:drawableEnd="?android:attr/actionModeWebSearchDrawable"
-                android:focusable="false"
-                android:clickable="true"
-                android:scrollbars="vertical"
-                android:fadeScrollbars="false"
-                android:nestedScrollingEnabled="true"
-                android:minLines="3"
-                android:maxLines="100"/>
+                android:hint="Transcribed text will appear here">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/whisper_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine"
+                    android:drawableEnd="?android:attr/actionModeWebSearchDrawable"
+                    android:focusable="false"
+                    android:clickable="true"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false"
+                    android:nestedScrollingEnabled="true"
+                    android:minLines="3"
+                    android:maxLines="100"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -356,24 +359,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/inputstick_controls">
 
-        <EditText
-            android:id="@+id/chatgpt_text"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="180dp"
             android:layout_weight="1"
-            android:background="@color/edit_text_background"
-            android:hint="ChatGPT response will appear here"
-            android:padding="8dp"
-            android:gravity="top|start"
-            android:inputType="textMultiLine"
-            android:drawableEnd="?android:attr/actionModeWebSearchDrawable"
-            android:focusable="false"
-            android:clickable="true"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="false"
-            android:nestedScrollingEnabled="true"
-            android:minLines="3"
-            android:maxLines="100"/>
+            android:hint="ChatGPT response will appear here">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/chatgpt_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top|start"
+                android:inputType="textMultiLine"
+                android:drawableEnd="?android:attr/actionModeWebSearchDrawable"
+                android:focusable="false"
+                android:clickable="true"
+                android:scrollbars="vertical"
+                android:fadeScrollbars="false"
+                android:nestedScrollingEnabled="true"
+                android:minLines="3"
+                android:maxLines="100"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
