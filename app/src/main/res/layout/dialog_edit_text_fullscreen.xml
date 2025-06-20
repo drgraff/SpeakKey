@@ -26,7 +26,6 @@
 
     <Button
         android:id="@+id/btn_save_fullscreen_edit"
-        style="@style/Widget.App.Button.OLED.Dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
