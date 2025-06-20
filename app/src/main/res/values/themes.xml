@@ -82,7 +82,7 @@
 
     <!-- TextInputLayout style for OLED -->
     <style name="Widget.App.TextInputLayout.OLED" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/oled_primary</item>
+        <item name="boxStrokeColor">@color/oled_textinput_border_color</item> <!-- Changed to ColorStateList -->
         <item name="hintTextColor">@color/oled_text_secondary</item>
     </style>
 
