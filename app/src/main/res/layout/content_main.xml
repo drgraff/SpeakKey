@@ -162,21 +162,12 @@
             android:visibility="gone"
             android:layout_marginBottom="4dp"/>
 
-        <!-- Whisper Section Label -->
-        <TextView
-            android:id="@+id/whisper_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Whisper Transcription"
-            android:layout_marginTop="4dp"
-            android:textStyle="bold" />
-
         <LinearLayout
             android:id="@+id/whisper_text_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="4dp"
             android:layout_marginBottom="2dp">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -337,25 +328,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ChatGPT Section -->
-    <TextView
-        android:id="@+id/chatgpt_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ChatGPT Response"
-        android:layout_marginTop="2dp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/textViewChatGptStatus"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <LinearLayout
         android:id="@+id/chatgpt_text_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="2dp"
-        app:layout_constraintTop_toBottomOf="@id/chatgpt_label"
+        app:layout_constraintTop_toBottomOf="@id/textViewChatGptStatus"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/inputstick_controls">
