@@ -137,6 +137,66 @@ public class OledThemeSettingsFragment extends PreferenceFragmentCompat {
         mutedModernColors.put("pref_oled_textbox_accent", Color.parseColor("#B0BEC5"));
         mutedModernColors.put("pref_oled_accent_general", Color.parseColor("#FF7043"));
         PRESET_COLORS.put("muted_modern", mutedModernColors);
+
+        // Add Ocean (New)
+        Map<String, Integer> oceanColorsNew = new HashMap<>();
+        oceanColorsNew.put("pref_oled_topbar_background", Color.parseColor("#0D47A1"));
+        oceanColorsNew.put("pref_oled_topbar_text_icon", Color.parseColor("#BBDEFB"));
+        oceanColorsNew.put("pref_oled_main_background", Color.parseColor("#000000"));
+        oceanColorsNew.put("pref_oled_surface_background", Color.parseColor("#011C30"));
+        oceanColorsNew.put("pref_oled_general_text_primary", Color.parseColor("#90CAF9"));
+        oceanColorsNew.put("pref_oled_general_text_secondary", Color.parseColor("#64B5F6"));
+        oceanColorsNew.put("pref_oled_button_background", Color.parseColor("#1976D2"));
+        oceanColorsNew.put("pref_oled_button_text_icon", Color.parseColor("#E3F2FD"));
+        oceanColorsNew.put("pref_oled_textbox_background", Color.parseColor("#E8F5E9")); // Note: This was light green in prompt
+        oceanColorsNew.put("pref_oled_textbox_accent", Color.parseColor("#0D47A1"));
+        oceanColorsNew.put("pref_oled_accent_general", Color.parseColor("#29B6F6"));
+        PRESET_COLORS.put("ocean", oceanColorsNew); // Key "ocean"
+
+        // Add Forest (New)
+        Map<String, Integer> forestColorsNew = new HashMap<>();
+        forestColorsNew.put("pref_oled_topbar_background", Color.parseColor("#1B5E20"));
+        forestColorsNew.put("pref_oled_topbar_text_icon", Color.parseColor("#C8E6C9"));
+        forestColorsNew.put("pref_oled_main_background", Color.parseColor("#000000"));
+        forestColorsNew.put("pref_oled_surface_background", Color.parseColor("#002000"));
+        forestColorsNew.put("pref_oled_general_text_primary", Color.parseColor("#A5D6A7"));
+        forestColorsNew.put("pref_oled_general_text_secondary", Color.parseColor("#81C784"));
+        forestColorsNew.put("pref_oled_button_background", Color.parseColor("#388E3C"));
+        forestColorsNew.put("pref_oled_button_text_icon", Color.parseColor("#E8F5E9"));
+        forestColorsNew.put("pref_oled_textbox_background", Color.parseColor("#E8F5E9"));
+        forestColorsNew.put("pref_oled_textbox_accent", Color.parseColor("#1B5E20"));
+        forestColorsNew.put("pref_oled_accent_general", Color.parseColor("#FFC107"));
+        PRESET_COLORS.put("forest", forestColorsNew); // Key "forest"
+
+        // Add Solar Flare
+        Map<String, Integer> solarFlareColors = new HashMap<>();
+        solarFlareColors.put("pref_oled_topbar_background", Color.parseColor("#FF8C00"));
+        solarFlareColors.put("pref_oled_topbar_text_icon", Color.parseColor("#FFF8E1"));
+        solarFlareColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        solarFlareColors.put("pref_oled_surface_background", Color.parseColor("#1A1200"));
+        solarFlareColors.put("pref_oled_general_text_primary", Color.parseColor("#FFE082"));
+        solarFlareColors.put("pref_oled_general_text_secondary", Color.parseColor("#FFAB40"));
+        solarFlareColors.put("pref_oled_button_background", Color.parseColor("#FF8C00"));
+        solarFlareColors.put("pref_oled_button_text_icon", Color.parseColor("#FFF8E1"));
+        solarFlareColors.put("pref_oled_textbox_background", Color.parseColor("#FFD54F"));
+        solarFlareColors.put("pref_oled_textbox_accent", Color.parseColor("#FF6F00"));
+        solarFlareColors.put("pref_oled_accent_general", Color.parseColor("#FFB300"));
+        PRESET_COLORS.put("solar_flare", solarFlareColors);
+
+        // Add Cyberpunk
+        Map<String, Integer> cyberpunkColors = new HashMap<>();
+        cyberpunkColors.put("pref_oled_topbar_background", Color.parseColor("#7B1FA2"));
+        cyberpunkColors.put("pref_oled_topbar_text_icon", Color.parseColor("#F8BBD0"));
+        cyberpunkColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        cyberpunkColors.put("pref_oled_surface_background", Color.parseColor("#10001A"));
+        cyberpunkColors.put("pref_oled_general_text_primary", Color.parseColor("#CE93D8"));
+        cyberpunkColors.put("pref_oled_general_text_secondary", Color.parseColor("#F48FB1"));
+        cyberpunkColors.put("pref_oled_button_background", Color.parseColor("#EC407A"));
+        cyberpunkColors.put("pref_oled_button_text_icon", Color.parseColor("#FCE4EC"));
+        cyberpunkColors.put("pref_oled_textbox_background", Color.parseColor("#F8BBD0"));
+        cyberpunkColors.put("pref_oled_textbox_accent", Color.parseColor("#7B1FA2"));
+        cyberpunkColors.put("pref_oled_accent_general", Color.parseColor("#00BCD4"));
+        PRESET_COLORS.put("cyberpunk", cyberpunkColors);
     }
 
     public static Map<String, Integer> getPresetColors(String presetName) {

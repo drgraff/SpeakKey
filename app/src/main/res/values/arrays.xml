@@ -81,6 +81,11 @@
         <item>Mono + Accent</item>
         <item>Retro CRT</item>
         <item>Muted Modern</item>
+        <!-- New entries -->
+        <item>Ocean</item>
+        <item>Forest</item>
+        <item>Solar Flare</item>
+        <item>Cyberpunk</item>
     </string-array>
     <string-array name="oled_color_preset_entry_values">
         <item>custom</item>
@@ -92,5 +97,10 @@
         <item>mono_accent</item>
         <item>retro_crt</item>
         <item>muted_modern</item>
+        <!-- New entry values -->
+        <item>ocean</item>
+        <item>forest</item>
+        <item>solar_flare</item>
+        <item>cyberpunk</item>
     </string-array>
 </resources>
