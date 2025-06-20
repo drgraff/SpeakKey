@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused and enabled state -->
+    <item android:color="@color/oled_primary" android:state_focused="true" android:state_enabled="true"/>
+    <!-- Unfocused and enabled state (default) -->
+    <item android:color="@color/oled_text_secondary" android:state_enabled="true"/>
+    <!-- Disabled state -->
+    <item android:color="@color/gray" android:state_enabled="false"/>
+    <!-- Default fallback (should ideally be covered by enabled states) -->
+    <item android:color="@color/oled_text_secondary"/>
+</selector>
