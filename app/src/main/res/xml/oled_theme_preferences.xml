@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"> <!-- Assuming app namespace might be used by ColorPickerPreference or other custom prefs if not already declared -->
+
+    <ListPreference
+        android:key="pref_oled_color_preset"
+        android:title="Color Preset"
+        android:summary="Select a predefined color scheme"
+        android:entries="@array/oled_color_preset_entries"
+        android:entryValues="@array/oled_color_preset_entry_values"
+        android:defaultValue="custom" />
 
     <PreferenceCategory android:title="OLED Theme Customizations">
 
