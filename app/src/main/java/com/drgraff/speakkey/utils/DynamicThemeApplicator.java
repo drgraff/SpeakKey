@@ -71,12 +71,14 @@ public class DynamicThemeApplicator {
         // Apply colors to Window elements
         activity.getWindow().setStatusBarColor(mainBackgroundColor);
         activity.getWindow().setNavigationBarColor(mainBackgroundColor);
+        Log.d(TAG, "applyOledColors: Attempting to set DecorView background to: 0x" + Integer.toHexString(mainBackgroundColor));
         activity.getWindow().getDecorView().setBackgroundColor(mainBackgroundColor);
 
         // Apply colors to Toolbar
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
         if (toolbar != null) {
             Log.d(TAG, "Toolbar found, applying new grouped colors.");
+            Log.d(TAG, "applyOledColors: Attempting to set Toolbar background to: 0x" + Integer.toHexString(topbarBackgroundColor));
             toolbar.setBackgroundColor(topbarBackgroundColor);
             toolbar.setTitleTextColor(topbarTextIconColor);
             if (toolbar.getNavigationIcon() != null) {

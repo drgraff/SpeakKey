@@ -73,6 +73,14 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        View decorView = getWindow().getDecorView();
+        android.graphics.drawable.Drawable background = decorView.getBackground();
+        String actualBackgroundColor = "#UNKNOWN";
+        if (background instanceof android.graphics.drawable.ColorDrawable) {
+            actualBackgroundColor = String.format("#%08X", ((android.graphics.drawable.ColorDrawable) background).getColor());
+        }
+        Log.d(TAG_ACTIVITY, "onCreate after setContentView: DecorView background color: " + actualBackgroundColor);
+
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         
@@ -93,18 +101,19 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
         // Apply custom OLED colors if OLED theme is active
         String currentActivityThemeValue = this.sharedPreferences.getString(ThemeManager.PREF_KEY_DARK_MODE, ThemeManager.THEME_DEFAULT);
         if (ThemeManager.THEME_OLED.equals(currentActivityThemeValue)) {
+            Log.d(TAG_ACTIVITY, "onCreate: OLED mode confirmed. Calling DynamicThemeApplicator.applyOledColors(). Prefs: TopbarBG=0x" + Integer.toHexString(sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)) + ", MainBG=0x" + Integer.toHexString(sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)));
             DynamicThemeApplicator.applyOledColors(this, this.sharedPreferences);
             this.mAppliedThemeMode = currentActivityThemeValue; // Store the theme mode applied
             this.mAppliedTopbarBackgroundColor = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
             this.mAppliedTopbarTextIconColor = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
             this.mAppliedMainBackgroundColor = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
-            Log.d(TAG_ACTIVITY, "onCreate: Stored mApplied OLED colors for activity frame.");
+            Log.d(TAG_ACTIVITY, "onCreate: Stored mApplied OLED colors for activity frame. TopbarBG=0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) + ", TopbarText=0x" + Integer.toHexString(mAppliedTopbarTextIconColor) + ", MainBG=0x" + Integer.toHexString(mAppliedMainBackgroundColor));
         } else { // If not OLED theme
             this.mAppliedThemeMode = currentActivityThemeValue; // Store the non-OLED theme mode
             this.mAppliedTopbarBackgroundColor = 0; // Reset
             this.mAppliedTopbarTextIconColor = 0;   // Reset
             this.mAppliedMainBackgroundColor = 0;   // Reset
-            Log.d(TAG_ACTIVITY, "onCreate: Not OLED mode, mApplied colors reset.");
+            Log.d(TAG_ACTIVITY, "onCreate: Not OLED mode, mApplied colors reset for activity frame.");
         }
     }
 
@@ -124,17 +133,20 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                 needsRecreate = true;
                 Log.d(TAG_ACTIVITY, "onResume: Theme mode changed. OldMode=" + mAppliedThemeMode + ", NewMode=" + currentThemeValue);
             } else if (ThemeManager.THEME_OLED.equals(currentThemeValue)) {
-                if (mAppliedTopbarBackgroundColor != this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND)) {
+                int currentTopbarBgFromPrefs = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
+                if (mAppliedTopbarBackgroundColor != currentTopbarBgFromPrefs) {
                     needsRecreate = true;
-                    Log.d(TAG_ACTIVITY, "onResume: OLED Topbar Background Color changed.");
+                    Log.d(TAG_ACTIVITY, "onResume: OLED Topbar Background Color changed. Stored: 0x" + Integer.toHexString(mAppliedTopbarBackgroundColor) + ", Current Pref: 0x" + Integer.toHexString(currentTopbarBgFromPrefs));
                 }
-                if (mAppliedTopbarTextIconColor != this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON)) {
+                int currentTopbarTextIconFromPrefs = this.sharedPreferences.getInt("pref_oled_topbar_text_icon", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_TEXT_ICON);
+                if (mAppliedTopbarTextIconColor != currentTopbarTextIconFromPrefs) {
                     needsRecreate = true;
-                    Log.d(TAG_ACTIVITY, "onResume: OLED Topbar Text/Icon Color changed.");
+                    Log.d(TAG_ACTIVITY, "onResume: OLED Topbar Text/Icon Color changed. Stored: 0x" + Integer.toHexString(mAppliedTopbarTextIconColor) + ", Current Pref: 0x" + Integer.toHexString(currentTopbarTextIconFromPrefs));
                 }
-                if (mAppliedMainBackgroundColor != this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND)) {
+                int currentMainBgFromPrefs = this.sharedPreferences.getInt("pref_oled_main_background", DynamicThemeApplicator.DEFAULT_OLED_MAIN_BACKGROUND);
+                if (mAppliedMainBackgroundColor != currentMainBgFromPrefs) {
                     needsRecreate = true;
-                    Log.d(TAG_ACTIVITY, "onResume: OLED Main Background Color changed.");
+                    Log.d(TAG_ACTIVITY, "onResume: OLED Main Background Color changed. Stored: 0x" + Integer.toHexString(mAppliedMainBackgroundColor) + ", Current Pref: 0x" + Integer.toHexString(currentMainBgFromPrefs));
                 }
             }
 
