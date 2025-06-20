@@ -4,17 +4,24 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/edit_text_fullscreen_content"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_layout_fullscreen"
+        style="@style/Widget.App.TextInputLayout.OLED"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/btn_save_fullscreen_edit"
         android:layout_alignParentTop="true"
-        android:gravity="top|start"
-        android:inputType="textMultiLine"
-        android:padding="8dp"
-        android:scrollbars="vertical"
-        android:hint="Enter text here..."/>
+        android:hint="Enter text here...">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text_fullscreen_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:scrollbars="vertical"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btn_save_fullscreen_edit"
