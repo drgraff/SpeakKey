@@ -73,14 +73,24 @@
     <!-- OLED Color Preset Options -->
     <string-array name="oled_color_preset_entries">
         <item>Custom</item>
-        <item>Neon</item>
-        <item>Forest</item>
-        <item>Ocean</item>
+        <item>Neon Noir</item>
+        <item>Frosted Glass</item>
+        <item>Pastels</item>
+        <item>Earthtones</item>
+        <item>Imperial Jade</item>
+        <item>Mono + Accent</item>
+        <item>Retro CRT</item>
+        <item>Muted Modern</item>
     </string-array>
     <string-array name="oled_color_preset_entry_values">
         <item>custom</item>
-        <item>neon</item>
-        <item>forest</item>
-        <item>ocean</item>
+        <item>neon_noir</item>
+        <item>frosted_glass</item>
+        <item>pastels</item>
+        <item>earthtones</item>
+        <item>imperial_jade</item>
+        <item>mono_accent</item>
+        <item>retro_crt</item>
+        <item>muted_modern</item>
     </string-array>
 </resources>

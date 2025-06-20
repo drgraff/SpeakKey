@@ -24,47 +24,119 @@ public class OledThemeSettingsFragment extends PreferenceFragmentCompat {
     private static final Map<String, Map<String, Integer>> PRESET_COLORS = new HashMap<>();
 
     static {
-        Map<String, Integer> neonColors = new HashMap<>();
-        neonColors.put("pref_oled_topbar_background", Color.parseColor("#FF00FF")); // Magenta
-        neonColors.put("pref_oled_topbar_text_icon", Color.parseColor("#000000"));    // Black
-        neonColors.put("pref_oled_main_background", Color.parseColor("#000000"));      // Black
-        neonColors.put("pref_oled_surface_background", Color.parseColor("#1A1A1A"));  // Dark Grey
-        neonColors.put("pref_oled_general_text_primary", Color.parseColor("#00FF00")); // Lime Green
-        neonColors.put("pref_oled_general_text_secondary", Color.parseColor("#A0FFA0"));// Light Lime
-        neonColors.put("pref_oled_button_background", Color.parseColor("#FFFF00"));    // Yellow
-        neonColors.put("pref_oled_button_text_icon", Color.parseColor("#000000"));    // Black
-        neonColors.put("pref_oled_textbox_background", Color.parseColor("#101010"));  // Very Dark Grey
-        neonColors.put("pref_oled_textbox_accent", Color.parseColor("#FF00FF"));       // Magenta
-        neonColors.put("pref_oled_accent_general", Color.parseColor("#00FFFF"));       // Cyan accent
-        PRESET_COLORS.put("neon", neonColors);
+        PRESET_COLORS.clear(); // Clear old presets if any
 
-        Map<String, Integer> forestColors = new HashMap<>();
-        forestColors.put("pref_oled_topbar_background", Color.parseColor("#2E7D32")); // Dark Green
-        forestColors.put("pref_oled_topbar_text_icon", Color.parseColor("#FFFFFF"));    // White
-        forestColors.put("pref_oled_main_background", Color.parseColor("#000000"));      // Black
-        forestColors.put("pref_oled_surface_background", Color.parseColor("#101010"));  // Very Dark Grey
-        forestColors.put("pref_oled_general_text_primary", Color.parseColor("#A5D6A7")); // Light Green
-        forestColors.put("pref_oled_general_text_secondary", Color.parseColor("#81C784"));// Medium Light Green
-        forestColors.put("pref_oled_button_background", Color.parseColor("#558B2F"));    // Olive Green
-        forestColors.put("pref_oled_button_text_icon", Color.parseColor("#FFFFFF"));    // White
-        forestColors.put("pref_oled_textbox_background", Color.parseColor("#0A0A0A"));  // Near Black
-        forestColors.put("pref_oled_textbox_accent", Color.parseColor("#A5D6A7"));       // Light Green
-        forestColors.put("pref_oled_accent_general", Color.parseColor("#FFB300"));       // Amber accent
-        PRESET_COLORS.put("forest", forestColors);
+        Map<String, Integer> neonNoirColors = new HashMap<>();
+        neonNoirColors.put("pref_oled_topbar_background", Color.parseColor("#FF00A0"));
+        neonNoirColors.put("pref_oled_topbar_text_icon", Color.parseColor("#00FFFF"));
+        neonNoirColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        neonNoirColors.put("pref_oled_surface_background", Color.parseColor("#1A1A1A"));
+        neonNoirColors.put("pref_oled_general_text_primary", Color.parseColor("#00FFFF"));
+        neonNoirColors.put("pref_oled_general_text_secondary", Color.parseColor("#9D00FF"));
+        neonNoirColors.put("pref_oled_button_background", Color.parseColor("#FF00A0"));
+        neonNoirColors.put("pref_oled_button_text_icon", Color.parseColor("#00FFFF"));
+        neonNoirColors.put("pref_oled_textbox_background", Color.parseColor("#B6FF00"));
+        neonNoirColors.put("pref_oled_textbox_accent", Color.parseColor("#9D00FF"));
+        neonNoirColors.put("pref_oled_accent_general", Color.parseColor("#B6FF00"));
+        PRESET_COLORS.put("neon_noir", neonNoirColors);
 
-        Map<String, Integer> oceanColors = new HashMap<>();
-        oceanColors.put("pref_oled_topbar_background", Color.parseColor("#0277BD")); // Deep Blue
-        oceanColors.put("pref_oled_topbar_text_icon", Color.parseColor("#FFFFFF"));    // White
-        oceanColors.put("pref_oled_main_background", Color.parseColor("#000000"));      // Black
-        oceanColors.put("pref_oled_surface_background", Color.parseColor("#0D0D0D"));  // Dark Grey
-        oceanColors.put("pref_oled_general_text_primary", Color.parseColor("#B3E5FC")); // Light Sky Blue
-        oceanColors.put("pref_oled_general_text_secondary", Color.parseColor("#81D4FA"));// Medium Sky Blue
-        oceanColors.put("pref_oled_button_background", Color.parseColor("#039BE5"));    // Bright Blue
-        oceanColors.put("pref_oled_button_text_icon", Color.parseColor("#FFFFFF"));    // White
-        oceanColors.put("pref_oled_textbox_background", Color.parseColor("#0A0A0A"));  // Near Black
-        oceanColors.put("pref_oled_textbox_accent", Color.parseColor("#81D4FA"));       // Medium Sky Blue
-        oceanColors.put("pref_oled_accent_general", Color.parseColor("#FFCA28"));       // Amber/Gold accent
-        PRESET_COLORS.put("ocean", oceanColors);
+        Map<String, Integer> frostedGlassColors = new HashMap<>();
+        frostedGlassColors.put("pref_oled_topbar_background", Color.parseColor("#E0E0E0"));
+        frostedGlassColors.put("pref_oled_topbar_text_icon", Color.parseColor("#000000"));
+        frostedGlassColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        frostedGlassColors.put("pref_oled_surface_background", Color.parseColor("#202020"));
+        frostedGlassColors.put("pref_oled_general_text_primary", Color.parseColor("#FFFFFF"));
+        frostedGlassColors.put("pref_oled_general_text_secondary", Color.parseColor("#B0B0B0"));
+        frostedGlassColors.put("pref_oled_button_background", Color.parseColor("#757575"));
+        frostedGlassColors.put("pref_oled_button_text_icon", Color.parseColor("#FFFFFF"));
+        frostedGlassColors.put("pref_oled_textbox_background", Color.parseColor("#252525"));
+        frostedGlassColors.put("pref_oled_textbox_accent", Color.parseColor("#E0E0E0"));
+        frostedGlassColors.put("pref_oled_accent_general", Color.parseColor("#9E9E9E"));
+        PRESET_COLORS.put("frosted_glass", frostedGlassColors);
+
+        Map<String, Integer> pastelsColors = new HashMap<>();
+        pastelsColors.put("pref_oled_topbar_background", Color.parseColor("#FFCDD2"));
+        pastelsColors.put("pref_oled_topbar_text_icon", Color.parseColor("#4E342E"));
+        pastelsColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        pastelsColors.put("pref_oled_surface_background", Color.parseColor("#1C1C1C"));
+        pastelsColors.put("pref_oled_general_text_primary", Color.parseColor("#E1BEE7"));
+        pastelsColors.put("pref_oled_general_text_secondary", Color.parseColor("#CFD8DC"));
+        pastelsColors.put("pref_oled_button_background", Color.parseColor("#C8E6C9"));
+        pastelsColors.put("pref_oled_button_text_icon", Color.parseColor("#3E2723"));
+        pastelsColors.put("pref_oled_textbox_background", Color.parseColor("#151515"));
+        pastelsColors.put("pref_oled_textbox_accent", Color.parseColor("#B3E5FC"));
+        pastelsColors.put("pref_oled_accent_general", Color.parseColor("#FFF59D"));
+        PRESET_COLORS.put("pastels", pastelsColors);
+
+        Map<String, Integer> earthtonesColors = new HashMap<>();
+        earthtonesColors.put("pref_oled_topbar_background", Color.parseColor("#5D4037"));
+        earthtonesColors.put("pref_oled_topbar_text_icon", Color.parseColor("#D7CCC8"));
+        earthtonesColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        earthtonesColors.put("pref_oled_surface_background", Color.parseColor("#1E1E1E"));
+        earthtonesColors.put("pref_oled_general_text_primary", Color.parseColor("#A1887F"));
+        earthtonesColors.put("pref_oled_general_text_secondary", Color.parseColor("#BCAAA4"));
+        earthtonesColors.put("pref_oled_button_background", Color.parseColor("#795548"));
+        earthtonesColors.put("pref_oled_button_text_icon", Color.parseColor("#FFFFFF"));
+        earthtonesColors.put("pref_oled_textbox_background", Color.parseColor("#121212"));
+        earthtonesColors.put("pref_oled_textbox_accent", Color.parseColor("#8D6E63"));
+        earthtonesColors.put("pref_oled_accent_general", Color.parseColor("#FFAB40"));
+        PRESET_COLORS.put("earthtones", earthtonesColors);
+
+        Map<String, Integer> imperialJadeColors = new HashMap<>();
+        imperialJadeColors.put("pref_oled_topbar_background", Color.parseColor("#2E7D32"));
+        imperialJadeColors.put("pref_oled_topbar_text_icon", Color.parseColor("#FFEB3B"));
+        imperialJadeColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        imperialJadeColors.put("pref_oled_surface_background", Color.parseColor("#0A0A0A"));
+        imperialJadeColors.put("pref_oled_general_text_primary", Color.parseColor("#C8E6C9"));
+        imperialJadeColors.put("pref_oled_general_text_secondary", Color.parseColor("#A5D6A7"));
+        imperialJadeColors.put("pref_oled_button_background", Color.parseColor("#FFC107"));
+        imperialJadeColors.put("pref_oled_button_text_icon", Color.parseColor("#000000"));
+        imperialJadeColors.put("pref_oled_textbox_background", Color.parseColor("#050505"));
+        imperialJadeColors.put("pref_oled_textbox_accent", Color.parseColor("#FFEB3B"));
+        imperialJadeColors.put("pref_oled_accent_general", Color.parseColor("#B71C1C"));
+        PRESET_COLORS.put("imperial_jade", imperialJadeColors);
+
+        Map<String, Integer> monoAccentColors = new HashMap<>();
+        monoAccentColors.put("pref_oled_topbar_background", Color.parseColor("#212121"));
+        monoAccentColors.put("pref_oled_topbar_text_icon", Color.parseColor("#FFFFFF"));
+        monoAccentColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        monoAccentColors.put("pref_oled_surface_background", Color.parseColor("#101010"));
+        monoAccentColors.put("pref_oled_general_text_primary", Color.parseColor("#E0E0E0"));
+        monoAccentColors.put("pref_oled_general_text_secondary", Color.parseColor("#9E9E9E"));
+        monoAccentColors.put("pref_oled_button_background", Color.parseColor("#FBC02D"));
+        monoAccentColors.put("pref_oled_button_text_icon", Color.parseColor("#000000"));
+        monoAccentColors.put("pref_oled_textbox_background", Color.parseColor("#080808"));
+        monoAccentColors.put("pref_oled_textbox_accent", Color.parseColor("#FBC02D"));
+        monoAccentColors.put("pref_oled_accent_general", Color.parseColor("#FBC02D"));
+        PRESET_COLORS.put("mono_accent", monoAccentColors);
+
+        Map<String, Integer> retroCrtColors = new HashMap<>();
+        retroCrtColors.put("pref_oled_topbar_background", Color.parseColor("#001000"));
+        retroCrtColors.put("pref_oled_topbar_text_icon", Color.parseColor("#00FF00"));
+        retroCrtColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        retroCrtColors.put("pref_oled_surface_background", Color.parseColor("#000500"));
+        retroCrtColors.put("pref_oled_general_text_primary", Color.parseColor("#00C000"));
+        retroCrtColors.put("pref_oled_general_text_secondary", Color.parseColor("#00A000"));
+        retroCrtColors.put("pref_oled_button_background", Color.parseColor("#003000"));
+        retroCrtColors.put("pref_oled_button_text_icon", Color.parseColor("#00FF00"));
+        retroCrtColors.put("pref_oled_textbox_background", Color.parseColor("#000300"));
+        retroCrtColors.put("pref_oled_textbox_accent", Color.parseColor("#00FF00"));
+        retroCrtColors.put("pref_oled_accent_general", Color.parseColor("#00FF00"));
+        PRESET_COLORS.put("retro_crt", retroCrtColors);
+
+        Map<String, Integer> mutedModernColors = new HashMap<>();
+        mutedModernColors.put("pref_oled_topbar_background", Color.parseColor("#455A64"));
+        mutedModernColors.put("pref_oled_topbar_text_icon", Color.parseColor("#CFD8DC"));
+        mutedModernColors.put("pref_oled_main_background", Color.parseColor("#000000"));
+        mutedModernColors.put("pref_oled_surface_background", Color.parseColor("#102027"));
+        mutedModernColors.put("pref_oled_general_text_primary", Color.parseColor("#B0BEC5"));
+        mutedModernColors.put("pref_oled_general_text_secondary", Color.parseColor("#78909C"));
+        mutedModernColors.put("pref_oled_button_background", Color.parseColor("#546E7A"));
+        mutedModernColors.put("pref_oled_button_text_icon", Color.parseColor("#ECEFF1"));
+        mutedModernColors.put("pref_oled_textbox_background", Color.parseColor("#0A1014"));
+        mutedModernColors.put("pref_oled_textbox_accent", Color.parseColor("#B0BEC5"));
+        mutedModernColors.put("pref_oled_accent_general", Color.parseColor("#FF7043"));
+        PRESET_COLORS.put("muted_modern", mutedModernColors);
     }
 
     public static Map<String, Integer> getPresetColors(String presetName) {
