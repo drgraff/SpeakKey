@@ -69,4 +69,18 @@
         <item>oled</item>
         <item>default</item>
     </string-array>
+
+    <!-- OLED Color Preset Options -->
+    <string-array name="oled_color_preset_entries">
+        <item>Custom</item>
+        <item>Neon</item>
+        <item>Forest</item>
+        <item>Ocean</item>
+    </string-array>
+    <string-array name="oled_color_preset_entry_values">
+        <item>custom</item>
+        <item>neon</item>
+        <item>forest</item>
+        <item>ocean</item>
+    </string-array>
 </resources>
