@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="?android:attr/colorBackground">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/text_input_layout_fullscreen"
@@ -25,6 +26,7 @@
 
     <Button
         android:id="@+id/btn_save_fullscreen_edit"
+        style="@style/Widget.App.Button.OLED.Dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

@@ -99,4 +99,12 @@
         <item name="navigationIconTint">@color/oled_icon_tint</item> <!-- For Up button, etc. -->
         <item name="iconTint">@color/oled_icon_tint</item> <!-- For menu items if not overridden by action menu style -->
     </style>
+
+    <!-- Button style for OLED Dialogs -->
+    <style name="Widget.App.Button.OLED.Dialog" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/oled_surface</item> <!-- Or @color/oled_edit_text_background -->
+        <item name="android:textColor">@color/oled_primary</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+    </style>
 </resources>
