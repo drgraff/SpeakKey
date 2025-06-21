@@ -81,11 +81,16 @@
         <item>Mono + Accent</item>
         <item>Retro CRT</item>
         <item>Muted Modern</item>
-        <!-- New entries -->
         <item>Ocean</item>
         <item>Forest</item>
         <item>Solar Flare</item>
         <item>Cyberpunk</item>
+        <!-- Added from JSON -->
+        <item>Desert Dusk</item>
+        <item>Minimal Luxe</item>
+        <item>Aurora</item>
+        <item>Void</item>
+        <item>Candy Pop</item>
     </string-array>
     <string-array name="oled_color_preset_entry_values">
         <item>custom</item>
@@ -97,10 +102,15 @@
         <item>mono_accent</item>
         <item>retro_crt</item>
         <item>muted_modern</item>
-        <!-- New entry values -->
         <item>ocean</item>
         <item>forest</item>
         <item>solar_flare</item>
         <item>cyberpunk</item>
+        <!-- Added from JSON -->
+        <item>desert_dusk</item>
+        <item>minimal_luxe</item>
+        <item>aurora</item>
+        <item>void</item>
+        <item>candy_pop</item>
     </string-array>
 </resources>
