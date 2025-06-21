@@ -133,6 +133,23 @@
         <service
             android:name=".service.UploadService"
             android:exported="false" />
+
+        <activity
+            android:name=".ShareDispatcherActivity"
+            android:label="Share to SpeakKey"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+        </activity>
     </application>
 
     <queries>
