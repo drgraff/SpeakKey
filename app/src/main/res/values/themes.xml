@@ -112,7 +112,7 @@
     <style name="Widget.App.Button.OLED.PrimaryAction" parent="Widget.MaterialComponents.Button">
         <item name="android:backgroundTint">@color/oled_secondary</item> <!-- Cyan background -->
         <item name="android:textColor">@color/black</item>           <!-- Black text -->
-        <item name="app:iconTint">@color/black</item>                <!-- Black icon tint -->
+        <item name="iconTint">@color/black</item>                <!-- Black icon tint (Corrected) -->
         <item name="android:paddingLeft">16dp</item>
         <item name="android:paddingRight">16dp</item>
     </style>
