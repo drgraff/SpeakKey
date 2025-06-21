@@ -102,11 +102,13 @@ public class ShareDispatcherActivity extends AppCompatActivity {
                 UploadService.startUploadService(ShareDispatcherActivity.this);
             });
 
-            Toast.makeText(this, "Audio shared for transcription.", Toast.LENGTH_LONG).show();
-            // Optionally, navigate to MainActivity
-            // Intent mainActivityIntent = new Intent(this, MainActivity.class);
-            // mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            // startActivity(mainActivityIntent);
+            Toast.makeText(this, "Audio shared for transcription. Opening app...", Toast.LENGTH_LONG).show();
+
+            // Navigate to MainActivity
+            Intent mainActivityIntent = new Intent(this, MainActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Or FLAG_ACTIVITY_REORDER_TO_FRONT
+            startActivity(mainActivityIntent);
+
         } else {
             Log.e(TAG, "Failed to copy shared audio file locally.");
             Toast.makeText(this, "Failed to process shared audio.", Toast.LENGTH_SHORT).show();
