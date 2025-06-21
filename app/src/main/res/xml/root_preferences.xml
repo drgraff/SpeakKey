@@ -110,6 +110,14 @@
             android:title="@string/settings_auto_send_inputstick_title"
             android:summary="@string/settings_auto_send_inputstick_summary"
             android:defaultValue="false" />
+
+        <ListPreference
+            android:key="pref_macro_button_height"
+            android:title="Macro Button Height"
+            android:summary="%s"
+            android:entries="@array/macro_button_height_entries"
+            android:entryValues="@array/macro_button_height_values"
+            android:defaultValue="medium" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="InputStick Text Formatting">

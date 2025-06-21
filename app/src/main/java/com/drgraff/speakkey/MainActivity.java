@@ -1764,9 +1764,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             button.setText(macro.getName());
             button.setEllipsize(TextUtils.TruncateAt.END); // Ellipsize long text
             button.setMaxLines(2); // Allow up to 2 lines, then ellipsize
+
+            // Get preferred button height
+            String buttonHeightSetting = sharedPreferences.getString("pref_macro_button_height", "medium");
+            int buttonHeightInPx;
+            switch (buttonHeightSetting) {
+                case "small":
+                    buttonHeightInPx = (int) getResources().getDimension(R.dimen.macro_button_height_small);
+                    break;
+                case "large":
+                    buttonHeightInPx = (int) getResources().getDimension(R.dimen.macro_button_height_large);
+                    break;
+                case "medium":
+                default:
+                    buttonHeightInPx = (int) getResources().getDimension(R.dimen.macro_button_height_medium);
+                    break;
+            }
+
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     0, // width
-                    LinearLayout.LayoutParams.WRAP_CONTENT, // height
+                    buttonHeightInPx, // height
                     1.0f // weight
             );
             params.setMargins(marginHorizontalPx, 0, marginHorizontalPx, 0);
