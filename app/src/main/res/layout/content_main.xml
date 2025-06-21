@@ -10,7 +10,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:descendantFocusability="beforeDescendants">
+    android:descendantFocusability="beforeDescendants"
+    android:padding="16dp"
+    tools:context=".MainActivity"
+    tools:showIn="@layout/app_bar_main">
 
     <LinearLayout
         android:id="@+id/dummy_focusable_view"
