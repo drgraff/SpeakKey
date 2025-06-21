@@ -71,6 +71,19 @@
         <!-- Control colors for widgets like CheckBox, Switch, RadioButton -->
         <item name="colorControlActivated">@color/oled_secondary</item>
         <item name="colorControlNormal">@color/oled_text_secondary</item>
+        <item name="alertDialogTheme">@style/AppTheme.OLED.AlertDialogStyle</item>
+    </style>
+
+    <style name="AppTheme.OLED.AlertDialogStyle" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:background">@color/oled_surface</item> <!-- Dialog window background -->
+        <item name="colorSurface">@color/oled_surface</item> <!-- Surface color for dialog components -->
+        <item name="android:textColorPrimary">@color/oled_text_primary</item>
+        <item name="android:textColorSecondary">@color/oled_text_secondary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button.OLED.Dialog</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.App.Button.OLED.Dialog</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.App.Button.OLED.Dialog</item>
+        <!-- For ListPreference item selection -->
+        <item name="colorControlActivated">@color/oled_secondary</item>
     </style>
 
     <style name="Widget.App.NavigationView.OLED" parent="Widget.Design.NavigationView">
