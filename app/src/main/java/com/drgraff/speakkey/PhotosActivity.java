@@ -69,7 +69,7 @@ import com.drgraff.speakkey.service.UploadService;
 import com.drgraff.speakkey.inputstick.InputStickManager;
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.utils.AppLogManager;
-import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // Keep for now, remove if class deleted
+// import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // REMOVED
 
 public class PhotosActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener { // FullScreenEditTextDialogFragment.OnSaveListener REMOVED
 
