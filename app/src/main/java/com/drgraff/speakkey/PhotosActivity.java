@@ -69,9 +69,9 @@ import com.drgraff.speakkey.service.UploadService;
 import com.drgraff.speakkey.inputstick.InputStickManager;
 import com.drgraff.speakkey.settings.SettingsActivity;
 import com.drgraff.speakkey.utils.AppLogManager;
-import com.drgraff.speakkey.FullScreenEditTextDialogFragment;
+import com.drgraff.speakkey.FullScreenEditTextDialogFragment; // Keep for now, remove if class deleted
 
-public class PhotosActivity extends AppCompatActivity implements FullScreenEditTextDialogFragment.OnSaveListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class PhotosActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener { // FullScreenEditTextDialogFragment.OnSaveListener REMOVED
 
     private static final String TAG = "PhotosActivity";
     private SharedPreferences sharedPreferences;
@@ -260,10 +260,10 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
             sendPhotoAndPromptsToChatGpt();
         });
         if (editTextChatGptResponsePhoto != null) {
-            editTextChatGptResponsePhoto.setOnClickListener(v -> {
-                FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(editTextChatGptResponsePhoto.getText().toString());
-                dialogFragment.show(getSupportFragmentManager(), "edit_chatgpt_response_photo_dialog");
-            });
+            // editTextChatGptResponsePhoto.setOnClickListener(v -> {
+            //     FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(editTextChatGptResponsePhoto.getText().toString());
+            //     dialogFragment.show(getSupportFragmentManager(), "edit_chatgpt_response_photo_dialog");
+            // });
             editTextChatGptResponsePhoto.setOnTouchListener((v, event) -> {
                 if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
                     if (textViewPhotoStatus != null && progressBarPhotoProcessing != null &&
@@ -728,12 +728,12 @@ public class PhotosActivity extends AppCompatActivity implements FullScreenEditT
         }
     }
 
-    @Override
-    public void onSave(String editedText) {
-        if (editTextChatGptResponsePhoto != null) {
-            editTextChatGptResponsePhoto.setText(editedText);
-        }
-    }
+    // @Override // OnSaveListener REMOVED
+    // public void onSave(String editedText) {
+    //     if (editTextChatGptResponsePhoto != null) {
+    //         editTextChatGptResponsePhoto.setText(editedText);
+    //     }
+    // }
 
     private class PhotoVisionBroadcastReceiver extends BroadcastReceiver {
         @Override

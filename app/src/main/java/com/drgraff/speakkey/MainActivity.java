@@ -82,7 +82,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import android.text.TextUtils; // Added for ellipsize
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, FullScreenEditTextDialogFragment.OnSaveListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private String mAppliedThemeMode = null;
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private View whisperSectionContainer; // Added
     private CheckBox chkAutoSendWhisper, chkAutoSendInputStick, chkAutoSendToChatGpt; // Added chkAutoSendToChatGpt
     private CheckBox chk_auto_send_whisper_to_inputstick; // Added
-    private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment
+    // private EditText currentEditingEditText; // For FullScreenEditTextDialogFragment (REMOVED)
 
     private ProgressBar progressBarWhisper; // Added
     private TextView textViewWhisperStatus; // Added
@@ -505,18 +505,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         whisperText.setOnTouchListener(editTextTouchListener);
         chatGptText.setOnTouchListener(editTextTouchListener);
 
-        // Listeners for opening full-screen editor
-        whisperText.setOnClickListener(v -> {
-            currentEditingEditText = whisperText;
-            FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(whisperText.getText().toString());
-            dialogFragment.show(getSupportFragmentManager(), "edit_whisper_text_dialog");
-        });
+        // Listeners for opening full-screen editor (REMOVED)
+        // whisperText.setOnClickListener(v -> {
+        //     currentEditingEditText = whisperText;
+        //     FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(whisperText.getText().toString());
+        //     dialogFragment.show(getSupportFragmentManager(), "edit_whisper_text_dialog");
+        // });
 
-        chatGptText.setOnClickListener(v -> {
-            currentEditingEditText = chatGptText;
-            FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(chatGptText.getText().toString());
-            dialogFragment.show(getSupportFragmentManager(), "edit_chatgpt_text_dialog");
-        });
+        // chatGptText.setOnClickListener(v -> {
+        //     currentEditingEditText = chatGptText;
+        //     FullScreenEditTextDialogFragment dialogFragment = FullScreenEditTextDialogFragment.newInstance(chatGptText.getText().toString());
+        //     dialogFragment.show(getSupportFragmentManager(), "edit_chatgpt_text_dialog");
+        // });
     }
     
     private void initializeApis() {
@@ -1870,15 +1870,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // Implementation for FullScreenEditTextDialogFragment.OnSaveListener
-    @Override
-    public void onSave(String editedText) {
-        if (currentEditingEditText != null) {
-            currentEditingEditText.setText(editedText);
-            // Optionally, you can clear the reference if it's no longer needed immediately
-            // currentEditingEditText = null; 
-        }
-    }
+    // Implementation for FullScreenEditTextDialogFragment.OnSaveListener (REMOVED)
+    // @Override
+    // public void onSave(String editedText) {
+    //     if (currentEditingEditText != null) {
+    //         currentEditingEditText.setText(editedText);
+    //         // Optionally, you can clear the reference if it's no longer needed immediately
+    //         // currentEditingEditText = null;
+    //     }
+    // }
 
     private void sendWhisperToInputStick() {
         if (!sharedPreferences.getBoolean("inputstick_enabled", true)) {
