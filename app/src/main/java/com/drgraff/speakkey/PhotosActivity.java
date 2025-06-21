@@ -297,6 +297,31 @@ public class PhotosActivity extends AppCompatActivity implements SharedPreferenc
         if (progressBarPhotoProcessing != null) progressBarPhotoProcessing.setVisibility(View.GONE);
         if (textViewPhotoStatus != null) textViewPhotoStatus.setVisibility(View.GONE);
 
+        // Handle incoming shared image
+        if (getIntent().hasExtra("SHARED_IMAGE_PATH")) {
+            currentPhotoPath = getIntent().getStringExtra("SHARED_IMAGE_PATH");
+            Log.d(TAG, "Received shared image path: " + currentPhotoPath);
+            if (currentPhotoPath != null && !currentPhotoPath.isEmpty()) {
+                setPic(); // Load the picture
+                // Simulate auto-send
+                // Ensure UI elements are ready before calling showPhotoUploadProgressUI if it relies on them.
+                // Post to handler to ensure layout is complete if called very early in onCreate.
+                mainHandler.post(() -> {
+                    if (imageViewPhoto.getVisibility() == View.VISIBLE) { // Check if setPic was successful
+                        showPhotoUploadProgressUI();
+                        sendPhotoAndPromptsToChatGpt();
+                    } else {
+                        Log.e(TAG, "Shared image loaded via setPic but imageViewPhoto not visible, cannot auto-send.");
+                        Toast.makeText(PhotosActivity.this, "Error loading shared image for auto-send.", Toast.LENGTH_LONG).show();
+                    }
+                });
+            } else {
+                 Log.e(TAG, "SHARED_IMAGE_PATH extra was present but null or empty.");
+                 Toast.makeText(this, "Error receiving shared image path.", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+
         this.mAppliedThemeMode = themeValue;
         if (ThemeManager.THEME_OLED.equals(themeValue)) {
             this.mAppliedTopbarBackgroundColor = this.sharedPreferences.getInt("pref_oled_topbar_background", DynamicThemeApplicator.DEFAULT_OLED_TOPBAR_BACKGROUND);
