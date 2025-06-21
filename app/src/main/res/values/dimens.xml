@@ -6,4 +6,5 @@
     <dimen name="macro_button_height_small">40dp</dimen>
     <dimen name="macro_button_height_medium">56dp</dimen>
     <dimen name="macro_button_height_large">72dp</dimen>
+    <dimen name="macro_button_height_xlarge">88dp</dimen>
 </resources>
