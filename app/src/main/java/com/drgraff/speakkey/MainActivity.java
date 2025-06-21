@@ -1591,6 +1591,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         displayActiveMacros(); // Moved here
         refreshTranscriptionStatus(false); // false because it's an automatic refresh onResume
         Log.d(TAG, "onResume: All UI setup calls complete in onResume.");
+
+        // Request focus on a non-EditText view to prevent keyboard from popping up
+        View dummyFocusableView = findViewById(R.id.dummy_focusable_view);
+        if (dummyFocusableView != null) {
+            dummyFocusableView.requestFocus();
+        }
+        // Alternative: Clear focus from specific EditTexts
+        // if (whisperText != null) whisperText.clearFocus();
+        // if (chatGptText != null) chatGptText.clearFocus();
     }
 
     @Override
