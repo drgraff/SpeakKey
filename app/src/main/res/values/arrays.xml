@@ -113,4 +113,16 @@
         <item>void</item>
         <item>candy_pop</item>
     </string-array>
+
+    <!-- Macro Button Height Options -->
+    <string-array name="macro_button_height_entries">
+        <item>Small</item>
+        <item>Medium (Default)</item>
+        <item>Large</item>
+    </string-array>
+    <string-array name="macro_button_height_values">
+        <item>small</item>
+        <item>medium</item>
+        <item>large</item>
+    </string-array>
 </resources>
