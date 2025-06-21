@@ -1775,6 +1775,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 case "large":
                     buttonHeightInPx = (int) getResources().getDimension(R.dimen.macro_button_height_large);
                     break;
+                case "xlarge":
+                    buttonHeightInPx = (int) getResources().getDimension(R.dimen.macro_button_height_xlarge);
+                    break;
                 case "medium":
                 default:
                     buttonHeightInPx = (int) getResources().getDimension(R.dimen.macro_button_height_medium);
