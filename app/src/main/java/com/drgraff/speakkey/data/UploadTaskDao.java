@@ -12,7 +12,7 @@ import java.util.List;
 public interface UploadTaskDao {
 
     @Insert
-    void insert(UploadTask task);
+    long insert(UploadTask task); // Changed from void to long
 
     @Update
     void update(UploadTask task);
