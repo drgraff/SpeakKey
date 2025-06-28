@@ -1355,23 +1355,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i(TAG, "sendToChatGpt called. Mode: " + transcriptionMode);
 
         String transcript = whisperText.getText().toString().trim();
-        boolean isSharedAudioContext = (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
-        boolean canUseLastRecordedAudio = (lastRecordedAudioPathForChatGPTDirect != null && new File(lastRecordedAudioPathForChatGPTDirect).exists());
+        boolean isSharedAudio = (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
+        boolean canUseLastRecordedAudioDirectly = (lastRecordedAudioPathForChatGPTDirect != null &&
+                                                   !lastRecordedAudioPathForChatGPTDirect.isEmpty() &&
+                                                   new File(lastRecordedAudioPathForChatGPTDirect).exists());
 
-        // Path 1: In-app recording in "one_step_transcription" mode.
-        // This is the only path that should use `transcribeAudioWithChatGpt` which sends audio.
-        if (transcriptionMode.equals("one_step_transcription") && canUseLastRecordedAudio && !isSharedAudioContext) {
-            Log.d(TAG, "sendToChatGpt (One-Step, In-App Recording): Calling transcribeAudioWithChatGpt for MP3 file " + lastRecordedAudioPathForChatGPTDirect);
+        // Path 1: In-app recording in "one_step_transcription" mode, and we have the direct audio path.
+        // This is the only path that should use `transcribeAudioWithChatGpt` (which sends audio).
+        if (transcriptionMode.equals("one_step_transcription") && canUseLastRecordedAudioDirectly && !isSharedAudio) {
+            Log.d(TAG, "sendToChatGpt (Path 1: One-Step, In-App Recording with Direct Audio): Calling transcribeAudioWithChatGpt for " + lastRecordedAudioPathForChatGPTDirect);
             transcribeAudioWithChatGpt(); // Uses audio file and PREF_KEY_ONESTEP_PROCESSING_MODEL (audio model)
         }
-        // Path 2: All other scenarios that involve sending TEXT to ChatGPT.
-        // This includes:
-        //   a) Shared audio in "one_step_transcription" mode (Whisper has already transcribed it).
-        //   b) Any audio (in-app or shared) in "two_step_transcription" mode (Whisper has already transcribed it).
+        // Path 2: All other scenarios involve sending TEXT (already transcribed by Whisper) to ChatGPT.
         else {
             if (transcript.isEmpty() || isPlaceholderOrError(transcript)) {
                 Toast.makeText(this, "No valid transcription available to send to ChatGPT.", Toast.LENGTH_LONG).show();
                 AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Text Path) called with no/invalid transcript.", "Current text: " + transcript);
+                if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true); // Re-enable button
+                if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
                 return;
             }
 
