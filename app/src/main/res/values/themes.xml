@@ -129,4 +129,14 @@
         <item name="android:paddingLeft">16dp</item>
         <item name="android:paddingRight">16dp</item>
     </style>
+
+    <!-- Theme for ShareDispatcherActivity -->
+    <style name="Theme.SpeakKey.ShareDispatcher" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item> <!-- Typically false for full screen translucent -->
+        <item name="android:backgroundDimEnabled">false</item> <!-- Optional: if you don't want dimming -->
+    </style>
 </resources>
