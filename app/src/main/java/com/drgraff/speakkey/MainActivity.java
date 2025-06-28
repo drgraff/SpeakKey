@@ -1406,11 +1406,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             if (isSharedAudioOneStepContext) {
                 activePrompts = promptManager.getPromptsForMode("one_step").stream().filter(Prompt::isActive).collect(Collectors.toList());
-                modelForTextProcessing = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-4o"); // Model for text if audio was pre-transcribed
+                // **FIX**: Use a text model for this path, not the one-step audio model.
+                // The "one-step processing model" is for direct audio->text+completion.
+                // Here, audio is already transcribed, so we need a text completion model.
+                // Using the two-step's text processing model is a sensible default.
+                modelForTextProcessing = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
                 logContext = "ONE_STEP_SHARED_AUDIO_TEXT_TO_CHATGPT";
-                // For one-step shared audio, the prompt used for initial transcription (whisper-1) was generic.
-                // Here, we apply the user's "one_step" prompts to the transcribed text.
-            } else { // Two-step mode
+            } else { // Two-step mode (or other future text-only paths)
                 activePrompts = promptManager.getPromptsForMode("two_step_processing").stream().filter(Prompt::isActive).collect(Collectors.toList());
                 modelForTextProcessing = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
                 logContext = "TWO_STEP_TEXT_TO_CHATGPT";
