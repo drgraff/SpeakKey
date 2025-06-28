@@ -1382,9 +1382,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return;
             }
 
-            List<Prompt> activePrompts;
-            String modelForTextCompletion;
-            String logContextSuffix;
+            // Ensure these are declared outside the if/else so they are accessible to the new Thread
+            // and make them final as they will be used in an inner class (the runnable).
+            final List<Prompt> activePrompts;
+            final String modelForTextCompletion;
+            final String logContextSuffix;
 
             if (transcriptionMode.equals("one_step_transcription")) {
                 // This covers: Shared audio in one-step mode (isSharedAudioContext will be true).
@@ -1408,31 +1410,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             String promptsText = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
-            String finalTextPayload = promptsText.isEmpty() ? transcript : promptsText + "\n\n" + transcript;
+            final String finalTextPayload = promptsText.isEmpty() ? transcript : promptsText + "\n\n" + transcript; // Make effectively final
 
-            Log.d(TAG, "Using " + logContext + " Model: " + modelForTextProcessing);
-            showChatGptProgressUI("Sending to " + modelForTextProcessing + "...");
+            Log.d(TAG, "Using " + logContextSuffix + " Model: " + modelForTextCompletion); // Corrected variable name
+            showChatGptProgressUI("Sending to " + modelForTextCompletion + "..."); // Corrected variable name
             if (chatGptText != null) chatGptText.setText("");
 
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": " + logContext, "Model: " + modelForTextProcessing + ", Payload Length: " + finalTextPayload.length());
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": " + logContextSuffix, "Model: " + modelForTextCompletion + ", Payload Length: " + finalTextPayload.length()); // Corrected variable names
 
             new Thread(() -> {
                 try {
-                    final String result = chatGptApi.getCompletion(finalTextPayload, modelForTextProcessing);
-                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": " + logContext + " Response from " + modelForTextProcessing + " received.", "Output Length: " + (result != null ? result.length() : "null"));
+                    final String result = chatGptApi.getCompletion(finalTextPayload, modelForTextCompletion); // Corrected variable name
+                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": " + logContextSuffix + " Response from " + modelForTextCompletion + " received.", "Output Length: " + (result != null ? result.length() : "null")); // Corrected variable names
                     mainHandler.post(() -> {
                         if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                         if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
                         if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                         if (chatGptText != null) chatGptText.setText(result);
-                        Toast.makeText(MainActivity.this, logContext + ": " + modelForTextProcessing + " processing complete.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, logContextSuffix + ": " + modelForTextCompletion + " processing complete.", Toast.LENGTH_SHORT).show(); // Corrected variable names
                         if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
                             sendToInputStick();
                         }
                     });
                 } catch (IOException e) {
-                    Log.e(TAG, logContext + ": IOException during " + modelForTextProcessing + " processing: " + e.getMessage(), e);
-                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContext + " IOException in " + modelForTextProcessing + " processing.", "Error: " + e.getMessage());
+                    Log.e(TAG, logContextSuffix + ": IOException during " + modelForTextCompletion + " processing: " + e.getMessage(), e); // Corrected variable names
+                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContextSuffix + " IOException in " + modelForTextCompletion + " processing.", "Error: " + e.getMessage()); // Corrected variable names
                     mainHandler.post(() -> {
                         if (textViewChatGptStatus != null) {
                             textViewChatGptStatus.setText("Error: " + e.getMessage());
@@ -1441,11 +1443,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                         if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                         if (chatGptText != null) chatGptText.setText("");
-                        Toast.makeText(MainActivity.this, logContext + ": API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, logContextSuffix + ": API Error - " + e.getMessage(), Toast.LENGTH_LONG).show(); // Corrected variable name
                     });
                 } catch (Exception e) {
-                    Log.e(TAG, logContext + ": Unexpected error during " + modelForTextProcessing + " processing: " + e.getMessage(), e);
-                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContext + " Unexpected error in " + modelForTextProcessing + " processing.", "Error: " + e.toString());
+                    Log.e(TAG, logContextSuffix + ": Unexpected error during " + modelForTextCompletion + " processing: " + e.getMessage(), e); // Corrected variable names
+                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContextSuffix + " Unexpected error in " + modelForTextCompletion + " processing.", "Error: " + e.toString()); // Corrected variable names
                     mainHandler.post(() -> {
                         if (textViewChatGptStatus != null) {
                             textViewChatGptStatus.setText("Unexpected error: " + e.getMessage());
@@ -1454,7 +1456,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                         if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                         if (chatGptText != null) chatGptText.setText("");
-                        Toast.makeText(MainActivity.this, logContext + ": Unexpected error (" + modelForTextProcessing + ")", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, logContextSuffix + ": Unexpected error (" + modelForTextCompletion + ")", Toast.LENGTH_LONG).show(); // Corrected variable names
                     });
                 }
             }).start();
