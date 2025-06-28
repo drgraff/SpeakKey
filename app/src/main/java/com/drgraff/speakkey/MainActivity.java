@@ -1403,7 +1403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // We'll use the PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL as the designated text completion model.
                 modelForTextCompletion = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
                 logContextSuffix = " (One-Step Text Completion after Whisper)";
-                 if(isSharedAudioContext) {
+                 if(isSharedAudio) {
                     Log.d(TAG, "sendToChatGpt (One-Step, Shared Audio): Using transcribed text from whisperText.");
                  } else {
                     Log.d(TAG, "sendToChatGpt (One-Step, Fallback to Text): Using transcribed text from whisperText.");
