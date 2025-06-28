@@ -95,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mAppliedOledAccentGeneralColor = 0;
     private int mAppliedOledGeneralTextSecondaryColor = 0;
     public static final String TRANSCRIPTION_QUEUED_PLACEHOLDER = "[Transcription queued... Tap to refresh]"; // Added
+    public static final String EXTRA_SHARED_AUDIO_TASK_ID = "shared_audio_task_id"; // For shared audio
+    public static final String EXTRA_SHARED_AUDIO_FILE_PATH = "shared_audio_file_path"; // For shared audio
+
 
     // UI elements
     private DrawerLayout drawerLayout;
@@ -340,6 +343,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Display active macros
         updateUiForTranscriptionMode(transcriptionMode); // Added
         displayActiveMacros(); // Call after macroRepository is initialized
+
+        // Handle intent if launched from ShareDispatcherActivity
+        handleIntentExtras(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Important to update the intent this activity holds
+        handleIntentExtras(intent);
+    }
+
+    private void handleIntentExtras(Intent intent) {
+        if (intent != null) {
+            if (intent.hasExtra(EXTRA_SHARED_AUDIO_TASK_ID) && intent.hasExtra(EXTRA_SHARED_AUDIO_FILE_PATH)) {
+                long taskId = intent.getLongExtra(EXTRA_SHARED_AUDIO_TASK_ID, -1);
+                String sharedAudioPath = intent.getStringExtra(EXTRA_SHARED_AUDIO_FILE_PATH);
+
+                if (taskId != -1 && sharedAudioPath != null && !sharedAudioPath.isEmpty()) {
+                    Log.d(TAG, "MainActivity received shared audio task. Task ID: " + taskId + ", FilePath: " + sharedAudioPath);
+                    this.audioFilePath = sharedAudioPath; // Set the audioFilePath for this MainActivity instance
+
+                    // It's crucial that this.audioFilePath is set BEFORE calling UI update methods
+                    // that might depend on it or trigger DB lookups based on it (like refreshTranscriptionStatus)
+
+                    showAudioTranscriptionProgressUI(); // Show "Queued..." or similar
+
+                    // Optional: Immediately refresh status from DB
+                    // This might be good if the service processes tasks very quickly.
+                    // refreshTranscriptionStatus(false);
+
+                    // Remove the extras to prevent re-processing on configuration change if not desired,
+                    // though onNewIntent should get a fresh intent.
+                    // However, if activity is recreated (e.g. rotation) after onNewIntent but before task completion,
+                    // onCreate would get the same intent again.
+                    // A flag to indicate "shared audio already processed by this instance" might be needed
+                    // or ensure refreshTranscriptionStatus correctly handles existing state.
+                    // For now, let's assume refreshTranscriptionStatus in onResume will handle it.
+                    // intent.removeExtra(EXTRA_SHARED_AUDIO_TASK_ID);
+                    // intent.removeExtra(EXTRA_SHARED_AUDIO_FILE_PATH);
+                }
+            }
+        }
     }
 
     private void updateUiForTranscriptionMode(String mode) {
@@ -846,7 +892,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     
     private void stopRecording() {
         if (!isRecording) return;
-        
+
         try {
             stopTimer();
             recordingThreadRunning = false;
@@ -863,92 +909,63 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 audioRecord.release();
                 audioRecord = null;
             }
-            
+
             isRecording = false;
             isPaused = false;
             recordingDuration += System.currentTimeMillis() - recordingStartTime;
-            
+
             updateUiForRecording(false);
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             Log.d(TAG, "Screen orientation unlocked due to recording stop.");
-            
-            Log.d(TAG, "Recording stopped, duration: " + recordingDuration + "ms");
+
+            Log.d(TAG, "Recording stopped, duration: " + recordingDuration + "ms. PCM at: " + pcmFilePath);
+
+            File pcmFile = new File(pcmFilePath);
+            File targetMp3File = new File(this.mp3FilePath); // Use the class field mp3FilePath for output
+
+            File convertedMp3 = com.drgraff.speakkey.utils.AudioUtils.convertToMp3(pcmFile, targetMp3File);
+
+            if (convertedMp3 == null || !convertedMp3.exists()) {
+                Toast.makeText(this, "Failed to convert recording to MP3.", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "MP3 conversion failed for " + pcmFilePath);
+                return;
+            }
+            Log.i(TAG, "Successfully converted PCM to MP3: " + convertedMp3.getAbsolutePath());
+            this.audioFilePath = convertedMp3.getAbsolutePath(); // Update audioFilePath to the new MP3
 
             String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
             if (transcriptionMode.equals("one_step_transcription")) {
-                String converted = convertToMp3(new File(pcmFilePath));
-                if (converted != null) {
-                    lastRecordedAudioPathForChatGPTDirect = converted;
-                    audioFilePath = converted;
-                    if (chkAutoSendToChatGpt.isChecked()) { // This checkbox now implies auto-send for one-step
-                        transcribeAudioWithChatGpt();
-                    }
-                } else {
-                    Toast.makeText(this, "Failed to convert recording to MP3 for one-step.", Toast.LENGTH_LONG).show();
+                lastRecordedAudioPathForChatGPTDirect = this.audioFilePath;
+                if (chkAutoSendToChatGpt.isChecked()) {
+                    transcribeAudioWithChatGpt();
                 }
             } else { // "two_step_transcription" mode
                 String step1Engine = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_ENGINE, "whisper");
                 Log.d(TAG, "Two Step Mode - Step 1 Engine: " + step1Engine);
 
-                if ("chatgpt".equals(step1Engine)) { // This now means "OpenAI API for Transcription"
+                if ("chatgpt".equals(step1Engine)) { // OpenAI API for Transcription
                     String step1ModelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP1_CHATGPT_MODEL, "whisper-1");
-                    // Fallback for invalid chat model is removed as this preference now points to transcription models.
-
                     List<Prompt> activePromptsForStep1 = promptManager.getPromptsForMode("two_step_processing").stream()
-                                                             .filter(Prompt::isActive)
-                                                             .collect(Collectors.toList());
-                    String transcriptionHint = "";
-                    if (!activePromptsForStep1.isEmpty()) {
-                        String hint = activePromptsForStep1.get(0).getTranscriptionHint();
-                        if (hint != null && !hint.trim().isEmpty()) {
-                            transcriptionHint = hint.trim();
-                        }
-                    }
+                            .filter(Prompt::isActive)
+                            .collect(Collectors.toList());
+                    String transcriptionHint = activePromptsForStep1.stream()
+                            .map(Prompt::getTranscriptionHint)
+                            .filter(hint -> hint != null && !hint.trim().isEmpty())
+                            .findFirst().orElse("").trim();
+
                     Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Using model: " + step1ModelName + ", Hint: '" + transcriptionHint + "'");
 
-                    String convertedFilePath = convertToMp3(new File(pcmFilePath));
-                    if (convertedFilePath != null) {
-                        audioFilePath = convertedFilePath; // Keep this to ensure broadcast receiver can match
-                        // lastRecordedAudioPathForChatGPTDirect = convertedFilePath; // This might not be needed anymore
-
-                        // Create UploadTask with the specific model and hint using factory method
-                        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
-                            audioFilePath,
-                            step1ModelName, // modelNameForTranscription
-                            transcriptionHint // transcriptionHint
-                        );
-
-                        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
-                        // Make variables final for use in lambda
-                        final String finalStep1ModelName = step1ModelName;
-                        final String finalTranscriptionHint = transcriptionHint;
-                        final String finalAudioFilePath = audioFilePath;
-                        final UploadTask finalUploadTask = uploadTask;
-
-                        Executors.newSingleThreadExecutor().execute(() -> {
-                            database.uploadTaskDao().insert(finalUploadTask);
-                            Log.d(TAG, "Two Step (Step 1 - OpenAI Transcription): Queued UploadTask ID: " + finalUploadTask.id +
-                                       " with model: " + finalStep1ModelName + " and hint: '" + finalTranscriptionHint + "'");
-                            AppLogManager.getInstance().addEntry("INFO", TAG + ": OpenAI Transcription task queued in DB.",
-                                                               "File: " + finalAudioFilePath + ", Model: " + finalStep1ModelName);
-                            UploadService.startUploadService(MainActivity.this);
-                        });
-
-                        showAudioTranscriptionProgressUI(); // Show "Queued..." UI, same as default Whisper path
-
-                    } else {
-                        Toast.makeText(this, "Failed to convert recording to MP3 for two-step (OpenAI Transcription).", Toast.LENGTH_LONG).show();
-                    }
+                    UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
+                            this.audioFilePath,
+                            step1ModelName,
+                            transcriptionHint
+                    );
+                    queueUploadTask(uploadTask);
+                    showAudioTranscriptionProgressUI();
                 } else { // Default to Whisper (UploadService) for Step 1
-                    String converted = convertToMp3(new File(pcmFilePath));
-                    if (converted != null) {
-                        audioFilePath = converted;
-                        if (chkAutoSendWhisper.isChecked()) {
-                            showAudioTranscriptionProgressUI(); // Added
-                            transcribeAudio(); // Queues via UploadService
-                        }
-                    } else {
-                        Toast.makeText(this, "Failed to convert recording to MP3 for two-step (Whisper).", Toast.LENGTH_LONG).show();
+                    if (chkAutoSendWhisper.isChecked()) {
+                        showAudioTranscriptionProgressUI();
+                        transcribeAudio(); // Queues UploadTask for this.audioFilePath
                     }
                 }
             }
@@ -956,6 +973,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.e(TAG, "Error stopping recording", e);
             Toast.makeText(this, R.string.error_recording, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void queueUploadTask(UploadTask uploadTask) {
+        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        Executors.newSingleThreadExecutor().execute(() -> {
+            database.uploadTaskDao().insert(uploadTask);
+            Log.d(TAG, "UploadTask queued with ID: " + uploadTask.id + " for file: " + uploadTask.filePath);
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": UploadTask queued in DB.",
+                    "File: " + uploadTask.filePath + ", Model: " + uploadTask.modelName); // Assuming modelName is part of UploadTask
+            UploadService.startUploadService(MainActivity.this);
+        });
     }
     
     private void startTimer() {
@@ -1047,56 +1075,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         btnStopRecording.setEnabled(true);
         recordingIndicator.setVisibility(View.INVISIBLE);
     }
-    
+
     private void transcribeAudio() {
-        File audioFile = new File(audioFilePath);
+        // This method is called when "Send to Whisper" button is pressed,
+        // or automatically if chkAutoSendWhisper is checked after recording.
+        // The audioFilePath should already be set to the MP3 file path by stopRecording().
+
+        File audioFile = new File(this.audioFilePath); // Use this.audioFilePath
         if (!audioFile.exists() || audioFile.length() == 0) {
-            Toast.makeText(this, "No recording available to transcribe", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No valid audio file available to transcribe. Current path: " + this.audioFilePath, Toast.LENGTH_LONG).show();
+            Log.w(TAG, "transcribeAudio: No valid audio file at path: " + this.audioFilePath);
             return;
         }
-        
+
         String apiKey = sharedPreferences.getString("openai_api_key", "");
         if (apiKey.isEmpty()) {
             Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        Toast.makeText(this, "Queueing transcription...", Toast.LENGTH_SHORT).show(); // Changed message
-        AppLogManager.getInstance().addEntry("INFO", "Whisper: Queuing transcription task...", null);
 
-        // Create UploadTask using factory method for default Whisper path
-        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(audioFilePath, "whisper-1", "");
+        Toast.makeText(this, "Queueing transcription...", Toast.LENGTH_SHORT).show();
+        AppLogManager.getInstance().addEntry("INFO", "Whisper: Queuing transcription task...", "File: " + this.audioFilePath);
 
-        // Get DAO and insert in background
-        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
-        // Using a simple executor for this one-off DB operation.
-        // Consider a shared executor if this pattern becomes common.
-        Executors.newSingleThreadExecutor().execute(() -> {
-            database.uploadTaskDao().insert(uploadTask);
-            Log.d(TAG, "New UploadTask inserted with ID: " + uploadTask.id); // ID will be auto-generated
-            AppLogManager.getInstance().addEntry("INFO", "Whisper: Transcription task queued in DB.", "File: " + audioFilePath);
+        // Create UploadTask using factory method for default Whisper path.
+        // Prompts for "two_step_processing" (Whisper path) are handled by UploadService/WhisperApi itself if needed,
+        // or could be fetched here and passed if the design required it.
+        // For now, assuming default Whisper behavior from UploadTask factory.
+        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(this.audioFilePath, "whisper-1", "");
 
-            // Start the service to process the queue
-            // It's okay to call this multiple times; IntentService handles sequential execution.
-            UploadService.startUploadService(MainActivity.this);
-        });
+        queueUploadTask(uploadTask); // Use the new helper method
 
-        // Update UI (e.g., clear previous transcription or show "queued" status)
-        // mainHandler.post(() -> { // UI update logic moved to showAudioTranscriptionProgressUI() and called by callers
-        //     // whisperText.setText(TRANSCRIPTION_QUEUED_PLACEHOLDER); // Replaced by new UI
-        //     if (whisperText != null) whisperText.setText("");
-        //
-        //     if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);
-        //     if (textViewWhisperStatus != null) {
-        //         textViewWhisperStatus.setVisibility(View.VISIBLE);
-        //         textViewWhisperStatus.setText("Queued for transcription...");
-        //     }
-        //     if (btnSendWhisper != null) btnSendWhisper.setEnabled(false);
-        //     // Do NOT automatically call sendToChatGpt or sendWhisperToInputStick here anymore.
-        //     // That logic will move to when the task is actually completed by the service.
-        // });
-        Log.i(TAG, "MainActivity.transcribeAudio: Queued recording for Whisper transcription via UploadService.");
+        // UI updates are handled by showAudioTranscriptionProgressUI(), which should be called
+        // by the caller of transcribeAudio() or when auto-sending.
+        Log.i(TAG, "MainActivity.transcribeAudio: Queued recording for Whisper transcription via UploadService for file: " + this.audioFilePath);
     }
+
 
     private void showAudioTranscriptionProgressUI() {
         if (progressBarWhisper != null) progressBarWhisper.setVisibility(View.VISIBLE);

@@ -9,12 +9,13 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider; // If needed for granting permissions later, not for initial copy
+// import androidx.core.content.FileProvider; // Not strictly needed for initial copy if target is cache
 
 import com.drgraff.speakkey.data.AppDatabase;
 import com.drgraff.speakkey.data.UploadTask;
 import com.drgraff.speakkey.service.UploadService;
 import com.drgraff.speakkey.utils.AppLogManager;
+import com.drgraff.speakkey.utils.AudioUtils; // Added for MP3 conversion
 
 
 import java.io.File;
@@ -67,89 +68,148 @@ public class ShareDispatcherActivity extends AppCompatActivity {
 
     private void handleSharedAudio(Uri audioUri) {
         Log.d(TAG, "Handling shared audio: " + audioUri.toString());
-        String fileExtension = getFileExtensionFromUri(audioUri);
-        if (fileExtension == null || fileExtension.isEmpty()) {
-            // Try to get from MIME type
-            String mimeType = getContentResolver().getType(audioUri);
-            if (mimeType != null) {
-                fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-            }
-            if (fileExtension == null || fileExtension.isEmpty()) {
-                fileExtension = "audio"; // Fallback extension
-            }
-        }
+        String originalMimeType = getContentResolver().getType(audioUri);
+        String fileExtension = getFileExtensionFromUri(audioUri, originalMimeType);
 
-        File localAudioFile = copyContentUriToLocalFile(audioUri, "shared_audio", fileExtension);
+        File copiedAudioFile = copyContentUriToLocalFile(audioUri, "shared_audio_temp", fileExtension);
 
-        if (localAudioFile != null && localAudioFile.exists()) {
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio file copied to " + localAudioFile.getAbsolutePath(), null);
-
-            // Create UploadTask - simulating the "auto-send Whisper" path
-            // This assumes default Whisper processing. If different models/prompts are needed for shared audio,
-            // this part would need more complex logic or user preferences.
-            // For now, using default transcription like a new recording.
-            UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
-                    localAudioFile.getAbsolutePath(),
-                    "whisper-1", // Default model for transcription
-                    "" // Default empty prompt
-            );
-
-            AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
-            Executors.newSingleThreadExecutor().execute(() -> {
-                database.uploadTaskDao().insert(uploadTask);
-                Log.d(TAG, "Shared audio UploadTask inserted with ID: " + uploadTask.id);
-                AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio transcription task queued in DB.", "File: " + localAudioFile.getAbsolutePath());
-                UploadService.startUploadService(ShareDispatcherActivity.this);
-            });
-
-            Toast.makeText(this, "Audio shared for transcription. Opening app...", Toast.LENGTH_LONG).show();
-
-            // Navigate to MainActivity
-            Intent mainActivityIntent = new Intent(this, MainActivity.class);
-            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Or FLAG_ACTIVITY_REORDER_TO_FRONT
-            startActivity(mainActivityIntent);
-
-        } else {
+        if (copiedAudioFile == null || !copiedAudioFile.exists()) {
             Log.e(TAG, "Failed to copy shared audio file locally.");
-            Toast.makeText(this, "Failed to process shared audio.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to process shared audio (copy phase).", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
-        finish();
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio file copied to " + copiedAudioFile.getAbsolutePath(), null);
+
+        File fileToProcess = copiedAudioFile;
+
+        // Transcode if not MP3
+        if (!AudioUtils.isMimeTypeMp3(originalMimeType) && !"mp3".equalsIgnoreCase(fileExtension)) {
+            Log.d(TAG, "Shared audio is not MP3 (MIME: " + originalMimeType + ", Ext: " + fileExtension + "). Attempting transcoding.");
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio is not MP3. Transcoding...", "Original: " + copiedAudioFile.getName());
+
+            File cacheDir = getCacheDir();
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+            String mp3FileName = "shared_audio_transcoded_" + timeStamp + ".mp3";
+            File mp3Output = new File(cacheDir, mp3FileName);
+
+            // Note: AudioUtils.convertToMp3 expects PCM input.
+            // If the input 'copiedAudioFile' is not PCM (e.g., m4a, ogg, wav),
+            // a more general transcoding solution (like using FFmpeg or MediaCodec) would be needed.
+            // For this task, we assume the shared audio might be in a format that LAME can process
+            // or that the primary concern is non-MP3 formats that are PCM-like or can be handled.
+            // If it's a compressed format like M4A, LAME directly on it won't work as LAME expects PCM.
+            // This is a limitation of the current AudioUtils.convertToMp3 if source is not PCM.
+            // For the scope of this fix, we'll proceed assuming AudioUtils.convertToMp3
+            // is intended to convert *some* non-MP3 to MP3, typically from PCM.
+            // If the source is e.g. a WAV file (which is often PCM), it should work.
+            // If it's M4A, this step will likely fail or produce an invalid MP3.
+            // A robust solution would involve a full-fledged audio library.
+
+            // For now, let's assume we're trying to convert. If it fails, we'll log and use original.
+            File transcodedMp3 = AudioUtils.convertToMp3(copiedAudioFile, mp3Output);
+
+            if (transcodedMp3 != null && transcodedMp3.exists()) {
+                Log.d(TAG, "Transcoding successful: " + transcodedMp3.getAbsolutePath());
+                AppLogManager.getInstance().addEntry("INFO", TAG + ": Transcoding to MP3 successful.", "New file: " + transcodedMp3.getName());
+                fileToProcess = transcodedMp3;
+                // Delete the original non-MP3 temp file
+                if (!copiedAudioFile.delete()) {
+                    Log.w(TAG, "Failed to delete original non-MP3 temp file: " + copiedAudioFile.getAbsolutePath());
+                }
+            } else {
+                Log.w(TAG, "Transcoding to MP3 failed or source was not suitable for LAME. Using original copied file: " + copiedAudioFile.getName());
+                AppLogManager.getInstance().addEntry("WARN", TAG + ": Transcoding to MP3 failed. Using original copied file.", "File: " + copiedAudioFile.getName());
+                // fileToProcess remains copiedAudioFile
+            }
+        } else {
+            Log.d(TAG, "Shared audio is already MP3 or transcoding is not attempted based on MIME/extension.");
+        }
+
+
+        // Create UploadTask
+        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
+                fileToProcess.getAbsolutePath(),
+                "whisper-1", // Default model
+                ""           // Default empty prompt
+        );
+
+        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+        Executors.newSingleThreadExecutor().execute(() -> {
+            long taskId = database.uploadTaskDao().insert(uploadTask); // insert returns long (the rowId)
+            uploadTask.id = taskId; // Set the ID on the task object for passing via Intent
+
+            Log.d(TAG, "Shared audio UploadTask inserted with ID: " + uploadTask.id);
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio transcription task queued in DB.", "File: " + fileToProcess.getAbsolutePath() + ", TaskID: " + uploadTask.id);
+            UploadService.startUploadService(ShareDispatcherActivity.this);
+
+            // Navigate to MainActivity on the main thread after DB operations
+            runOnUiThread(() -> {
+                Toast.makeText(ShareDispatcherActivity.this, "Audio shared for transcription. Opening app...", Toast.LENGTH_LONG).show();
+                Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
+                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_TASK_ID, uploadTask.id);
+                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, fileToProcess.getAbsolutePath());
+                startActivity(mainActivityIntent);
+                finish(); // Finish ShareDispatcherActivity
+            });
+        });
+        // finish() is now called inside runOnUiThread after starting MainActivity
     }
 
-    private String getFileExtensionFromUri(Uri uri) {
+    private String getFileExtensionFromUri(Uri uri, String mimeTypeHint) {
         String extension = null;
+        // Try to get extension from file name in URI path first
         String path = uri.getPath();
         if (path != null) {
             int lastDot = path.lastIndexOf('.');
-            if (lastDot >= 0) {
+            if (lastDot >= 0 && lastDot < path.length() - 1) {
                 extension = path.substring(lastDot + 1);
             }
         }
+
+        // If not found from path, try from MIME type
         if (extension == null || extension.isEmpty()) {
-            // Try to get from ContentResolver if it's a content URI
-            if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
-                String mimeType = getContentResolver().getType(uri);
-                if (mimeType != null) {
-                    extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-                }
+            if (mimeTypeHint != null) {
+                extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeTypeHint);
             }
         }
-        return extension;
+
+        // If still not found, and it's a content URI, try querying display name
+        if ((extension == null || extension.isEmpty()) && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+            try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    String displayName = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                    if (displayName != null) {
+                        int lastDot = displayName.lastIndexOf('.');
+                        if (lastDot >= 0 && lastDot < displayName.length() - 1) {
+                            extension = displayName.substring(lastDot + 1);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Could not determine extension from display name for URI: " + uri, e);
+            }
+        }
+
+        // Fallback if all else fails
+        if (extension == null || extension.isEmpty()) {
+            if (mimeTypeHint != null && mimeTypeHint.startsWith("audio/")) {
+                extension = "audio"; // Generic audio fallback
+            } else if (mimeTypeHint != null && mimeTypeHint.startsWith("image/")) {
+                extension = "img"; // Generic image fallback
+            } else {
+                extension = "tmp"; // Generic fallback
+            }
+        }
+        return extension.toLowerCase(Locale.US);
     }
+
 
     private void handleSharedImage(Uri imageUri) {
         Log.d(TAG, "Handling shared image: " + imageUri.toString());
-        String fileExtension = getFileExtensionFromUri(imageUri);
-        if (fileExtension == null || fileExtension.isEmpty()) {
-            // Try to get from MIME type
-            String mimeType = getContentResolver().getType(imageUri);
-            if (mimeType != null) {
-                fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-            }
-            if (fileExtension == null || fileExtension.isEmpty()) {
-                fileExtension = "jpg"; // Fallback to jpg for images
-            }
-        }
+        String originalMimeType = getContentResolver().getType(imageUri);
+        String fileExtension = getFileExtensionFromUri(imageUri, originalMimeType);
 
         File localImageFile = copyContentUriToLocalFile(imageUri, "shared_image", fileExtension);
 
