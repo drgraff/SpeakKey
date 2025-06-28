@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey;
 public class UploadTask {
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id; // Changed from int to long
 
     public String filePath;
     public String uploadType; // e.g., "AUDIO_TRANSCRIPTION", "PHOTO_VISION"
