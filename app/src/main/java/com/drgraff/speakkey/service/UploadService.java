@@ -121,7 +121,8 @@ public class UploadService extends IntentService {
             return; // Don't show notification for unknown type
         }
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, task.id /* requestCode */, resultIntent,
+        // Cast task.id to int for requestCode
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) task.id /* requestCode */, resultIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainApplication.UPLOAD_COMPLETE_CHANNEL_ID)
@@ -131,7 +132,8 @@ public class UploadService extends IntentService {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
-        notificationManager.notify(SUCCESS_NOTIFICATION_ID_OFFSET + task.id, builder.build());
+        // Cast task.id to int for notificationId
+        notificationManager.notify(SUCCESS_NOTIFICATION_ID_OFFSET + (int) task.id, builder.build());
     }
 
     private void showFailedNotification(UploadTask task) {
@@ -149,7 +151,8 @@ public class UploadService extends IntentService {
         }
         // resultIntent.putExtra("failed_task_id", task.id); // To highlight in UI
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, task.id /* requestCode */, resultIntent,
+        // Cast task.id to int for requestCode
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, (int) task.id /* requestCode */, resultIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MainApplication.UPLOAD_FAILED_CHANNEL_ID)
@@ -160,9 +163,9 @@ public class UploadService extends IntentService {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(false); // Keep it until user dismisses or acts
 
-        notificationManager.notify(FAILED_NOTIFICATION_ID_OFFSET + task.id, builder.build());
+        // Cast task.id to int for notificationId
+        notificationManager.notify(FAILED_NOTIFICATION_ID_OFFSET + (int) task.id, builder.build());
     }
-
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
