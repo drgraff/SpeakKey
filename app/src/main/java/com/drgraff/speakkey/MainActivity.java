@@ -1355,7 +1355,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i(TAG, "sendToChatGpt called. Mode: " + transcriptionMode);
 
         String transcript = whisperText.getText().toString().trim();
-        // Correctly define isSharedAudio (was isSharedAudioContext, which caused the compile error)
+        // Correctly define isSharedAudio (it was isSharedAudioContext in the error, causing the compile error)
         boolean isSharedAudio = (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
         boolean canUseLastRecordedAudioDirectly = (lastRecordedAudioPathForChatGPTDirect != null &&
                                                    !lastRecordedAudioPathForChatGPTDirect.isEmpty() &&
