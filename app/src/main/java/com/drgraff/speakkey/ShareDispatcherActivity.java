@@ -128,19 +128,20 @@ public class ShareDispatcherActivity extends AppCompatActivity {
 
 
         // Create UploadTask
-        UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
+        final UploadTask finalUploadTask = UploadTask.createAudioTranscriptionTask(
                 fileToProcess.getAbsolutePath(),
                 "whisper-1", // Default model
                 ""           // Default empty prompt
         );
+        final File finalFileToProcess = fileToProcess; // Make effectively final for lambda
 
         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
         Executors.newSingleThreadExecutor().execute(() -> {
-            long taskId = database.uploadTaskDao().insert(uploadTask); // insert returns long (the rowId)
-            uploadTask.id = taskId; // Set the ID on the task object for passing via Intent
+            long taskId = database.uploadTaskDao().insert(finalUploadTask); // insert returns long (the rowId)
+            finalUploadTask.id = taskId; // Set the ID on the task object for passing via Intent
 
-            Log.d(TAG, "Shared audio UploadTask inserted with ID: " + uploadTask.id);
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio transcription task queued in DB.", "File: " + fileToProcess.getAbsolutePath() + ", TaskID: " + uploadTask.id);
+            Log.d(TAG, "Shared audio UploadTask inserted with ID: " + finalUploadTask.id);
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio transcription task queued in DB.", "File: " + finalFileToProcess.getAbsolutePath() + ", TaskID: " + finalUploadTask.id);
             UploadService.startUploadService(ShareDispatcherActivity.this);
 
             // Navigate to MainActivity on the main thread after DB operations
@@ -148,8 +149,8 @@ public class ShareDispatcherActivity extends AppCompatActivity {
                 Toast.makeText(ShareDispatcherActivity.this, "Audio shared for transcription. Opening app...", Toast.LENGTH_LONG).show();
                 Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
                 mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_TASK_ID, uploadTask.id);
-                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, fileToProcess.getAbsolutePath());
+                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_TASK_ID, finalUploadTask.id);
+                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, finalFileToProcess.getAbsolutePath());
                 startActivity(mainActivityIntent);
                 finish(); // Finish ShareDispatcherActivity
             });
