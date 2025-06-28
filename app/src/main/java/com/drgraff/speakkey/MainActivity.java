@@ -1354,42 +1354,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String transcriptionMode = sharedPreferences.getString("transcription_mode", "two_step_transcription");
         Log.i(TAG, "sendToChatGpt called. Mode: " + transcriptionMode);
 
-        String transcript = whisperText.getText().toString().trim(); // Get transcript early for checks
+        String transcript = whisperText.getText().toString().trim();
+        boolean isSharedAudioContext = (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
+        boolean canUseLastRecordedAudio = (lastRecordedAudioPathForChatGPTDirect != null && new File(lastRecordedAudioPathForChatGPTDirect).exists());
 
-        // Determine if this is a shared audio context in one-step mode
-        boolean isSharedAudioOneStepContext = transcriptionMode.equals("one_step_transcription") &&
-                                              (lastRecordedAudioPathForChatGPTDirect == null || lastRecordedAudioPathForChatGPTDirect.isEmpty()) &&
-                                              !transcript.isEmpty() &&
-                                              !isPlaceholderOrError(transcript) &&
-                                              (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
-
-
-        if (transcriptionMode.equals("one_step_transcription") && !isSharedAudioOneStepContext) {
-            // This is for in-app recording in one-step mode
-            if (lastRecordedAudioPathForChatGPTDirect != null && new File(lastRecordedAudioPathForChatGPTDirect).exists()) {
-                Log.d(TAG, "sendToChatGpt (One-Step, In-App Recording): Calling transcribeAudioWithChatGpt for MP3 file " + lastRecordedAudioPathForChatGPTDirect);
-                transcribeAudioWithChatGpt(); // Uses MP3 and calls getCompletionFromAudioAndPrompt
-            } else {
-                Toast.makeText(this, "Please record audio first for direct processing.", Toast.LENGTH_LONG).show();
-                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (One-Step, In-App Recording) called but no valid MP3 audio path.", "lastRecordedAudioPathForChatGPTDirect: " + lastRecordedAudioPathForChatGPTDirect);
-            }
-        } else {
-            // This block now handles:
-            // 1. Two-step transcription mode (always uses text from whisperText)
-            // 2. One-step transcription mode for SHARED audio (uses text from whisperText)
-
-            if (isSharedAudioOneStepContext) {
-                Log.d(TAG, "sendToChatGpt (One-Step, Shared Audio): Using transcribed text from whisperText.");
-            } else { // This implies two_step_transcription mode
-                Log.d(TAG, "sendToChatGpt (Two-Step Mode): Text from whisperText: '" + transcript.substring(0, Math.min(transcript.length(), 50)) + "...'");
-            }
-
+        // Path 1: In-app recording in "one_step_transcription" mode.
+        // This is the only path that should use `transcribeAudioWithChatGpt` which sends audio.
+        if (transcriptionMode.equals("one_step_transcription") && canUseLastRecordedAudio && !isSharedAudioContext) {
+            Log.d(TAG, "sendToChatGpt (One-Step, In-App Recording): Calling transcribeAudioWithChatGpt for MP3 file " + lastRecordedAudioPathForChatGPTDirect);
+            transcribeAudioWithChatGpt(); // Uses audio file and PREF_KEY_ONESTEP_PROCESSING_MODEL (audio model)
+        }
+        // Path 2: All other scenarios that involve sending TEXT to ChatGPT.
+        // This includes:
+        //   a) Shared audio in "one_step_transcription" mode (Whisper has already transcribed it).
+        //   b) Any audio (in-app or shared) in "two_step_transcription" mode (Whisper has already transcribed it).
+        else {
             if (transcript.isEmpty() || isPlaceholderOrError(transcript)) {
-                String message = isSharedAudioOneStepContext ?
-                        "No valid transcription from shared audio to send." :
-                        "No valid Whisper transcription to send. Please transcribe first or wait for completion.";
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Text Path) called with no valid transcript.", "Current text: " + transcript);
+                Toast.makeText(this, "No valid transcription available to send to ChatGPT.", Toast.LENGTH_LONG).show();
+                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Text Path) called with no/invalid transcript.", "Current text: " + transcript);
                 return;
             }
 
@@ -1401,21 +1383,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             List<Prompt> activePrompts;
-            String modelForTextProcessing;
-            String logContext;
+            String modelForTextCompletion;
+            String logContextSuffix;
 
-            if (isSharedAudioOneStepContext) {
+            if (transcriptionMode.equals("one_step_transcription")) {
+                // This covers: Shared audio in one-step mode (isSharedAudioContext will be true).
+                // Or, in-app one-step if canUseLastRecordedAudio was false but transcript is somehow populated.
                 activePrompts = promptManager.getPromptsForMode("one_step").stream().filter(Prompt::isActive).collect(Collectors.toList());
-                // **FIX**: Use a text model for this path, not the one-step audio model.
-                // The "one-step processing model" is for direct audio->text+completion.
-                // Here, audio is already transcribed, so we need a text completion model.
-                // Using the two-step's text processing model is a sensible default.
-                modelForTextProcessing = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
-                logContext = "ONE_STEP_SHARED_AUDIO_TEXT_TO_CHATGPT";
-            } else { // Two-step mode (or other future text-only paths)
+                // For text completion, even in one-step mode (if audio was pre-transcribed), use a text model.
+                // The PREF_KEY_ONESTEP_PROCESSING_MODEL is for audio input.
+                // We'll use the PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL as the designated text completion model.
+                modelForTextCompletion = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
+                logContextSuffix = " (One-Step Text Completion after Whisper)";
+                 if(isSharedAudioContext) {
+                    Log.d(TAG, "sendToChatGpt (One-Step, Shared Audio): Using transcribed text from whisperText.");
+                 } else {
+                    Log.d(TAG, "sendToChatGpt (One-Step, Fallback to Text): Using transcribed text from whisperText.");
+                 }
+            } else { // "two_step_transcription" mode
                 activePrompts = promptManager.getPromptsForMode("two_step_processing").stream().filter(Prompt::isActive).collect(Collectors.toList());
-                modelForTextProcessing = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
-                logContext = "TWO_STEP_TEXT_TO_CHATGPT";
+                modelForTextCompletion = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
+                logContextSuffix = " (Two-Step Text Completion)";
+                Log.d(TAG, "sendToChatGpt (Two-Step Mode): Text from whisperText: '" + transcript.substring(0, Math.min(transcript.length(), 50)) + "...'");
             }
 
             String promptsText = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
