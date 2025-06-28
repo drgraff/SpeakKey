@@ -1355,24 +1355,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i(TAG, "sendToChatGpt called. Mode: " + transcriptionMode);
 
         String transcript = whisperText.getText().toString().trim();
-        // Correctly define isSharedAudio (it was isSharedAudioContext in the error, causing the compile error)
-        boolean isSharedAudio = (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
-        boolean canUseLastRecordedAudioDirectly = (lastRecordedAudioPathForChatGPTDirect != null &&
-                                                   !lastRecordedAudioPathForChatGPTDirect.isEmpty() &&
-                                                   new File(lastRecordedAudioPathForChatGPTDirect).exists());
+        boolean isSharedAudio = (this.audioFilePath != null && this.audioFilePath.contains(getCacheDir().getName()));
+        // ^ this.audioFilePath is set by handleIntentExtras for shared audio.
+        // lastRecordedAudioPathForChatGPTDirect is set by stopRecording for in-app recordings.
 
-        // Path 1: In-app recording in "one_step_transcription" mode, and we have the direct audio path.
-        // This is the only path that should use `transcribeAudioWithChatGpt` (which sends audio).
-        if (transcriptionMode.equals("one_step_transcription") && canUseLastRecordedAudioDirectly && !isSharedAudio) {
-            Log.d(TAG, "sendToChatGpt (Path 1: One-Step, In-App Recording with Direct Audio): Calling transcribeAudioWithChatGpt for " + lastRecordedAudioPathForChatGPTDirect);
-            transcribeAudioWithChatGpt(); // Uses audio file and PREF_KEY_ONESTEP_PROCESSING_MODEL (audio model)
+        if (transcriptionMode.equals("one_step_transcription")) {
+            if (isSharedAudio) {
+                // Path for One-Step Shared Audio: Use the original shared audio file.
+                Log.d(TAG, "sendToChatGpt (Path: One-Step, Shared Audio): Using shared audio file: " + this.audioFilePath);
+                if (this.audioFilePath != null && !this.audioFilePath.isEmpty() && new File(this.audioFilePath).exists()) {
+                    this.lastRecordedAudioPathForChatGPTDirect = this.audioFilePath; // Ensure this is set
+                    transcribeAudioWithChatGpt(); // This sends the audio file to the one-step audio model
+                } else {
+                    Toast.makeText(this, "Error: Shared audio file path is invalid for One-Step mode.", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "sendToChatGpt (Path: One-Step, Shared Audio): Invalid audioFilePath: " + this.audioFilePath);
+                    // Potentially reset UI or enable button
+                    if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                    if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                    if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
+                }
+            } else {
+                // Path for One-Step In-App Recording:
+                // lastRecordedAudioPathForChatGPTDirect should already be set by stopRecording().
+                boolean canUseInAppRecordingAudio = (this.lastRecordedAudioPathForChatGPTDirect != null &&
+                                                     !this.lastRecordedAudioPathForChatGPTDirect.isEmpty() &&
+                                                     new File(this.lastRecordedAudioPathForChatGPTDirect).exists());
+                if (canUseInAppRecordingAudio) {
+                    Log.d(TAG, "sendToChatGpt (Path: One-Step, In-App Recording): Calling transcribeAudioWithChatGpt for " + this.lastRecordedAudioPathForChatGPTDirect);
+                    transcribeAudioWithChatGpt(); // Uses audio file and PREF_KEY_ONESTEP_PROCESSING_MODEL
+                } else {
+                    Toast.makeText(this, "No valid audio recorded for One-Step direct processing.", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "sendToChatGpt (Path: One-Step, In-App Recording): lastRecordedAudioPathForChatGPTDirect is invalid: " + this.lastRecordedAudioPathForChatGPTDirect);
+                     if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                    if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                    if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
+                }
+            }
         }
-        // Path 2: All other scenarios involve sending TEXT (already transcribed by Whisper) to ChatGPT.
-        else {
+        // Path 2: All other scenarios (i.e., "two_step_transcription" mode) involve sending TEXT.
+        else { // two_step_transcription mode
             if (transcript.isEmpty() || isPlaceholderOrError(transcript)) {
                 Toast.makeText(this, "No valid transcription available to send to ChatGPT.", Toast.LENGTH_LONG).show();
-                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Text Path) called with no/invalid transcript.", "Current text: " + transcript);
-                if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true); // Re-enable button
+                AppLogManager.getInstance().addEntry("WARN", TAG + ": sendToChatGpt (Two-Step Text Path) called with no/invalid transcript.", "Current text: " + transcript);
+                if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                 if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                 if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
                 return;
@@ -1381,66 +1406,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String apiKey = sharedPreferences.getString("openai_api_key", "");
             if (apiKey.isEmpty()) {
                 Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show();
-                AppLogManager.getInstance().addEntry("ERROR", TAG + ": sendToChatGpt (Text Path) - API Key not set.", null);
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": sendToChatGpt (Two-Step Text Path) - API Key not set.", null);
                 if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                 if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                 if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
                 return;
             }
 
-            // Ensure these are declared outside the if/else so they are accessible to the new Thread
-            // and make them final as they will be used in an inner class (the runnable).
-            final List<Prompt> activePrompts;
-            final String modelForTextCompletion;
-            final String logContextSuffix;
-
-            if (transcriptionMode.equals("one_step_transcription")) {
-                // This covers: Shared audio in one-step mode (isSharedAudioContext will be true).
-                // Or, in-app one-step if canUseLastRecordedAudio was false but transcript is somehow populated.
-                activePrompts = promptManager.getPromptsForMode("one_step").stream().filter(Prompt::isActive).collect(Collectors.toList());
-                // For text completion, even in one-step mode (if audio was pre-transcribed), use a text model.
-                // The PREF_KEY_ONESTEP_PROCESSING_MODEL is for audio input.
-                // We'll use the PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL as the designated text completion model.
-                modelForTextCompletion = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
-                logContextSuffix = " (One-Step Text Completion after Whisper)";
-                 if(isSharedAudio) {
-                    Log.d(TAG, "sendToChatGpt (One-Step, Shared Audio): Using transcribed text from whisperText.");
-                 } else {
-                    Log.d(TAG, "sendToChatGpt (One-Step, Fallback to Text): Using transcribed text from whisperText.");
-                 }
-            } else { // "two_step_transcription" mode
-                activePrompts = promptManager.getPromptsForMode("two_step_processing").stream().filter(Prompt::isActive).collect(Collectors.toList());
-                modelForTextCompletion = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
-                logContextSuffix = " (Two-Step Text Completion)";
-                Log.d(TAG, "sendToChatGpt (Two-Step Mode): Text from whisperText: '" + transcript.substring(0, Math.min(transcript.length(), 50)) + "...'");
-            }
+            final List<Prompt> activePrompts = promptManager.getPromptsForMode("two_step_processing").stream().filter(Prompt::isActive).collect(Collectors.toList());
+            final String modelForTextCompletion = sharedPreferences.getString(SettingsActivity.PREF_KEY_TWOSTEP_STEP2_PROCESSING_MODEL, "gpt-4o");
+            final String logContextSuffix = " (Two-Step Text Completion)";
+            Log.d(TAG, "sendToChatGpt (Two-Step Mode): Text from whisperText: '" + transcript.substring(0, Math.min(transcript.length(), 50)) + "...'");
 
             String promptsText = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
-            final String finalTextPayload = promptsText.isEmpty() ? transcript : promptsText + "\n\n" + transcript; // Make effectively final
+            final String finalTextPayload = promptsText.isEmpty() ? transcript : promptsText + "\n\n" + transcript;
 
-            Log.d(TAG, "Using " + logContextSuffix + " Model: " + modelForTextCompletion); // Corrected variable name
-            showChatGptProgressUI("Sending to " + modelForTextCompletion + "..."); // Corrected variable name
+            Log.d(TAG, "Using " + logContextSuffix + " Model: " + modelForTextCompletion);
+            showChatGptProgressUI("Sending to " + modelForTextCompletion + "...");
             if (chatGptText != null) chatGptText.setText("");
 
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": " + logContextSuffix, "Model: " + modelForTextCompletion + ", Payload Length: " + finalTextPayload.length()); // Corrected variable names
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": " + logContextSuffix, "Model: " + modelForTextCompletion + ", Payload Length: " + finalTextPayload.length());
 
             new Thread(() -> {
                 try {
-                    final String result = chatGptApi.getCompletion(finalTextPayload, modelForTextCompletion); // Corrected variable name
-                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": " + logContextSuffix + " Response from " + modelForTextCompletion + " received.", "Output Length: " + (result != null ? result.length() : "null")); // Corrected variable names
+                    final String result = chatGptApi.getCompletion(finalTextPayload, modelForTextCompletion);
+                    AppLogManager.getInstance().addEntry("SUCCESS", TAG + ": " + logContextSuffix + " Response from " + modelForTextCompletion + " received.", "Output Length: " + (result != null ? result.length() : "null"));
                     mainHandler.post(() -> {
                         if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                         if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
                         if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                         if (chatGptText != null) chatGptText.setText(result);
-                        Toast.makeText(MainActivity.this, logContextSuffix + ": " + modelForTextCompletion + " processing complete.", Toast.LENGTH_SHORT).show(); // Corrected variable names
+                        Toast.makeText(MainActivity.this, logContextSuffix + ": " + modelForTextCompletion + " processing complete.", Toast.LENGTH_SHORT).show();
                         if (chkAutoSendInputStick.isChecked() && sharedPreferences.getBoolean("inputstick_enabled", true)) {
                             sendToInputStick();
                         }
                     });
                 } catch (IOException e) {
-                    Log.e(TAG, logContextSuffix + ": IOException during " + modelForTextCompletion + " processing: " + e.getMessage(), e); // Corrected variable names
-                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContextSuffix + " IOException in " + modelForTextCompletion + " processing.", "Error: " + e.getMessage()); // Corrected variable names
+                    Log.e(TAG, logContextSuffix + ": IOException during " + modelForTextCompletion + " processing: " + e.getMessage(), e);
+                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContextSuffix + " IOException in " + modelForTextCompletion + " processing.", "Error: " + e.getMessage());
                     mainHandler.post(() -> {
                         if (textViewChatGptStatus != null) {
                             textViewChatGptStatus.setText("Error: " + e.getMessage());
@@ -1449,11 +1452,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                         if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                         if (chatGptText != null) chatGptText.setText("");
-                        Toast.makeText(MainActivity.this, logContextSuffix + ": API Error - " + e.getMessage(), Toast.LENGTH_LONG).show(); // Corrected variable name
+                        Toast.makeText(MainActivity.this, logContextSuffix + ": API Error - " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
                 } catch (Exception e) {
-                    Log.e(TAG, logContextSuffix + ": Unexpected error during " + modelForTextCompletion + " processing: " + e.getMessage(), e); // Corrected variable names
-                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContextSuffix + " Unexpected error in " + modelForTextCompletion + " processing.", "Error: " + e.toString()); // Corrected variable names
+                    Log.e(TAG, logContextSuffix + ": Unexpected error during " + modelForTextCompletion + " processing: " + e.getMessage(), e);
+                    AppLogManager.getInstance().addEntry("ERROR", TAG + ": " + logContextSuffix + " Unexpected error in " + modelForTextCompletion + " processing.", "Error: " + e.toString());
                     mainHandler.post(() -> {
                         if (textViewChatGptStatus != null) {
                             textViewChatGptStatus.setText("Unexpected error: " + e.getMessage());
@@ -1462,7 +1465,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
                         if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                         if (chatGptText != null) chatGptText.setText("");
-                        Toast.makeText(MainActivity.this, logContextSuffix + ": Unexpected error (" + modelForTextCompletion + ")", Toast.LENGTH_LONG).show(); // Corrected variable names
+                        Toast.makeText(MainActivity.this, logContextSuffix + ": Unexpected error (" + modelForTextCompletion + ")", Toast.LENGTH_LONG).show();
                     });
                 }
             }).start();

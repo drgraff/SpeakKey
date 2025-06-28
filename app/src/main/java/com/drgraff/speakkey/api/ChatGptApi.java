@@ -59,7 +59,7 @@ public class ChatGptApi {
         this.model = model;
 
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(message -> Log.d(TAG, message));
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
 
         this.client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)

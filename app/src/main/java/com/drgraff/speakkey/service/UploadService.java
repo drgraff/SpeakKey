@@ -360,12 +360,20 @@ public class UploadService extends IntentService {
         String modelToUse = (task.modelNameForTranscription != null && !task.modelNameForTranscription.isEmpty())
                             ? task.modelNameForTranscription
                             : "whisper-1"; // Fallback if somehow still null/empty
+
+        // Correction: If a GPT-4o model (or similar chat model) is mistakenly selected for the transcription endpoint,
+        // default to whisper-1, as the /v1/audio/transcriptions endpoint expects a Whisper model.
+        if (modelToUse != null && (modelToUse.startsWith("gpt-4o") || modelToUse.startsWith("gpt-3.5"))) {
+            Log.w(TAG, "Model " + modelToUse + " is not suitable for /v1/audio/transcriptions. Defaulting to whisper-1 for task ID: " + task.id);
+            modelToUse = "whisper-1";
+        }
+
         String hintToUse = (task.transcriptionHint != null)
                             ? task.transcriptionHint
                             : ""; // Fallback if somehow null
 
         Log.d(TAG, "UploadService: Transcribing audio task ID: " + task.id +
-                   " with model: " + modelToUse + " and hint: '" + hintToUse + "'");
+                   " with final model: " + modelToUse + " and hint: '" + hintToUse + "'");
 
         try {
             Log.d(TAG, "Task ID: " + task.id + " - Setting status to PROCESSING before API call (audio).");
