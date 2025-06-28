@@ -1355,6 +1355,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.i(TAG, "sendToChatGpt called. Mode: " + transcriptionMode);
 
         String transcript = whisperText.getText().toString().trim();
+        // Correctly define isSharedAudio (was isSharedAudioContext, which caused the compile error)
         boolean isSharedAudio = (audioFilePath != null && audioFilePath.contains(getCacheDir().getName()));
         boolean canUseLastRecordedAudioDirectly = (lastRecordedAudioPathForChatGPTDirect != null &&
                                                    !lastRecordedAudioPathForChatGPTDirect.isEmpty() &&
@@ -1381,6 +1382,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (apiKey.isEmpty()) {
                 Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show();
                 AppLogManager.getInstance().addEntry("ERROR", TAG + ": sendToChatGpt (Text Path) - API Key not set.", null);
+                if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
+                if (progressBarChatGpt != null) progressBarChatGpt.setVisibility(View.GONE);
+                if (textViewChatGptStatus != null) textViewChatGptStatus.setVisibility(View.GONE);
                 return;
             }
 
