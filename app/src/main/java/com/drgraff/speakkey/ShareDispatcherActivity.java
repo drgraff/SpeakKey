@@ -131,33 +131,35 @@ public class ShareDispatcherActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
-    File fileToSendToMain = null; // This will hold the path to send to MainActivity
+    File fileToSendToMain = null;
 
-    boolean isOriginalMp3 = "mp3".equalsIgnoreCase(fileExtension) || AudioUtils.isMimeTypeMp3(originalMimeType);
+    // Prioritize file extension for MP3 check. Mime type can be misleading.
+    boolean isMp3Extension = "mp3".equalsIgnoreCase(fileExtension);
 
     if ("one_step_transcription".equals(transcriptionMode)) {
-        if (isOriginalMp3) {
-            Log.d(TAG, "One-Step: Shared audio is already MP3. Using original copied file.");
-            fileToSendToMain = copiedAudioFile; // Use the initially copied file
+        if (isMp3Extension) {
+            Log.d(TAG, "One-Step: Shared audio has .mp3 extension. Using original copied file: " + copiedAudioFile.getName());
+            fileToSendToMain = copiedAudioFile;
         } else {
-            Log.d(TAG, "One-Step: Shared audio is not MP3 (MIME: " + originalMimeType + ", Ext: " + fileExtension + "). Attempting transcoding.");
+            Log.d(TAG, "One-Step: Shared audio is not MP3 (Ext: " + fileExtension + ", MIME: " + originalMimeType + "). Attempting transcoding to MP3.");
             File cacheDir = getCacheDir();
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             String mp3FileName = "shared_audio_transcoded_" + timeStamp + ".mp3";
             File mp3Output = new File(cacheDir, mp3FileName);
-            File transcodedMp3 = AudioUtils.convertToMp3(copiedAudioFile, mp3Output);
+            File transcodedMp3File = AudioUtils.convertToMp3(copiedAudioFile, mp3Output);
 
-            if (transcodedMp3 != null && transcodedMp3.exists() && transcodedMp3.getName().toLowerCase().endsWith(".mp3")) {
-                Log.d(TAG, "One-Step: Transcoding to MP3 successful: " + transcodedMp3.getAbsolutePath());
-                AppLogManager.getInstance().addEntry("INFO", TAG + ": One-Step: Transcoding to MP3 successful.", "New file: " + transcodedMp3.getName());
-                fileToSendToMain = transcodedMp3;
+            if (transcodedMp3File != null && transcodedMp3File.exists() && transcodedMp3File.getName().toLowerCase().endsWith(".mp3")) {
+                Log.d(TAG, "One-Step: Transcoding to MP3 successful: " + transcodedMp3File.getAbsolutePath());
+                AppLogManager.getInstance().addEntry("INFO", TAG + ": One-Step: Transcoding to MP3 successful.", "New file: " + transcodedMp3File.getName());
+                fileToSendToMain = transcodedMp3File;
                 if (!copiedAudioFile.delete()) {
                     Log.w(TAG, "Failed to delete original non-MP3 temp file: " + copiedAudioFile.getAbsolutePath());
                 }
             } else {
-                Log.e(TAG, "One-Step: Failed to convert audio to MP3. Original file: " + copiedAudioFile.getName());
-                AppLogManager.getInstance().addEntry("ERROR", TAG + ": One-Step: MP3 transcoding failed.", "Original File: " + copiedAudioFile.getName());
-                Toast.makeText(ShareDispatcherActivity.this, "Failed to convert audio to MP3 for One-Step. Please use an MP3 file or select Two-Step mode.", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "One-Step: Failed to convert '" + copiedAudioFile.getName() + "' to MP3. AudioUtils.convertToMp3 might not support this format or failed.");
+                AppLogManager.getInstance().addEntry("ERROR", TAG + ": One-Step: MP3 transcoding failed for " + fileExtension, "Original File: " + copiedAudioFile.getName());
+                final String originalFormatForToast = (fileExtension != null && !fileExtension.isEmpty()) ? fileExtension.toUpperCase() : "audio";
+                runOnUiThread(() -> Toast.makeText(ShareDispatcherActivity.this, "Failed to convert " + originalFormatForToast + " to MP3 for One-Step. Please use an MP3 file or select Two-Step mode in settings.", Toast.LENGTH_LONG).show());
                 finish();
                 return; // Abort
             }
@@ -165,7 +167,7 @@ public class ShareDispatcherActivity extends AppCompatActivity {
 
         // If we reach here for One-Step, fileToSendToMain should be a valid MP3
         Log.d(TAG, "One-Step: Proceeding to MainActivity with MP3: " + fileToSendToMain.getAbsolutePath());
-        final File finalPathForMain = fileToSendToMain;
+        final File finalPathForMain = fileToSendToMain; // Effectively final for lambda
         runOnUiThread(() -> {
             Toast.makeText(ShareDispatcherActivity.this, "Audio prepared for One-Step processing...", Toast.LENGTH_LONG).show();
             Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
@@ -176,27 +178,27 @@ public class ShareDispatcherActivity extends AppCompatActivity {
         });
 
     } else { // Two-Step Transcription mode (or default)
-        // Current behavior: try to transcode, if fails, use original for Whisper.
         File fileForTwoStep = copiedAudioFile; // Start with the original copied file
-        if (!isOriginalMp3) {
-            Log.d(TAG, "Two-Step: Shared audio is not MP3. Attempting transcoding for robust Whisper processing.");
+        if (!isMp3Extension) { // If not an MP3 by extension, try to convert for Whisper robustness
+            Log.d(TAG, "Two-Step: Shared audio is not MP3 (Ext: " + fileExtension + "). Attempting transcoding for robust Whisper processing.");
             File cacheDir = getCacheDir();
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             String mp3FileName = "shared_audio_transcoded_for_whisper_" + timeStamp + ".mp3";
             File mp3Output = new File(cacheDir, mp3FileName);
-            File transcodedMp3 = AudioUtils.convertToMp3(copiedAudioFile, mp3Output);
-            if (transcodedMp3 != null && transcodedMp3.exists() && transcodedMp3.getName().toLowerCase().endsWith(".mp3")) {
-                Log.d(TAG, "Two-Step: Transcoding to MP3 successful: " + transcodedMp3.getAbsolutePath());
-                fileForTwoStep = transcodedMp3;
+            File transcodedMp3File = AudioUtils.convertToMp3(copiedAudioFile, mp3Output);
+
+            if (transcodedMp3File != null && transcodedMp3File.exists() && transcodedMp3File.getName().toLowerCase().endsWith(".mp3")) {
+                Log.d(TAG, "Two-Step: Transcoding to MP3 successful: " + transcodedMp3File.getAbsolutePath());
+                fileForTwoStep = transcodedMp3File;
                 if (!copiedAudioFile.delete()) {
                     Log.w(TAG, "Failed to delete original non-MP3 temp file (two-step path): " + copiedAudioFile.getAbsolutePath());
                 }
             } else {
-                Log.w(TAG, "Two-Step: Transcoding to MP3 failed. Using original copied file for Whisper: " + copiedAudioFile.getName());
-                // fileForTwoStep remains copiedAudioFile
+                Log.w(TAG, "Two-Step: Transcoding to MP3 failed. Using original copied file for Whisper: " + copiedAudioFile.getName() + " (AudioUtils may not support this format for MP3 conversion).");
+                // fileForTwoStep remains copiedAudioFile, Whisper endpoint might handle it
             }
         } else {
-            Log.d(TAG, "Two-Step: Shared audio is already MP3. Using original copied file.");
+            Log.d(TAG, "Two-Step: Shared audio has .mp3 extension. Using original copied file: " + copiedAudioFile.getName());
         }
         processAsTwoStep(fileForTwoStep);
     }
