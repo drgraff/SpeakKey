@@ -126,36 +126,53 @@ public class ShareDispatcherActivity extends AppCompatActivity {
             Log.d(TAG, "Shared audio is already MP3 or transcoding is not attempted based on MIME/extension.");
         }
 
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
+    final File finalFileToProcess = fileToProcess; // Make effectively final
 
+    if ("one_step_transcription".equals(transcriptionMode)) {
+        Log.d(TAG, "One-Step Transcription mode for shared audio. Bypassing UploadService, sending directly to MainActivity.");
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": One-Step shared audio. Preparing direct MainActivity launch.", "File: " + finalFileToProcess.getAbsolutePath());
+
+            runOnUiThread(() -> {
+            Toast.makeText(ShareDispatcherActivity.this, "Audio shared for One-Step processing. Opening app...", Toast.LENGTH_LONG).show();
+                Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
+                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            // Only pass the file path, no task ID for one-step direct handling
+                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, finalFileToProcess.getAbsolutePath());
+                startActivity(mainActivityIntent);
+            finish();
+            });
+
+    } else { // Two-Step Transcription mode (or default)
+        Log.d(TAG, "Two-Step Transcription mode for shared audio. Creating UploadTask.");
         // Create UploadTask
         final UploadTask finalUploadTask = UploadTask.createAudioTranscriptionTask(
-                fileToProcess.getAbsolutePath(),
-                "whisper-1", // Default model
+                finalFileToProcess.getAbsolutePath(),
+                "whisper-1", // Default model for initial Whisper transcription
                 ""           // Default empty prompt
         );
-        final File finalFileToProcess = fileToProcess; // Make effectively final for lambda
 
         AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
         Executors.newSingleThreadExecutor().execute(() -> {
-            long taskId = database.uploadTaskDao().insert(finalUploadTask); // insert returns long (the rowId)
-            finalUploadTask.id = taskId; // Set the ID on the task object for passing via Intent
+            long taskId = database.uploadTaskDao().insert(finalUploadTask);
+            finalUploadTask.id = taskId;
 
             Log.d(TAG, "Shared audio UploadTask inserted with ID: " + finalUploadTask.id);
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio transcription task queued in DB.", "File: " + finalFileToProcess.getAbsolutePath() + ", TaskID: " + finalUploadTask.id);
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio (Two-Step) transcription task queued.", "File: " + finalFileToProcess.getAbsolutePath() + ", TaskID: " + finalUploadTask.id);
             UploadService.startUploadService(ShareDispatcherActivity.this);
 
-            // Navigate to MainActivity on the main thread after DB operations
             runOnUiThread(() -> {
-                Toast.makeText(ShareDispatcherActivity.this, "Audio shared for transcription. Opening app...", Toast.LENGTH_LONG).show();
+                Toast.makeText(ShareDispatcherActivity.this, "Audio shared for Two-Step transcription. Opening app...", Toast.LENGTH_LONG).show();
                 Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
                 mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_TASK_ID, finalUploadTask.id);
                 mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, finalFileToProcess.getAbsolutePath());
                 startActivity(mainActivityIntent);
-                finish(); // Finish ShareDispatcherActivity
+                finish();
             });
         });
-        // finish() is now called inside runOnUiThread after starting MainActivity
+    }
     }
 
     private String getFileExtensionFromUri(Uri uri, String mimeTypeHint) {

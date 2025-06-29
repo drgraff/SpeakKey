@@ -356,36 +356,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void handleIntentExtras(Intent intent) {
-        if (intent != null) {
-            if (intent.hasExtra(EXTRA_SHARED_AUDIO_TASK_ID) && intent.hasExtra(EXTRA_SHARED_AUDIO_FILE_PATH)) {
-                long taskId = intent.getLongExtra(EXTRA_SHARED_AUDIO_TASK_ID, -1);
-                String sharedAudioPath = intent.getStringExtra(EXTRA_SHARED_AUDIO_FILE_PATH);
+        if (intent == null) return;
 
-                if (taskId != -1 && sharedAudioPath != null && !sharedAudioPath.isEmpty()) {
-                    Log.d(TAG, "MainActivity received shared audio task. Task ID: " + taskId + ", FilePath: " + sharedAudioPath);
-                    this.audioFilePath = sharedAudioPath; // Set the audioFilePath for this MainActivity instance
+        String sharedAudioPath = intent.getStringExtra(EXTRA_SHARED_AUDIO_FILE_PATH);
+        if (sharedAudioPath == null || sharedAudioPath.isEmpty()) {
+            return; // No valid file path
+        }
 
-                    // It's crucial that this.audioFilePath is set BEFORE calling UI update methods
-                    // that might depend on it or trigger DB lookups based on it (like refreshTranscriptionStatus)
+        this.audioFilePath = sharedAudioPath; // Always set this if path is valid
 
-                    showAudioTranscriptionProgressUI(); // Show "Queued..." or similar
+        if (intent.hasExtra(EXTRA_SHARED_AUDIO_TASK_ID)) {
+            // This is a Two-Step shared audio (or other task-based flow)
+            long taskId = intent.getLongExtra(EXTRA_SHARED_AUDIO_TASK_ID, -1);
+            if (taskId != -1) {
+                Log.d(TAG, "MainActivity received shared audio task (Two-Step flow). Task ID: " + taskId + ", FilePath: " + sharedAudioPath);
+                showAudioTranscriptionProgressUI(); // UI for Whisper transcription queue
+                // Optional: refreshTranscriptionStatus(false);
+            }
+        } else {
+            // This is a One-Step shared audio (no task ID)
+            Log.d(TAG, "MainActivity received shared audio for One-Step flow. FilePath: " + sharedAudioPath);
+            this.lastRecordedAudioPathForChatGPTDirect = sharedAudioPath; // Set for direct processing
 
-                    // Optional: Immediately refresh status from DB
-                    // This might be good if the service processes tasks very quickly.
-                    // refreshTranscriptionStatus(false);
-
-                    // Remove the extras to prevent re-processing on configuration change if not desired,
-                    // though onNewIntent should get a fresh intent.
-                    // However, if activity is recreated (e.g. rotation) after onNewIntent but before task completion,
-                    // onCreate would get the same intent again.
-                    // A flag to indicate "shared audio already processed by this instance" might be needed
-                    // or ensure refreshTranscriptionStatus correctly handles existing state.
-                    // For now, let's assume refreshTranscriptionStatus in onResume will handle it.
-                    // intent.removeExtra(EXTRA_SHARED_AUDIO_TASK_ID);
-                    // intent.removeExtra(EXTRA_SHARED_AUDIO_FILE_PATH);
+            String currentTranscriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
+            if ("one_step_transcription".equals(currentTranscriptionMode)) {
+                if (chkAutoSendToChatGpt != null && chkAutoSendToChatGpt.isChecked()) {
+                    Log.d(TAG, "One-Step shared audio: Auto-sending to ChatGPT.");
+                    transcribeAudioWithChatGpt();
+                } else {
+                    // Not auto-sending, so just update UI to show it's ready for manual send
+                    if (chatGptText != null) chatGptText.setHint("Shared audio ready for One-Step processing.");
+                    Log.d(TAG, "One-Step shared audio: Ready for manual send. Path: " + this.lastRecordedAudioPathForChatGPTDirect);
+                     // Ensure button is enabled if it was disabled by a previous operation
+                    if (btnSendChatGpt != null) btnSendChatGpt.setEnabled(true);
                 }
+            } else {
+                Log.w(TAG, "Received shared audio without TaskID, but mode is not One-Step. Current mode: " + currentTranscriptionMode + ". This scenario might need review.");
+                // Fallback: treat as a two-step if something went wrong, or show an error.
+                // For now, let's show the whisper progress UI as a safe default.
+                showAudioTranscriptionProgressUI();
             }
         }
+        // Clear the specific extras to prevent reprocessing on activity recreation if not desired,
+        // though onNewIntent should handle fresh intents.
+        // intent.removeExtra(EXTRA_SHARED_AUDIO_TASK_ID); // Be careful if other logic relies on these after initial handling
+        // intent.removeExtra(EXTRA_SHARED_AUDIO_FILE_PATH);
     }
 
     private void updateUiForTranscriptionMode(String mode) {
