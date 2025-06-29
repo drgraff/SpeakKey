@@ -1307,7 +1307,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         List<Prompt> activePrompts = promptManager.getPromptsForMode("one_step").stream().filter(Prompt::isActive).collect(Collectors.toList());
         String userPrompt = activePrompts.stream().map(Prompt::getText).collect(Collectors.joining("\n\n"));
         if (userPrompt.isEmpty()) {
-            userPrompt = "Please transcribe the audio file.  Do not add anything else before or after the transcribed text."; // Default prompt
+            // More explicit prompt for transcription
+            userPrompt = "Transcribe the following audio into text. Provide only the transcribed text and nothing else.";
         }
         final String finalUserPrompt = userPrompt;
         final String modelName = sharedPreferences.getString(SettingsActivity.PREF_KEY_ONESTEP_PROCESSING_MODEL, "gpt-4o"); // Default to gpt-4o or another suitable model
