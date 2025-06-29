@@ -131,51 +131,69 @@ public class ShareDispatcherActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
-    final File finalFileToProcess = fileToProcess; // Make effectively final
+    File effectiveFileToProcess = fileToProcess; // This is the .mp3 if transcoding succeeded, else original.
 
     if ("one_step_transcription".equals(transcriptionMode)) {
-        Log.d(TAG, "One-Step Transcription mode for shared audio. Bypassing UploadService, sending directly to MainActivity.");
-        AppLogManager.getInstance().addEntry("INFO", TAG + ": One-Step shared audio. Preparing direct MainActivity launch.", "File: " + finalFileToProcess.getAbsolutePath());
+        // For one-step, we need an MP3. If fileToProcess is not an MP3 (because transcoding failed/skipped for non-MP3),
+        // then we must fallback to two-step.
+        boolean isMp3 = effectiveFileToProcess.getName().toLowerCase().endsWith(".mp3");
 
+        if (isMp3) {
+            Log.d(TAG, "One-Step Transcription mode for shared audio. MP3 available. Sending directly to MainActivity.");
+            AppLogManager.getInstance().addEntry("INFO", TAG + ": One-Step shared audio (MP3). Preparing direct MainActivity launch.", "File: " + effectiveFileToProcess.getAbsolutePath());
+            final File fileToSendToMain = effectiveFileToProcess;
             runOnUiThread(() -> {
-            Toast.makeText(ShareDispatcherActivity.this, "Audio shared for One-Step processing. Opening app...", Toast.LENGTH_LONG).show();
+                Toast.makeText(ShareDispatcherActivity.this, "Audio shared for One-Step processing. Opening app...", Toast.LENGTH_LONG).show();
                 Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
                 mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            // Only pass the file path, no task ID for one-step direct handling
-                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, finalFileToProcess.getAbsolutePath());
-                startActivity(mainActivityIntent);
-            finish();
-            });
-
-    } else { // Two-Step Transcription mode (or default)
-        Log.d(TAG, "Two-Step Transcription mode for shared audio. Creating UploadTask.");
-        // Create UploadTask
-        final UploadTask finalUploadTask = UploadTask.createAudioTranscriptionTask(
-                finalFileToProcess.getAbsolutePath(),
-                "whisper-1", // Default model for initial Whisper transcription
-                ""           // Default empty prompt
-        );
-
-        AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
-        Executors.newSingleThreadExecutor().execute(() -> {
-            long taskId = database.uploadTaskDao().insert(finalUploadTask);
-            finalUploadTask.id = taskId;
-
-            Log.d(TAG, "Shared audio UploadTask inserted with ID: " + finalUploadTask.id);
-            AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio (Two-Step) transcription task queued.", "File: " + finalFileToProcess.getAbsolutePath() + ", TaskID: " + finalUploadTask.id);
-            UploadService.startUploadService(ShareDispatcherActivity.this);
-
-            runOnUiThread(() -> {
-                Toast.makeText(ShareDispatcherActivity.this, "Audio shared for Two-Step transcription. Opening app...", Toast.LENGTH_LONG).show();
-                Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
-                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_TASK_ID, finalUploadTask.id);
-                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, finalFileToProcess.getAbsolutePath());
+                mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, fileToSendToMain.getAbsolutePath());
                 startActivity(mainActivityIntent);
                 finish();
             });
-        });
+        } else {
+            Log.w(TAG, "One-Step Transcription mode, but MP3 not available (transcoding failed or original was not MP3 and not converted). Path: " + effectiveFileToProcess.getAbsolutePath() + ". Falling back to Two-Step flow.");
+            AppLogManager.getInstance().addEntry("WARN", TAG + ": One-Step shared audio - MP3 conversion failed/skipped. Falling back to Two-Step.", "Original File: " + effectiveFileToProcess.getName());
+            Toast.makeText(ShareDispatcherActivity.this, "Audio format not suitable for direct One-Step. Processing via standard transcription...", Toast.LENGTH_LONG).show();
+            // Fallback to Two-Step: use 'copiedAudioFile' which is the original temp file.
+            // 'effectiveFileToProcess' here would be 'copiedAudioFile' if transcoding failed.
+            processAsTwoStep(copiedAudioFile); // Pass the original copied file (e.g. .m4a, .oga)
+        }
+    } else { // Two-Step Transcription mode (or default)
+        Log.d(TAG, "Two-Step Transcription mode for shared audio. Creating UploadTask with file: " + effectiveFileToProcess.getAbsolutePath());
+        // For two-step, Whisper endpoint is more robust, so use 'effectiveFileToProcess'
+        // which could be the original if it was already mp3, or the transcoded mp3 if successful,
+        // or the original non-mp3 if transcoding failed (Whisper might handle it).
+        processAsTwoStep(effectiveFileToProcess);
     }
+}
+
+private void processAsTwoStep(File audioFileToProcess) {
+    final UploadTask uploadTask = UploadTask.createAudioTranscriptionTask(
+            audioFileToProcess.getAbsolutePath(),
+            "whisper-1", // Default model for initial Whisper transcription
+            ""           // Default empty prompt
+    );
+
+    AppDatabase database = AppDatabase.getDatabase(getApplicationContext());
+    Executors.newSingleThreadExecutor().execute(() -> {
+        long taskId = database.uploadTaskDao().insert(uploadTask);
+        uploadTask.id = taskId;
+
+        Log.d(TAG, "Shared audio UploadTask (Two-Step flow) inserted with ID: " + uploadTask.id + " for file " + audioFileToProcess.getName());
+        AppLogManager.getInstance().addEntry("INFO", TAG + ": Shared audio (Two-Step) transcription task queued.", "File: " + audioFileToProcess.getAbsolutePath() + ", TaskID: " + uploadTask.id);
+        UploadService.startUploadService(ShareDispatcherActivity.this);
+
+        runOnUiThread(() -> {
+            // Toast message might vary if this is a fallback
+            Toast.makeText(ShareDispatcherActivity.this, "Audio sent for standard transcription.", Toast.LENGTH_LONG).show();
+            Intent mainActivityIntent = new Intent(ShareDispatcherActivity.this, MainActivity.class);
+            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_TASK_ID, uploadTask.id);
+            mainActivityIntent.putExtra(MainActivity.EXTRA_SHARED_AUDIO_FILE_PATH, audioFileToProcess.getAbsolutePath());
+            startActivity(mainActivityIntent);
+            finish();
+        });
+    });
     }
 
     private String getFileExtensionFromUri(Uri uri, String mimeTypeHint) {
