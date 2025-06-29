@@ -9,11 +9,14 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager; // Added
 // import androidx.core.content.FileProvider; // Not strictly needed for initial copy if target is cache
 
+import android.content.SharedPreferences; // Added
 import com.drgraff.speakkey.data.AppDatabase;
 import com.drgraff.speakkey.data.UploadTask;
 import com.drgraff.speakkey.service.UploadService;
+import com.drgraff.speakkey.settings.SettingsActivity; // Added
 import com.drgraff.speakkey.utils.AppLogManager;
 import com.drgraff.speakkey.utils.AudioUtils; // Added for MP3 conversion
 
