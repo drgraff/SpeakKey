@@ -416,23 +416,38 @@ public class ChatGptApi {
                     JSONObject firstChoice = choices.getJSONObject(0);
                     JSONObject message = firstChoice.optJSONObject("message");
                     if (message != null) {
-                        // Prioritize audio.transcript
+                        String contentText = null;
+                        if (message.has("content") && !message.isNull("content")) {
+                            contentText = message.getString("content").trim();
+                        }
+
+                        if (contentText != null && !contentText.isEmpty()) {
+                            // If content has text, prefer it.
+                            Log.d(TAG, "Using message.content for transcription: " + contentText);
+                            return contentText;
+                        }
+
+                        // If message.content is null or empty, check audio.transcript
                         JSONObject audio = message.optJSONObject("audio");
                         if (audio != null && audio.has("transcript") && !audio.isNull("transcript")) {
-                            String transcript = audio.getString("transcript");
-                            // Ensure transcript is not an empty string if that's considered invalid
-                            if (transcript != null && !transcript.isEmpty()) {
-                                return transcript;
+                            String audioTranscript = audio.getString("transcript").trim();
+                            if (audioTranscript != null && !audioTranscript.isEmpty()) {
+                                // Avoid common non-transcription placeholders if contentText was also empty
+                                if (audioTranscript.equalsIgnoreCase("[Applause]") ||
+                                    audioTranscript.equalsIgnoreCase("[Music]") ||
+                                    audioTranscript.equalsIgnoreCase("(gentle music)") || // Example
+                                    audioTranscript.equalsIgnoreCase("[ Silence ]")) { // Example
+                                    Log.w(TAG, "Audio transcript is a placeholder '" + audioTranscript + "' and content is empty. Returning empty.");
+                                    return ""; // Or throw an error indicating no useful transcription
+                                }
+                                Log.d(TAG, "Using message.audio.transcript as fallback: " + audioTranscript);
+                                return audioTranscript;
                             }
                         }
-                        // Fallback to content if audio.transcript is not available or empty
-                        if (message.has("content") && !message.isNull("content")) {
-                            return message.getString("content");
-                        }
                     }
-                    // If neither was found and returned
-                    Log.w(TAG, "No 'message.audio.transcript' or 'message.content' in API response choice (JSON audio chat): " + firstChoice.toString());
-                    throw new IOException("No 'message.audio.transcript' or 'message.content' in API response choice (JSON audio chat).");
+                    // If neither valid contentText nor valid audioTranscript was found
+                    Log.w(TAG, "No usable 'message.content' or 'message.audio.transcript' in API response choice (JSON audio chat): " + firstChoice.toString());
+                    throw new IOException("No usable transcription found in API response (JSON audio chat).");
                 } else {
                     throw new IOException("No choices returned in API response (JSON audio chat).");
                 }
