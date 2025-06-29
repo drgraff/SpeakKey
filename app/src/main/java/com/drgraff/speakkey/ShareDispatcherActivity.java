@@ -131,7 +131,6 @@ public class ShareDispatcherActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
-    String transcriptionMode = sharedPreferences.getString(SettingsActivity.PREF_KEY_TRANSCRIPTION_MODE, "two_step_transcription");
     File fileToSendToMain = null;
 
     boolean isMp3ByExtension = "mp3".equalsIgnoreCase(fileExtension);
